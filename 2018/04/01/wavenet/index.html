@@ -99,20 +99,29 @@
 
 
 
-  <meta property="og:type" content="website">
-<meta property="og:title" content="odie&#39;s whisper">
-<meta property="og:url" content="http://yoursite.com/index.html">
+  <meta name="description" content="WaveNet: A Generative Model for Raw Audio 是 DeepMind所提出的一種用於聲音的生成模型，例如最近發布的CLOUD TEXT-TO-SPEECH用的模型架構就是以這個為基礎，還有Making a Neural Synthesizer Instrument裡面都有用上類似WaveNet的結構 Autoregressive model統計上常用來處理時間序">
+<meta name="keywords" content="generative model">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Ｗavenet">
+<meta property="og:url" content="http://yoursite.com/2018/04/01/wavenet/index.html">
 <meta property="og:site_name" content="odie&#39;s whisper">
+<meta property="og:description" content="WaveNet: A Generative Model for Raw Audio 是 DeepMind所提出的一種用於聲音的生成模型，例如最近發布的CLOUD TEXT-TO-SPEECH用的模型架構就是以這個為基礎，還有Making a Neural Synthesizer Instrument裡面都有用上類似WaveNet的結構 Autoregressive model統計上常用來處理時間序">
 <meta property="og:locale" content="zh-TW">
+<meta property="og:image" content="http://yoursite.com/media/15228972877719.gif">
+<meta property="og:image" content="http://yoursite.com/media/15228552689393.png">
+<meta property="og:image" content="http://yoursite.com/media/15228902504332.png">
+<meta property="og:updated_time" content="2018-04-05T03:32:17.593Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="odie&#39;s whisper">
+<meta name="twitter:title" content="Ｗavenet">
+<meta name="twitter:description" content="WaveNet: A Generative Model for Raw Audio 是 DeepMind所提出的一種用於聲音的生成模型，例如最近發布的CLOUD TEXT-TO-SPEECH用的模型架構就是以這個為基礎，還有Making a Neural Synthesizer Instrument裡面都有用上類似WaveNet的結構 Autoregressive model統計上常用來處理時間序">
+<meta name="twitter:image" content="http://yoursite.com/media/15228972877719.gif">
 
 
 
 
 
 
-  <link rel="canonical" href="http://yoursite.com/"/>
+  <link rel="canonical" href="http://yoursite.com/2018/04/01/wavenet/"/>
 
 
 
@@ -122,7 +131,7 @@
   };
 </script>
 
-  <title>odie's whisper</title>
+  <title>Ｗavenet | odie's whisper</title>
   
 
 
@@ -169,8 +178,7 @@
     
   
 
-  <div class="container sidebar-position-left 
-  page-home">
+  <div class="container sidebar-position-left page-post-detail">
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
@@ -292,9 +300,9 @@
           
           <div id="content" class="content">
             
-  <section id="posts" class="posts-expand">
+
+  <div id="posts" class="posts-expand">
     
-      
 
   
 
@@ -326,9 +334,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/04/01/wavenet/" itemprop="url">Ｗavenet</a></h1>
+          <h1 class="post-title" itemprop="name headline">Ｗavenet</h1>
         
 
         <div class="post-meta">
@@ -377,9 +383,7 @@
       
 
       
-        
-          
-            <p><a href="https://deepmind.com/blog/wavenet-generative-model-raw-audio/" target="_blank" rel="noopener">WaveNet: A Generative Model for Raw Audio</a> 是 DeepMind所提出的一種用於聲音的生成模型，例如最近發布的<a href="https://cloud.google.com/text-to-speech/" target="_blank" rel="noopener">CLOUD TEXT-TO-SPEECH</a>用的模型架構就是以這個為基礎，還有<a href="https://magenta.tensorflow.org/nsynth-instrument" target="_blank" rel="noopener">Making a Neural Synthesizer Instrument</a>裡面都有用上類似WaveNet的結構</p>
+        <p><a href="https://deepmind.com/blog/wavenet-generative-model-raw-audio/" target="_blank" rel="noopener">WaveNet: A Generative Model for Raw Audio</a> 是 DeepMind所提出的一種用於聲音的生成模型，例如最近發布的<a href="https://cloud.google.com/text-to-speech/" target="_blank" rel="noopener">CLOUD TEXT-TO-SPEECH</a>用的模型架構就是以這個為基礎，還有<a href="https://magenta.tensorflow.org/nsynth-instrument" target="_blank" rel="noopener">Making a Neural Synthesizer Instrument</a>裡面都有用上類似WaveNet的結構</p>
 <h2 id="Autoregressive-model"><a href="#Autoregressive-model" class="headerlink" title="Autoregressive model"></a>Autoregressive model</h2><p>統計上常用來處理時間序列的方法，用過去歷史資料 $x_{1:t-1}$來預測現在$x_t$，可以看成過去的自己對現在的自己做回歸，所以被稱為自回歸模型</p>
 <p>本模型也是用過去的聲音訊號來預測現在的訊號點，這樣的缺點是要生成新樣本的時候效率很差，因為資料有序列關係，總是要等待前面產生，才可以依序產生新的點，算是這類模型的問題</p>
 <h2 id="Fully-observed-model"><a href="#Fully-observed-model" class="headerlink" title="Fully observed model"></a>Fully observed model</h2><p>本模型沒有任何的Latent variable，沒有需要估計或是近似的未知變量，任何資訊都是完全可見的，都是從過去歷史資料來的，這樣的模型架構上更為直接簡單，不需要處理隱變量問題，用上繁瑣的近似演算法等等，而可以直接做MLE訓練</p>
@@ -409,8 +413,6 @@
 <li><a href="http://musyoku.github.io/2016/09/18/wavenet-a-generative-model-for-raw-audio/" target="_blank" rel="noopener">ご注文は機械学習ですか</a></li>
 </ol>
 
-          
-        
       
     </div>
 
@@ -428,14 +430,20 @@
 
     <footer class="post-footer">
       
+        <div class="post-tags">
+          
+            <a href="/tags/generative-model/" rel="tag"># generative model</a>
+          
+        </div>
+      
+
+      
+      
+      
 
       
 
       
-
-      
-      
-        <div class="post-eof"></div>
       
     </footer>
   </div>
@@ -445,14 +453,19 @@
   </article>
 
 
-    
-  </section>
 
-  
+    <div class="post-spread">
+      
+    </div>
+  </div>
 
 
           </div>
           
+
+  
+
+
 
         </div>
         
@@ -473,8 +486,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目錄
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            本站概要
+          </li>
+        </ul>
+      
 
-      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+      <section class="site-overview-wrap sidebar-panel">
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
@@ -532,6 +554,22 @@
         </div>
       </section>
 
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Autoregressive-model"><span class="nav-number">1.</span> <span class="nav-text">Autoregressive model</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Fully-observed-model"><span class="nav-number">2.</span> <span class="nav-text">Fully observed model</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Implement-and-Tricks"><span class="nav-number">3.</span> <span class="nav-text">Implement and Tricks</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Causal-amp-Dilated-Conv1d"><span class="nav-number">3.1.</span> <span class="nav-text">Causal &amp; Dilated Conv1d</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Residual-amp-Stack-block"><span class="nav-number">3.2.</span> <span class="nav-text">Residual &amp; Stack block</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Data-processing-amp-Training"><span class="nav-number">3.3.</span> <span class="nav-text">Data processing &amp; Training</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Reference"><span class="nav-number">4.</span> <span class="nav-text">Reference</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
       
 
       
@@ -659,6 +697,10 @@
   
 
   
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.0.6"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.0.6"></script>
+
+
 
   
 
@@ -710,10 +752,6 @@
   
 
   
-  
-    
-      
-    
   
 
   
