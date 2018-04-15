@@ -99,20 +99,30 @@
 
 
 
-  <meta property="og:type" content="website">
-<meta property="og:title" content="odie&#39;s whisper">
-<meta property="og:url" content="http://yoursite.com/index.html">
+  <meta name="description" content="之前Google有一個有趣的小遊戲Quickdraw，給你一個題目要你20秒內畫出來，當然除了讓你打發時間外，大家手繪大作也變成機器的精神糧食，拿來學習了XD  SketchRNN是一個向量軌跡的生成模型，這篇部落格文章可以看到很多有趣的結果，詳細的模型架構與訓練過程可以看這一篇論文  整個模型可分為3個部分：  Seq2seq autoencoder + Gaussian mixture mod">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SketchRNN">
+<meta property="og:url" content="http://yoursite.com/2018/04/15/sketchrnn/index.html">
 <meta property="og:site_name" content="odie&#39;s whisper">
+<meta property="og:description" content="之前Google有一個有趣的小遊戲Quickdraw，給你一個題目要你20秒內畫出來，當然除了讓你打發時間外，大家手繪大作也變成機器的精神糧食，拿來學習了XD  SketchRNN是一個向量軌跡的生成模型，這篇部落格文章可以看到很多有趣的結果，詳細的模型架構與訓練過程可以看這一篇論文  整個模型可分為3個部分：  Seq2seq autoencoder + Gaussian mixture mod">
 <meta property="og:locale" content="zh-TW">
+<meta property="og:image" content="http://yoursite.com/media/7FB391C9-1C05-4051-88FE-80FF2961ED8F.png">
+<meta property="og:image" content="http://yoursite.com/media/15231614597425.png">
+<meta property="og:image" content="http://yoursite.com/media/15231633369052.jpg">
+<meta property="og:image" content="http://yoursite.com/media/BD8784F1-5355-4BE2-A726-BBB86271B739.png">
+<meta property="og:image" content="http://yoursite.com/media/15233779330198.jpg">
+<meta property="og:updated_time" content="2018-04-15T15:19:54.152Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="odie&#39;s whisper">
+<meta name="twitter:title" content="SketchRNN">
+<meta name="twitter:description" content="之前Google有一個有趣的小遊戲Quickdraw，給你一個題目要你20秒內畫出來，當然除了讓你打發時間外，大家手繪大作也變成機器的精神糧食，拿來學習了XD  SketchRNN是一個向量軌跡的生成模型，這篇部落格文章可以看到很多有趣的結果，詳細的模型架構與訓練過程可以看這一篇論文  整個模型可分為3個部分：  Seq2seq autoencoder + Gaussian mixture mod">
+<meta name="twitter:image" content="http://yoursite.com/media/7FB391C9-1C05-4051-88FE-80FF2961ED8F.png">
 
 
 
 
 
 
-  <link rel="canonical" href="http://yoursite.com/"/>
+  <link rel="canonical" href="http://yoursite.com/2018/04/15/sketchrnn/"/>
 
 
 
@@ -122,7 +132,7 @@
   };
 </script>
 
-  <title>odie's whisper</title>
+  <title>SketchRNN | odie's whisper</title>
   
 
 
@@ -169,8 +179,7 @@
     
   
 
-  <div class="container sidebar-position-left 
-  page-home">
+  <div class="container sidebar-position-left page-post-detail">
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
@@ -292,9 +301,9 @@
           
           <div id="content" class="content">
             
-  <section id="posts" class="posts-expand">
+
+  <div id="posts" class="posts-expand">
     
-      
 
   
 
@@ -326,9 +335,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/04/15/sketchrnn/" itemprop="url">SketchRNN</a></h1>
+          <h1 class="post-title" itemprop="name headline">SketchRNN</h1>
         
 
         <div class="post-meta">
@@ -395,9 +402,7 @@
       
 
       
-        
-          
-            <p>之前Google有一個有趣的小遊戲<a href="https://quickdraw.withgoogle.com" target="_blank" rel="noopener">Quickdraw</a>，給你一個題目要你20秒內畫出來，當然除了讓你打發時間外，大家手繪大作也變成機器的精神糧食，拿來學習了XD</p>
+        <p>之前Google有一個有趣的小遊戲<a href="https://quickdraw.withgoogle.com" target="_blank" rel="noopener">Quickdraw</a>，給你一個題目要你20秒內畫出來，當然除了讓你打發時間外，大家手繪大作也變成機器的精神糧食，拿來學習了XD</p>
 <p><img src="/media/7FB391C9-1C05-4051-88FE-80FF2961ED8F.png" alt="7FB391C9-1C05-4051-88FE-80FF2961ED8F"></p>
 <p>SketchRNN是一個向量軌跡的生成模型，這篇<a href="https://research.googleblog.com/2017/04/teaching-machines-to-draw.html" target="_blank" rel="noopener">部落格文章</a>可以看到很多有趣的結果，詳細的模型架構與訓練過程可以看這一篇<a href="https://arxiv.org/abs/1704.03477" target="_blank" rel="noopener">論文</a></p>
 <p><img src="/media/15231614597425.png" alt=""></p>
@@ -431,8 +436,6 @@
 <li><a href="https://github.com/alexis-jacq/Pytorch-Sketch-RNN" target="_blank" rel="noopener">alexis-jacq/Pytorch-Sketch-RNN</a></li>
 </ol>
 
-          
-        
       
     </div>
 
@@ -452,182 +455,28 @@
       
 
       
-
-      
-
       
       
-        <div class="post-eof"></div>
+
       
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/04/01/wavenet/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="odie">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="odie's whisper">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/04/01/wavenet/" itemprop="url">Ｗavenet</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
             
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">發表於</span>
-              
-              <time title="創建於" itemprop="dateCreated datePublished" datetime="2018-04-01T20:20:53+08:00">2018-04-01</time>
+              <a href="/2018/04/01/wavenet/" rel="next" title="Ｗavenet">
+                <i class="fa fa-chevron-left"></i> Ｗavenet
+              </a>
             
+          </div>
 
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
             
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分類於</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/generative-model/" itemprop="url" rel="index"><span itemprop="name">generative model</span></a></span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
+          </div>
         </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
       
 
       
-        
-          
-            <p><a href="https://deepmind.com/blog/wavenet-generative-model-raw-audio/" target="_blank" rel="noopener">WaveNet: A Generative Model for Raw Audio</a> 是 DeepMind所提出的一種用於聲音的生成模型，例如最近發布的<a href="https://cloud.google.com/text-to-speech/" target="_blank" rel="noopener">CLOUD TEXT-TO-SPEECH</a>用的模型架構就是以這個為基礎，還有<a href="https://magenta.tensorflow.org/nsynth-instrument" target="_blank" rel="noopener">Making a Neural Synthesizer Instrument</a>裡面都有用上類似WaveNet的結構</p>
-<h2 id="Autoregressive-model"><a href="#Autoregressive-model" class="headerlink" title="Autoregressive model"></a>Autoregressive model</h2><p>統計上常用來處理時間序列的方法，用過去歷史資料 $x_{1:t-1}$來預測現在$x_t$，可以看成過去的自己對現在的自己做回歸，所以被稱為自回歸模型</p>
-<p>本模型也是用過去的聲音訊號來預測現在的訊號點，這樣的缺點是要生成新樣本的時候效率很差，因為資料有序列關係，總是要等待前面產生，才可以依序產生新的點，算是這類模型的問題</p>
-<h2 id="Fully-observed-model"><a href="#Fully-observed-model" class="headerlink" title="Fully observed model"></a>Fully observed model</h2><p>本模型沒有任何的Latent variable，沒有需要估計或是近似的未知變量，任何資訊都是完全可見的，都是從過去歷史資料來的，這樣的模型架構上更為直接簡單，不需要處理隱變量問題，用上繁瑣的近似演算法等等，而可以直接做MLE訓練</p>
-<h2 id="Implement-and-Tricks"><a href="#Implement-and-Tricks" class="headerlink" title="Implement and Tricks"></a>Implement and Tricks</h2><p>我的<a href="https://github.com/odie2630463/WaveNet" target="_blank" rel="noopener">實作版本</a>，以Pytorch實作，僅有針對單一人語音訓練，沒有做多人訓練或是TTS等，但實作上相對透明簡單，可以比較深入看看實作過程</p>
-<h3 id="Causal-amp-Dilated-Conv1d"><a href="#Causal-amp-Dilated-Conv1d" class="headerlink" title="Causal &amp; Dilated Conv1d"></a>Causal &amp; Dilated Conv1d</h3><p><img src="/media/15228972877719.gif" alt=""><br>圖片來源：<a href="https://deepmind.com/blog/wavenet-generative-model-raw-audio/" target="_blank" rel="noopener">WaveNet: A Generative Model for Raw Audio</a></p>
-<ul>
-<li>Causal:不能用到未來的資訊，例如在實作 PixelCNN時，要把Kernel的一部分mask起來，但是在本實作1D conv時，Kernel直接是2，意思為要預測$x_{t}$時，僅用到$x_{t-2}$與$x_{t-1}$，不過要記得把最後一個時間去掉</li>
-<li>Dilated: 讓Kernel看遠一點，不要只看鄰居，如果Dilated設定大一些時，就會看$x_{t}$與$x_{t-N}$，大幅增加視野域，我猜音訊鄰近的時間點值都差不多，不如看遠一點可能會有比較多變化，提供模型更多有用訊息；建議參考<a href="http://sergeiturukin.com/2017/03/02/wavenet.html" target="_blank" rel="noopener">這篇</a>來了解Dilated Conv</li>
-</ul>
-<h3 id="Residual-amp-Stack-block"><a href="#Residual-amp-Stack-block" class="headerlink" title="Residual &amp; Stack block"></a>Residual &amp; Stack block</h3><p><img src="/media/15228552689393.png" alt=""><br>圖片來源：<a href="http://musyoku.github.io/2016/09/18/wavenet-a-generative-model-for-raw-audio/" target="_blank" rel="noopener">ご注文は機械学習ですか</a></p>
-<p><img src="/media/15228902504332.png" alt=""><br>圖片來源：<a href="https://arxiv.org/abs/1609.03499" target="_blank" rel="noopener">WaveNet: A Generative Model for Raw Audio</a></p>
-<ul>
-<li>模型以多個Block堆疊在一起，每個Block含有多個Dilated Conv，並且加入Residual link來幫助梯度傳遞</li>
-<li>把每一個Block的輸出匯集並加起來，每個Block計算視野不同，越往上層越大，代表資料不同的resolution，最後加總在經過轉換輸出得到下一個時間點的預測</li>
-</ul>
-<h3 id="Data-processing-amp-Training"><a href="#Data-processing-amp-Training" class="headerlink" title="Data processing &amp; Training"></a>Data processing &amp; Training</h3><ul>
-<li><a href="http://homepages.inf.ed.ac.uk/jyamagis/page3/page58/page58.html" target="_blank" rel="noopener">VCTK</a>資料集有多人的語音與文字內容，可以用來訓練TTS系統</li>
-<li>語音資料處理我用上<a href="https://github.com/pytorch/audio" target="_blank" rel="noopener">torchaudio</a>、<a href="https://librosa.github.io/librosa/" target="_blank" rel="noopener">librosa</a>，但不知道為什麼用兩個套件讀出來的有點差異，我最後用librosa來讀取音訊，還有把<strong>無聲部分去掉</strong>，這個步驟非常重要！不然訓練到最後只會一直產生靜音，再用torchaudio做Mulaw encoding</li>
-<li>訓練batch size為1，一次給一段語音來訓練，基本上因為訓練資料長度差異很大，要做padding很浪費與不好做，再且顯卡記憶體也不夠大，所以一次訓練一個語音檔是合理的做法</li>
-<li>訓練大概要2天，而且頗慢的，建議做learning rate scheduling從0.001往下到0.00001，我訓練在p225這個語音上，最後得到loss約2左右，可以得到還可以的結果</li>
-<li>計算視野其實蠻簡單，就餵給模型資料來測試看多長的資料，模型剛好輸出為1，就是模型的視野，代表要預測下一個時間點，需要往前看多長的資料</li>
-<li>產生新樣本非常慢的，請耐心等待，所以這一篇頂多只能說是開一個研究開頭，而且也無法直接做到TTS或其他應用，而是一個好的音訊產生網路結構，後續很多聲音產生都是基於此</li>
-</ul>
-<h2 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h2><ol>
-<li><a href="http://sergeiturukin.com/2017/03/02/wavenet.html" target="_blank" rel="noopener">Sergei Turukin blog</a></li>
-<li><a href="https://lirnli.wordpress.com/2017/10/16/pytorch-wavenet/" target="_blank" rel="noopener">winter plum blog</a></li>
-<li><a href="http://musyoku.github.io/2016/09/18/wavenet-a-generative-model-for-raw-audio/" target="_blank" rel="noopener">ご注文は機械学習ですか</a></li>
-</ol>
-
-          
-        
-      
-    </div>
-
-    
-
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
       
     </footer>
   </div>
@@ -637,14 +486,19 @@
   </article>
 
 
-    
-  </section>
 
-  
+    <div class="post-spread">
+      
+    </div>
+  </div>
 
 
           </div>
           
+
+  
+
+
 
         </div>
         
@@ -665,8 +519,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目錄
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            本站概要
+          </li>
+        </ul>
+      
 
-      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+      <section class="site-overview-wrap sidebar-panel">
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
@@ -724,6 +587,22 @@
         </div>
       </section>
 
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Seq2seq-autoencoder-Gaussian-mixture-model"><span class="nav-number">1.</span> <span class="nav-text">Seq2seq autoencoder + Gaussian mixture model</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Variational-inference"><span class="nav-number">2.</span> <span class="nav-text">Variational inference</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Implement-and-Tricks"><span class="nav-number">3.</span> <span class="nav-text">Implement and Tricks</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Data-processing-amp-Training"><span class="nav-number">3.1.</span> <span class="nav-text">Data processing &amp; Training</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Reference"><span class="nav-number">4.</span> <span class="nav-text">Reference</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
       
 
       
@@ -851,6 +730,10 @@
   
 
   
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.0.6"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.0.6"></script>
+
+
 
   
 
@@ -902,12 +785,6 @@
   
 
   
-  
-    
-      
-    
-      
-    
   
 
   
