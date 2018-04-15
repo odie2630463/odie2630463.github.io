@@ -415,7 +415,7 @@
 <p>每個時間點模型給出的預測$\hat{y}$為公式17，分別為是否停止、GMM的參數等，就可以直接做MLE訓練</p>
 <p><img src="/media/BD8784F1-5355-4BE2-A726-BBB86271B739.png" alt="BD8784F1-5355-4BE2-A726-BBB86271B739"></p>
 <h2 id="Variational-inference"><a href="#Variational-inference" class="headerlink" title="Variational inference"></a>Variational inference</h2><p>VAE這個東西是一個非常熱門的生成模型，下次有機會再開一篇來講講，如果想簡單了解，可以直接看<a href="https://jaan.io/what-is-variational-autoencoder-vae-tutorial/" target="_blank" rel="noopener">這裡</a>，直觀上SketchRNN透過$encoder$把序列壓縮到一個連續空間中，這個連續空間為高斯分佈$N(0,1)$，而$decoder$要能還原回原本的軌跡，但我們能從連續空間中抽樣出新的點，由$decoder$產生軌跡，就是產生新的塗鴉囉！</p>
-<h2 id="Implement-and-Tricks"><a href="#Implement-and-Tricks" class="headerlink" title="Implement and Tricks"></a>Implement and Tricks</h2><p>我的<a href="https://github.com/odie2630463/sketch_rnn" target="_blank" rel="noopener">實作版本</a>，以Pytorch實作，僅有針對單一人語音訓練，沒有做多人訓練或是TTS等，但實作上相對透明簡單，可以比較深入看看實作過程</p>
+<h2 id="Implement-and-Tricks"><a href="#Implement-and-Tricks" class="headerlink" title="Implement and Tricks"></a>Implement and Tricks</h2><p>我的<a href="https://github.com/odie2630463/sketch_rnn" target="_blank" rel="noopener">實作版本</a>，以Pytorch實作</p>
 <h3 id="Data-processing-amp-Training"><a href="#Data-processing-amp-Training" class="headerlink" title="Data processing &amp; Training"></a>Data processing &amp; Training</h3><ul>
 <li><a href="https://github.com/googlecreativelab/quickdraw-dataset" target="_blank" rel="noopener">quickdraw-dataset</a>有約300多種類別的塗鴉資料可以下載</li>
 <li>軌跡都是正整數，要先剔除一些異常資料，再做縮放正規化，這部分可以參考實作</li>
