@@ -106,7 +106,7 @@
 <meta property="og:site_name" content="odie&#39;s whisper">
 <meta property="og:description" content="機率分佈估計一直是機器學習中的核心問題，不論是分類問題估計條件機率分佈$p(y|x)$，或是建立生成模型$p(x,z)$，我們都在從資料中建立與學習出一個機率分佈 基本上機率分佈能做到兩件事：  評估機率值，計算$p(x)$，給樣本空間的點都要能得出機率值 抽樣，計算$x \sim p(x)$，要能依機率密度來抽樣出樣本  近年來，深度學習能有效率的近似高維度的複雜函數，而且還有完整的訓練框架，再">
 <meta property="og:locale" content="zh-TW">
-<meta property="og:updated_time" content="2018-07-11T07:13:46.183Z">
+<meta property="og:updated_time" content="2018-07-27T12:52:33.098Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Normalizing Flows">
 <meta name="twitter:description" content="機率分佈估計一直是機器學習中的核心問題，不論是分類問題估計條件機率分佈$p(y|x)$，或是建立生成模型$p(x,z)$，我們都在從資料中建立與學習出一個機率分佈 基本上機率分佈能做到兩件事：  評估機率值，計算$p(x)$，給樣本空間的點都要能得出機率值 抽樣，計算$x \sim p(x)$，要能依機率密度來抽樣出樣本  近年來，深度學習能有效率的近似高維度的複雜函數，而且還有完整的訓練框架，再">
@@ -418,7 +418,7 @@
 <p>計算行列式最差時候需要<a href="https://en.wikipedia.org/wiki/Computational_complexity_of_mathematical_operations" target="_blank" rel="noopener">$O(n^3)$</a>，所以就需要設計比較容易計算行列式的轉換，例如 Masked Autoregressive Flow、Inversed Autoregressive Flow、RealNVP等等模型，有用到Autoregressive的特性，所以行列式會很容易計算，這些方法會在後續的文章中介紹。</p>
 <h2 id="Training-and-sampling"><a href="#Training-and-sampling" class="headerlink" title="Training and sampling"></a>Training and sampling</h2><p><strong>向後機率計算</strong>，我們可以直接對$\log p(y)$最大化機率似然，給$y$透過一系列反函數得到$x$與行列式總和</p>
 <p>$$x = f_1^{-1}  \circ \dots \circ f_K^{-1}(y)$$</p>
-<p>最後計算$\log p(x)$減去轉換過程行列式總和，就可以算出$\log p(y)$，當然也就能用上SGD等優化方法，一系列轉換函數就當成一層層神經網路來訓練，只是這裡要求要能計算反函數</p>
+<p>最後計算$\log p(x)$減去轉換過程行列式總和(如式子2)，就可以算出$\log p(y)$，當然也就能用上SGD等優化方法，一系列轉換函數就當成一層層神經網路來訓練，只是這裡要求要能計算反函數</p>
 <p><strong>向前抽樣計算</strong>，出新樣本很直觀，就從$p(x)$抽樣出$x$，經過轉換即可得到$y$，而且還能順便得到$p(y)$</p>
 <p>$$y = f_K  \circ \dots \circ f_1(x)$$</p>
 <hr>
@@ -466,6 +466,10 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/07/28/pyro-lda/" rel="prev" title="LDA model use Pyro">
+                LDA model use Pyro <i class="fa fa-chevron-right"></i>
+              </a>
             
           </div>
         </div>
@@ -539,7 +543,7 @@
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">3</span>
+                    <span class="site-state-item-count">4</span>
                     <span class="site-state-item-name">文章</span>
                   </a>
                 </div>
@@ -554,7 +558,11 @@
                     
                       
                     
-                    <span class="site-state-item-count">1</span>
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">3</span>
                     <span class="site-state-item-name">分類</span>
                   </a>
                 </div>
