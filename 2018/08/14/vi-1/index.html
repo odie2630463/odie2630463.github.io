@@ -99,28 +99,26 @@
 
 
 
-  <meta name="description" content="WaveNet: A Generative Model for Raw Audio 是 DeepMind所提出的一種用於聲音的生成模型，例如最近發布的CLOUD TEXT-TO-SPEECH用的模型架構就是以這個為基礎，還有Making a Neural Synthesizer Instrument裡面都有用上類似WaveNet的結構 Autoregressive model統計上常用來處理時間序">
+  <meta name="description" content="Variational Inference 是一種近似複雜分佈的數學方法，我們假設一類計算簡單的候選分佈$q(z)$，並有另一個複雜難以計算的後驗分佈$p(z|x)$，我們希望從候選分佈中找一個最接近$p(z|x)$的$q^*(z)$，這個等同於最小化$KL(q(z) | p(z|x))$ 不過為什麼我們要近似後驗分佈$p(z|x)$呢？或是$q(z)$可以怎麼定義？與深度學習怎麼結合？本篇或接下">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Ｗavenet">
-<meta property="og:url" content="http://yoursite.com/2018/04/01/wavenet/index.html">
+<meta property="og:title" content="漫談 Variational Inference (一)">
+<meta property="og:url" content="http://yoursite.com/2018/08/14/vi-1/index.html">
 <meta property="og:site_name" content="odie&#39;s whisper">
-<meta property="og:description" content="WaveNet: A Generative Model for Raw Audio 是 DeepMind所提出的一種用於聲音的生成模型，例如最近發布的CLOUD TEXT-TO-SPEECH用的模型架構就是以這個為基礎，還有Making a Neural Synthesizer Instrument裡面都有用上類似WaveNet的結構 Autoregressive model統計上常用來處理時間序">
+<meta property="og:description" content="Variational Inference 是一種近似複雜分佈的數學方法，我們假設一類計算簡單的候選分佈$q(z)$，並有另一個複雜難以計算的後驗分佈$p(z|x)$，我們希望從候選分佈中找一個最接近$p(z|x)$的$q^*(z)$，這個等同於最小化$KL(q(z) | p(z|x))$ 不過為什麼我們要近似後驗分佈$p(z|x)$呢？或是$q(z)$可以怎麼定義？與深度學習怎麼結合？本篇或接下">
 <meta property="og:locale" content="zh-TW">
-<meta property="og:image" content="http://yoursite.com/media/15228972877719.gif">
-<meta property="og:image" content="http://yoursite.com/media/15228552689393.png">
-<meta property="og:image" content="http://yoursite.com/media/15228902504332.png">
-<meta property="og:updated_time" content="2018-04-07T13:25:06.878Z">
+<meta property="og:image" content="http://yoursite.com/media/15342296556201.png">
+<meta property="og:updated_time" content="2018-08-14T08:45:27.727Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Ｗavenet">
-<meta name="twitter:description" content="WaveNet: A Generative Model for Raw Audio 是 DeepMind所提出的一種用於聲音的生成模型，例如最近發布的CLOUD TEXT-TO-SPEECH用的模型架構就是以這個為基礎，還有Making a Neural Synthesizer Instrument裡面都有用上類似WaveNet的結構 Autoregressive model統計上常用來處理時間序">
-<meta name="twitter:image" content="http://yoursite.com/media/15228972877719.gif">
+<meta name="twitter:title" content="漫談 Variational Inference (一)">
+<meta name="twitter:description" content="Variational Inference 是一種近似複雜分佈的數學方法，我們假設一類計算簡單的候選分佈$q(z)$，並有另一個複雜難以計算的後驗分佈$p(z|x)$，我們希望從候選分佈中找一個最接近$p(z|x)$的$q^*(z)$，這個等同於最小化$KL(q(z) | p(z|x))$ 不過為什麼我們要近似後驗分佈$p(z|x)$呢？或是$q(z)$可以怎麼定義？與深度學習怎麼結合？本篇或接下">
+<meta name="twitter:image" content="http://yoursite.com/media/15342296556201.png">
 
 
 
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2018/04/01/wavenet/"/>
+  <link rel="canonical" href="http://yoursite.com/2018/08/14/vi-1/"/>
 
 
 
@@ -130,7 +128,7 @@
   };
 </script>
 
-  <title>Ｗavenet | odie's whisper</title>
+  <title>漫談 Variational Inference (一) | odie's whisper</title>
   
 
 
@@ -297,7 +295,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/04/01/wavenet/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/08/14/vi-1/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="odie">
@@ -314,7 +312,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">Ｗavenet</h1>
+          <h1 class="post-title" itemprop="name headline">漫談 Variational Inference (一)</h1>
         
 
         <div class="post-meta">
@@ -326,7 +324,7 @@
               
                 <span class="post-meta-item-text">發表於</span>
               
-              <time title="創建於" itemprop="dateCreated datePublished" datetime="2018-04-01T20:20:53+08:00">2018-04-01</time>
+              <time title="創建於" itemprop="dateCreated datePublished" datetime="2018-08-14T16:45:27+08:00">2018-08-14</time>
             
 
             
@@ -348,6 +346,13 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/generative-model/" itemprop="url" rel="index"><span itemprop="name">generative model</span></a></span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/generative-model/probabilistic-graphical-model/" itemprop="url" rel="index"><span itemprop="name">probabilistic graphical model</span></a></span>
 
                 
                 
@@ -381,35 +386,31 @@
       
 
       
-        <p><a href="https://deepmind.com/blog/wavenet-generative-model-raw-audio/" target="_blank" rel="noopener">WaveNet: A Generative Model for Raw Audio</a> 是 DeepMind所提出的一種用於聲音的生成模型，例如最近發布的<a href="https://cloud.google.com/text-to-speech/" target="_blank" rel="noopener">CLOUD TEXT-TO-SPEECH</a>用的模型架構就是以這個為基礎，還有<a href="https://magenta.tensorflow.org/nsynth-instrument" target="_blank" rel="noopener">Making a Neural Synthesizer Instrument</a>裡面都有用上類似WaveNet的結構</p>
-<h2 id="Autoregressive-model"><a href="#Autoregressive-model" class="headerlink" title="Autoregressive model"></a>Autoregressive model</h2><p>統計上常用來處理時間序列的方法，用過去歷史資料 $x_{1:t-1}$來預測現在$x_t$，可以看成過去的自己對現在的自己做回歸，所以被稱為自回歸模型</p>
-<p>本模型也是用過去的聲音訊號來預測現在的訊號點，這樣的缺點是要生成新樣本的時候效率很差，因為資料有序列關係，總是要等待前面產生，才可以依序產生新的點，算是這類模型的問題</p>
-<h2 id="Fully-observed-model"><a href="#Fully-observed-model" class="headerlink" title="Fully observed model"></a>Fully observed model</h2><p>本模型沒有任何的Latent variable，沒有需要估計或是近似的未知變量，任何資訊都是完全可見的，都是從過去歷史資料來的，這樣的模型架構上更為直接簡單，不需要處理隱變量問題，用上繁瑣的近似演算法等等，而可以直接做MLE訓練</p>
-<h2 id="Implement-and-Tricks"><a href="#Implement-and-Tricks" class="headerlink" title="Implement and Tricks"></a>Implement and Tricks</h2><p>我的<a href="https://github.com/odie2630463/WaveNet" target="_blank" rel="noopener">實作版本</a>，以Pytorch實作，僅有針對單一人語音訓練，沒有做多人訓練或是TTS等，但實作上相對透明簡單，可以比較深入看看實作過程</p>
-<h3 id="Causal-amp-Dilated-Conv1d"><a href="#Causal-amp-Dilated-Conv1d" class="headerlink" title="Causal &amp; Dilated Conv1d"></a>Causal &amp; Dilated Conv1d</h3><p><img src="/media/15228972877719.gif" alt=""><br>圖片來源：<a href="https://deepmind.com/blog/wavenet-generative-model-raw-audio/" target="_blank" rel="noopener">WaveNet: A Generative Model for Raw Audio</a></p>
-<ul>
-<li>Causal:不能用到未來的資訊，例如在實作 PixelCNN時，要把Kernel的一部分mask起來，但是在本實作1D conv時，Kernel直接是2，意思為要預測$x_{t}$時，僅用到$x_{t-2}$與$x_{t-1}$，不過要記得把最後一個時間去掉</li>
-<li>Dilated: 讓Kernel看遠一點，不要只看鄰居，如果Dilated設定大一些時，就會看$x_{t}$與$x_{t-N}$，大幅增加視野域，我猜音訊鄰近的時間點值都差不多，不如看遠一點可能會有比較多變化，提供模型更多有用訊息；建議參考<a href="http://sergeiturukin.com/2017/03/02/wavenet.html" target="_blank" rel="noopener">這篇</a>來了解Dilated Conv</li>
+        <p>Variational Inference 是一種近似複雜分佈的數學方法，我們假設一類計算簡單的<strong>候選分佈</strong>$q(z)$，並有另一個複雜難以計算的後驗分佈$p(z|x)$，我們希望從候選分佈中找一個最接近$p(z|x)$的$q^*(z)$，這個等同於最小化$KL(q(z) | p(z|x))$</p>
+<p>不過為什麼我們要近似後驗分佈$p(z|x)$呢？或是$q(z)$可以怎麼定義？與深度學習怎麼結合？本篇或接下來的幾篇文章就來跟大家漫談一下VI，整理了自己看過有關的資料，從幾個角度切入推導，並來看看跟其他生成模型有什麼關係</p>
+<h2 id="Latent-variable-model"><a href="#Latent-variable-model" class="headerlink" title="Latent variable model"></a>Latent variable model</h2><p>要談VI之前要先講一下隱變量模型(Latent variable model)，因為VI就是拿來求解隱變量模型方法之一，我們假設可觀測的隨機變數$x$與無法觀測的隱變量$z$聯合機率分佈為：</p>
+<p>$<br>p_{\theta}(x,z) = p_{\theta}(x|z)p(z) \tag{1}<br>$</p>
+<p>其中$p_{\theta}(x|z)$為一個參數化的模型來表示條件機率，再透過把$z$積分，我們可以得到$p(x)$：<br>$<br>p_{\theta}(x) = \int p_{\theta}(x,z)dz \tag{2}<br>$</p>
+<p>看來很完美，我們得到$p(x)$式子接著就能直接去用MLE去學習 $\theta$ 囉！</p>
+<p>這裡再多討論一下為何要使用隱變量模型，從上面式子來看，引入隱變量可以幫助我們定義出一個能計算的$p(x)$，解決了不知道怎麼假設$p(x)$的問題；另外，隱變量能捕捉資料所隱含的特性，例如「星座」是人們所加上的隱變量，有時候透過「星座」可以更快掌握你是個怎樣的人或是個性，或是說從你的行為來猜測你是什麼星座之類的，都是生活中常見的隱變量應用</p>
+<p>不過更多時候，隱變量於表徵學習任務上扮演重要的角色，像是這個<a href="https://arxiv.org/abs/1704.03477" target="_blank" rel="noopener">手繪塗鴉</a>的例子，所學習到的隱變量於低維度可以形成<a href="https://zh.wikipedia.org/wiki/流形" target="_blank" rel="noopener">流型(Manifolds)</a>，隱變量能捕捉資料的變異性，形成一個漸變的空間且具有泛化能力，代表隱變量能更好的表示資料特性，是很好的表徵學習方法</p>
+<p><img src="/media/15342296556201.png" alt="-w401"></p>
+<h2 id="計算後驗機率困難"><a href="#計算後驗機率困難" class="headerlink" title="計算後驗機率困難"></a>計算後驗機率困難</h2><p>我們先來看看為什麼要近似$p(z|x)$，從隱變量模型，我們有一個可以計算的$p(x,z)$，現在把$p(x)$重新寫成：</p>
+<p>$<br>p(x) = \frac{p(x,z)}{p(z|x)} \tag{3}<br>$</p>
+<p>又是另一片天地，我們想要能計算$p(x)$，那只要$p(x,z)$與$p(z|x)$都可以被計算，那一切就太好了；只可惜，$p(z|x)$是無法被計算的，原因是：</p>
+<p>$<br>p(z|x) = \frac{p(x,z)}{p(x)} \tag{4}<br>$</p>
+<p>又導回來了，我們就是苦於沒有$p(x)$呀，那只好直接用另一個$q(z)$來偽裝成$p(z|x)$了，如果他們兩個夠相似，$p(x)$應該是可以被近似求出來的，這裡就用上VI想法了！</p>
+<h2 id="Evidence-Lower-Bound"><a href="#Evidence-Lower-Bound" class="headerlink" title="Evidence Lower Bound"></a>Evidence Lower Bound</h2><p>我們希望用上$q_{\phi}(z)$來取代$p(z|x)$解決後驗計算困難問題，所以引入$q_{\phi}(z)$至$p(x)$得到：</p>
+<p>$<br>\begin{split}<br>\log p_{\theta}(x) &amp;= \mathbb{E}_{q_{\phi}(z)} \left[ \log p_{\theta}(x) \right] \\<br>          &amp;= \mathbb{E}_{q_{\phi}(z)} \left[ \log \frac{p_{\theta}(x,z)}{p(z|x)} \right] \\<br>&amp;= \mathbb{E}_{q_{\phi}(z)}<br>          \left[<br>          \log \frac{p_{\theta}(x,z)}{q_{\phi}(z)} \frac{q_{\phi}(z)}{p_{\theta}(z|x)}<br>          \right] \\<br>&amp;= \mathbb{E}_{q_{\phi}(z)}<br>          \left[<br>          \log \frac{p_{\theta}(x,z)}{q_{\phi}(z)}\right] + \mathbb{E}_{q_{\phi}(z)} \left[ \log \frac{q_{\phi}(z)}{p_{\theta}(z|x)}<br>          \right] \\<br>&amp;= \mathbb{E}_{q_{\phi}(z)}<br>        \left[<br>          \log \frac{p_{\theta}(x,z)}             {q_{\phi}(z)}\right] + KL(q_{\theta}(z)|| p_{\theta}(z|x))<br>\end{split}$</p>
+<p>我們將原本$\log p(x)$拆成兩項，先來看第二項，為我們VI方法裡面的候選分佈$q_{\phi}(z)$與後驗分佈$p_{\theta}(z|x)$的KL距離，一定大於等於0，但我們依然無法直接去最小化之間差距</p>
+<p>所以轉看第一項，又因$\log p(x)$為一個定值，第一項就成為了一個下界(Lower Bound)並稱為Evidence Lower Bound(ELBO)，如果我們最大化第一項，不就等同於最小化第二項了嗎！而且第一項完全是可以算的！我們能透過訓練參數$\theta , \phi$來最大化ELBO，等同於最大化$\log p(x)$與使得$q_{\phi}(z)$近似$p_{\theta}(z|x)$</p>
+<h2 id="結語"><a href="#結語" class="headerlink" title="結語"></a>結語</h2><p>本篇是漫談VI方法的第一篇，介紹了隱變量模型與其求解困難，並用上VI方法來求解模型，最後得出可以透過最大化ELBO來求解訓練參數</p>
+<p>第一篇算是基礎介紹，也是我論文裡文獻回顧又回顧一次，之後會介紹從 Importance sampling 角度出發推導出ELBO，還有 Amortised inference 概念，還有一些VI方法進階討論，希望能陸續整理出來</p>
+<h2 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h2><ul>
+<li>NIPS 2016 Tutorial，很完整介紹VI的發展歷史 <a href="https://media.nips.cc/Conferences/2016/Slides/6199-Slides.pdf" target="_blank" rel="noopener">Variational Inference: Foundations and Modern Methods</a></li>
+<li>VAE 提出者的博士論文，值得一看！<a href="https://www.dropbox.com/s/dl/v6ua3d9yt44vgb3/cover_and_thesis.pdf" target="_blank" rel="noopener">VARIATIONAL INFERENCE &amp; DEEP LEARNING: A NEW SYNTHESIS
+</a></li>
 </ul>
-<h3 id="Residual-amp-Stack-block"><a href="#Residual-amp-Stack-block" class="headerlink" title="Residual &amp; Stack block"></a>Residual &amp; Stack block</h3><p><img src="/media/15228552689393.png" alt=""><br>圖片來源：<a href="http://musyoku.github.io/2016/09/18/wavenet-a-generative-model-for-raw-audio/" target="_blank" rel="noopener">ご注文は機械学習ですか</a></p>
-<p><img src="/media/15228902504332.png" alt=""><br>圖片來源：<a href="https://arxiv.org/abs/1609.03499" target="_blank" rel="noopener">WaveNet: A Generative Model for Raw Audio</a></p>
-<ul>
-<li>模型以多個Block堆疊在一起，每個Block含有多個Dilated Conv，並且加入Residual link來幫助梯度傳遞</li>
-<li>把每一個Block的輸出匯集並加起來，每個Block計算視野不同，越往上層越大，代表資料不同的resolution，最後加總在經過轉換輸出得到下一個時間點的預測</li>
-</ul>
-<h3 id="Data-processing-amp-Training"><a href="#Data-processing-amp-Training" class="headerlink" title="Data processing &amp; Training"></a>Data processing &amp; Training</h3><ul>
-<li><a href="http://homepages.inf.ed.ac.uk/jyamagis/page3/page58/page58.html" target="_blank" rel="noopener">VCTK</a>資料集有多人的語音與文字內容，可以用來訓練TTS系統</li>
-<li>語音資料處理我用上<a href="https://github.com/pytorch/audio" target="_blank" rel="noopener">torchaudio</a>、<a href="https://librosa.github.io/librosa/" target="_blank" rel="noopener">librosa</a>，但不知道為什麼用兩個套件讀出來的有點差異，我最後用librosa來讀取音訊，還有把<strong>無聲部分去掉</strong>，這個步驟非常重要！不然訓練到最後只會一直產生靜音，再用torchaudio做Mulaw encoding</li>
-<li>訓練batch size為1，一次給一段語音來訓練，基本上因為訓練資料長度差異很大，要做padding很浪費與不好做，再且顯卡記憶體也不夠大，所以一次訓練一個語音檔是合理的做法</li>
-<li>訓練大概要2天，而且頗慢的，建議做learning rate scheduling從0.001往下到0.00001，我訓練在p225這個語音上，最後得到loss約2左右，可以得到還可以的結果</li>
-<li>計算視野其實蠻簡單，就餵給模型資料來測試看多長的資料，模型剛好輸出為1，就是模型的視野，代表要預測下一個時間點，需要往前看多長的資料</li>
-<li>產生新樣本非常慢的，請耐心等待，所以這一篇頂多只能說是開一個研究開頭，而且也無法直接做到TTS或其他應用，而是一個好的音訊產生網路結構，後續很多聲音產生都是基於此</li>
-</ul>
-<h2 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h2><ol>
-<li><a href="http://sergeiturukin.com/2017/03/02/wavenet.html" target="_blank" rel="noopener">Sergei Turukin blog</a></li>
-<li><a href="https://lirnli.wordpress.com/2017/10/16/pytorch-wavenet/" target="_blank" rel="noopener">winter plum blog</a></li>
-<li><a href="http://musyoku.github.io/2016/09/18/wavenet-a-generative-model-for-raw-audio/" target="_blank" rel="noopener">ご注文は機械学習ですか</a></li>
-</ol>
 
       
     </div>
@@ -437,15 +438,15 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
+              <a href="/2018/07/28/pyro-lda/" rel="next" title="LDA model use Pyro">
+                <i class="fa fa-chevron-left"></i> LDA model use Pyro
+              </a>
+            
           </div>
 
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2018/04/15/sketchrnn/" rel="prev" title="SketchRNN">
-                SketchRNN <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -593,7 +594,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Autoregressive-model"><span class="nav-number">1.</span> <span class="nav-text">Autoregressive model</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Fully-observed-model"><span class="nav-number">2.</span> <span class="nav-text">Fully observed model</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Implement-and-Tricks"><span class="nav-number">3.</span> <span class="nav-text">Implement and Tricks</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Causal-amp-Dilated-Conv1d"><span class="nav-number">3.1.</span> <span class="nav-text">Causal &amp; Dilated Conv1d</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Residual-amp-Stack-block"><span class="nav-number">3.2.</span> <span class="nav-text">Residual &amp; Stack block</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Data-processing-amp-Training"><span class="nav-number">3.3.</span> <span class="nav-text">Data processing &amp; Training</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Reference"><span class="nav-number">4.</span> <span class="nav-text">Reference</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Latent-variable-model"><span class="nav-number">1.</span> <span class="nav-text">Latent variable model</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#計算後驗機率困難"><span class="nav-number">2.</span> <span class="nav-text">計算後驗機率困難</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Evidence-Lower-Bound"><span class="nav-number">3.</span> <span class="nav-text">Evidence Lower Bound</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#結語"><span class="nav-number">4.</span> <span class="nav-text">結語</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Reference"><span class="nav-number">5.</span> <span class="nav-text">Reference</span></a></li></ol></div>
             
 
           </div>
