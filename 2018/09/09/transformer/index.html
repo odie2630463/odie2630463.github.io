@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-TW">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.0.6" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.0.6">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.0.6">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.0.6">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.0.6" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '6.0.6',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="序列資料模型我們常用LSTM、或是各種RNN的變形，在主流的各種任務上都取得了非常好的結果，如機器翻譯、序列生成等；但因為遞迴特性，訓練過程很難平行化計算，難以利用硬體加速，此外，RNN模型依然存在記憶遺忘問題，很難捕捉序列的長期關係 近年來出現不少不是基於RNN序列模型，這篇When Recurrent Models Don’t Need to be Recurrent分析兩種模型於序列模型上的">
+<meta property="og:type" content="article">
+<meta property="og:title" content="實作 Attention Is All You Need">
+<meta property="og:url" content="http://yoursite.com/2018/09/09/transformer/index.html">
+<meta property="og:site_name" content="odie&#39;s whisper">
+<meta property="og:description" content="序列資料模型我們常用LSTM、或是各種RNN的變形，在主流的各種任務上都取得了非常好的結果，如機器翻譯、序列生成等；但因為遞迴特性，訓練過程很難平行化計算，難以利用硬體加速，此外，RNN模型依然存在記憶遺忘問題，很難捕捉序列的長期關係 近年來出現不少不是基於RNN序列模型，這篇When Recurrent Models Don’t Need to be Recurrent分析兩種模型於序列模型上的">
+<meta property="og:locale" content="zh-TW">
+<meta property="og:image" content="http://yoursite.com/media/4656352C-84F1-47B2-9360-729C9EBF2546.png">
+<meta property="og:image" content="http://yoursite.com/media/EB3EFE51-9300-4E2B-A8D3-D61BF81FA0C1.png">
+<meta property="og:image" content="http://yoursite.com/media/3F201427-F154-4297-A0C7-5C4FB3F050CF.png">
+<meta property="og:image" content="http://yoursite.com/media/02EF842C-2429-4EF7-B08C-9A4331288E02.png">
+<meta property="og:updated_time" content="2018-09-09T08:18:25.126Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="實作 Attention Is All You Need">
+<meta name="twitter:description" content="序列資料模型我們常用LSTM、或是各種RNN的變形，在主流的各種任務上都取得了非常好的結果，如機器翻譯、序列生成等；但因為遞迴特性，訓練過程很難平行化計算，難以利用硬體加速，此外，RNN模型依然存在記憶遺忘問題，很難捕捉序列的長期關係 近年來出現不少不是基於RNN序列模型，這篇When Recurrent Models Don’t Need to be Recurrent分析兩種模型於序列模型上的">
+<meta name="twitter:image" content="http://yoursite.com/media/4656352C-84F1-47B2-9360-729C9EBF2546.png">
+
+
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2018/09/09/transformer/"/>
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>實作 Attention Is All You Need | odie's whisper</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-TW">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> 
+
+<div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">odie's whisper</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切換導航欄">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+          
+  <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首頁</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-about">
+    <a href="/about/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-user"></i> <br />關於</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分類</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />歸檔</a>
+</li>
+
+      
+
+      
+    </ul>
+  
+
+  
+    
+
+    
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+    
+
+  
+
+
+  
+
+  
+</nav>
+
+
+  
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/09/09/transformer/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="odie">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="odie's whisper">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">實作 Attention Is All You Need</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">發表於</span>
+              
+              <time title="創建於" itemprop="dateCreated datePublished" datetime="2018-09-09T16:18:25+08:00">2018-09-09</time>
+            
+
+            
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分類於</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/pytorch/" itemprop="url" rel="index"><span itemprop="name">pytorch</span></a></span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/pytorch/sequence-model/" itemprop="url" rel="index"><span itemprop="name">sequence model</span></a></span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/pytorch/sequence-model/paper-implement/" itemprop="url" rel="index"><span itemprop="name">paper implement</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>序列資料模型我們常用LSTM、或是各種RNN的變形，在主流的各種任務上都取得了非常好的結果，如機器翻譯、序列生成等；但因為遞迴特性，訓練過程很難平行化計算，難以利用硬體加速，此外，RNN模型依然存在記憶遺忘問題，很難捕捉序列的長期關係</p>
+<p>近年來出現不少不是基於RNN序列模型，這篇<a href="https://bair.berkeley.edu/blog/2018/08/06/recurrent/" target="_blank" rel="noopener">When Recurrent Models Don’t Need to be Recurrent</a>分析兩種模型於序列模型上的差異，非基於RNN模型如<a href="https://odie2630463.github.io/2018/04/01/wavenet/" target="_blank" rel="noopener">之前介紹的Wavenet</a>，是一種Feed-Forward序列生成的模型，本篇要介紹的是<a href="https://arxiv.org/abs/1706.03762" target="_blank" rel="noopener">Attention Is All You Need</a>，論文名稱很霸氣，果然有實力要叫什麼名字都可以XD，模型完全只使用注意力機制來做序列模型，在機器翻譯任務上，不僅訓練速度快且效果也非常好，很值得來實作的一篇論文；在後續研究上，注意力機制被用在更多的領域上，例如<a href="https://arxiv.org/abs/1805.08318" target="_blank" rel="noopener">Self-Attention Generative Adversarial Networks</a>，本篇論文也是扮演重要的承先啟後角色</p>
+<h2 id="Model-Architecture"><a href="#Model-Architecture" class="headerlink" title="Model Architecture"></a>Model Architecture</h2><p>論文提出模型稱為Transformer，這篇<a href="http://jalammar.github.io/illustrated-transformer/" target="_blank" rel="noopener">The Illustrated Transformer</a>介紹非常完整，而且還有動畫來說明，強烈建議先看看這篇，本篇文章就稍微偷懶只簡單談一下其中一些細節心得與看法</p>
+<p><img src="/media/4656352C-84F1-47B2-9360-729C9EBF2546.png" alt="4656352C-84F1-47B2-9360-729C9EBF2546"></p>
+<h3 id="Scaled-Dot-Product-Attention"><a href="#Scaled-Dot-Product-Attention" class="headerlink" title="Scaled Dot-Product Attention"></a>Scaled Dot-Product Attention</h3><p>注意力機制可以視為類似搜尋的過程，給一個你想搜尋的Query，Query去跟Key做內積看看相近程度，然後用softmax來正規化來得到注意力分佈，最後根據這個注意力分佈來加權Value得到結果，整個過程公式簡單明瞭，僅是矩陣相乘</p>
+<p><img src="/media/EB3EFE51-9300-4E2B-A8D3-D61BF81FA0C1.png" alt="EB3EFE51-9300-4E2B-A8D3-D61BF81FA0"></p>
+<h3 id="Multi-Head-Attention"><a href="#Multi-Head-Attention" class="headerlink" title="Multi-Head Attention"></a>Multi-Head Attention</h3><p>Multi-Head Attention其實也沒什麼，就只是把Q、K、Ｖ分成好幾個部份，然後經過Linear轉換，再將每個部份分別去做Scaled Dot-Product Attention最後黏起來，好處就是讓整個注意力機制過程變得更彈性、可訓練，每個部分可以有不一樣的注意力權重</p>
+<p><img src="/media/3F201427-F154-4297-A0C7-5C4FB3F050CF.png" alt="3F201427-F154-4297-A0C7-5C4FB3F050CF"></p>
+<h3 id="Encoder-amp-Decoder"><a href="#Encoder-amp-Decoder" class="headerlink" title="Encoder &amp; Decoder"></a>Encoder &amp; Decoder</h3><p>Encoder與Decoder都是由Block堆疊而成，Block裡面基本上由上一小節介紹的Multi-Head Attention與Feed Forward組成，但是EncoderBlock僅用到Self attention，意思是Multi-Head Attention中的Q,K,V都是同一個輸入</p>
+<p><img src="/media/02EF842C-2429-4EF7-B08C-9A4331288E02.png" alt="02EF842C-2429-4EF7-B08C-9A4331288E02"></p>
+<p>論文裡給了Encoder中5-6層的Attention結果，可以看到Self attention表示了句子中某一個字與其他字之間的關係，且因為是Multi-Head的關係，圖上有不同顏色區分不同部分；Encoder利用Self attention來提取整個序列的結構，且沒有沒有遺忘問題，序列上每個位置都與其他位置考慮到之間關係，計算也相當快速</p>
+<p>Decoder在進行解碼時，也先做Self attention來把目標序列的結構考慮進來，然後再引入Encoder的訊息做Multi-Head Attention，最後預測出序列下一個位置</p>
+<h2 id="Implement-and-Tricks"><a href="#Implement-and-Tricks" class="headerlink" title="Implement and Tricks"></a>Implement and Tricks</h2><p>我的<a href="https://github.com/odie2630463/transformer" target="_blank" rel="noopener">實作版本</a>，以pytorch實作並於IWSLT16英文-德語翻譯語料進行訓練與測試</p>
+<h3 id="Data-preprocessing"><a href="#Data-preprocessing" class="headerlink" title="Data preprocessing"></a>Data preprocessing</h3><p>把原始資料變成可以訓練的Dataloader常常要花一番苦工，Pytorch提供一系列不同的工具，像是<a href="https://github.com/pytorch/vision" target="_blank" rel="noopener">torchvision</a>、<a href="http://pytorch.org/audio/#torchaudio" target="_blank" rel="noopener">torchaudio</a>、<a href="https://github.com/pytorch/text" target="_blank" rel="noopener">torchtext</a>，裡面有一些整理好的資料集或是常用函數，不論是要自己重新做一個新資料集或是直接使用都非常方便，而且減少錯誤機會，所以基本上我不太喜歡自己去重寫資料整理的部分，而是去學習使用已有且穩定的套件</p>
+<p>torchtext其實是有直接提供IWSLT16 dataloader使用，但是有些錯誤，所以沒辦法順利直接利用，那只好利用所提供的函數自己來做一個囉</p>
+<p>要做一個翻譯的資料集相當簡單，只需要把語料資料整理成兩個文件(也可以是多個，用檔名區分即可)分別對應，像是這樣：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">#train.de.txt</span><br><span class="line"></span><br><span class="line">David Gallo: Das ist Bill Lange. Ich bin Dave Gallo.</span><br><span class="line">Wir werden Ihnen einige Geschichten über das Meer in Videoform erzählen.</span><br><span class="line">Wir haben ein paar der unglaublichsten Aufnahmen der Titanic, die man je gesehen hat,, und wir werden Ihnen nichts davon zeigen.</span><br><span class="line">...</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">#train.en.txt</span><br><span class="line"></span><br><span class="line">David Gallo: This is Bill Lange. I&apos;m Dave Gallo.</span><br><span class="line">And we&apos;re going to tell you some stories from the sea here in video.</span><br><span class="line">We&apos;ve got some of the most incredible video of Titanic that&apos;s ever been seen, and we&apos;re not going to show you any of it.</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+<p>用spacy來做斷詞，並告訴torchtext.data.Field所使用的斷詞器、與相關參數設定<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">spacy_de = spacy.load(<span class="string">'de'</span>)</span><br><span class="line">spacy_en = spacy.load(<span class="string">'en'</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">tokenize_en</span><span class="params">(text)</span>:</span></span><br><span class="line">    <span class="keyword">return</span> [tok.text <span class="keyword">for</span> tok <span class="keyword">in</span> spacy_en.tokenizer(text)]</span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">tokenize_de</span><span class="params">(text)</span>:</span></span><br><span class="line">    <span class="keyword">return</span> [tok.text <span class="keyword">for</span> tok <span class="keyword">in</span> spacy_de.tokenizer(text)]</span><br><span class="line"></span><br><span class="line">DE = data.Field(tokenize=tokenize_de,</span><br><span class="line">                init_token=<span class="string">'&lt;SOS&gt;'</span>,</span><br><span class="line">                eos_token=<span class="string">'&lt;EOS&gt;'</span>,</span><br><span class="line">                fix_length=<span class="number">20</span>,</span><br><span class="line">                lower=<span class="keyword">True</span>,</span><br><span class="line">                batch_first=<span class="keyword">True</span>)</span><br><span class="line">EN = data.Field(tokenize=tokenize_en,</span><br><span class="line">                init_token=<span class="string">'&lt;SOS&gt;'</span>,</span><br><span class="line">                eos_token=<span class="string">'&lt;EOS&gt;'</span>,</span><br><span class="line">                lower=<span class="keyword">True</span>,</span><br><span class="line">                fix_length=<span class="number">20</span>,</span><br><span class="line">                batch_first=<span class="keyword">True</span>)</span><br></pre></td></tr></table></figure></p>
+<p>用torchtext.datasets.TranslationDataset把語料包裝成datasets<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">train = datasets.TranslationDataset(path=<span class="string">'./data/train'</span>, </span><br><span class="line">                                    exts=(<span class="string">'.de.txt'</span>, <span class="string">'.en.txt'</span>),</span><br><span class="line">                                    fields=(DE, EN))</span><br></pre></td></tr></table></figure></p>
+<p>還有製作字典<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">DE.build_vocab(train.src, min_freq=<span class="number">3</span>)</span><br><span class="line">EN.build_vocab(train, max_size=<span class="number">50000</span>)</span><br></pre></td></tr></table></figure></p>
+<p>最後就可以包裝成Dataloader了<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">train_iter = data.BucketIterator(dataset=train, </span><br><span class="line">                                 batch_size=<span class="number">32</span>,</span><br><span class="line">                                 sort_key=<span class="keyword">lambda</span> x: data.interleave_keys(len(x.src), len(x.trg)))</span><br><span class="line">                                 </span><br><span class="line">train_batch = next(iter(train_iter))</span><br><span class="line">train_batch[<span class="number">0</span>].src</span><br><span class="line">&gt; tensor([[   <span class="number">2</span>,    <span class="number">6</span>,  <span class="number">195</span>,  <span class="number">437</span>,   <span class="number">13</span>,   <span class="number">82</span>, <span class="number">2076</span>,    <span class="number">0</span>,    <span class="number">5</span>,    <span class="number">3</span>,    <span class="number">1</span>,    <span class="number">1</span>,</span><br><span class="line">            <span class="number">1</span>,    <span class="number">1</span>,    <span class="number">1</span>,    <span class="number">1</span>,    <span class="number">1</span>,    <span class="number">1</span>,    <span class="number">1</span>,    <span class="number">1</span>]], device=<span class="string">'cuda:0'</span>)</span><br></pre></td></tr></table></figure></p>
+<p>以上很簡單介紹用法，這裡還有兩篇(<a href="https://zhuanlan.zhihu.com/p/37223078" target="_blank" rel="noopener">1</a>,<a href="https://zhuanlan.zhihu.com/p/31139113" target="_blank" rel="noopener">2</a>)不錯的教學，大家可以參考</p>
+<h3 id="Mask-is-important"><a href="#Mask-is-important" class="headerlink" title="Mask is important"></a>Mask is important</h3><p>Transformer模型不難理解與實作，但是有個小地方尤其重要，就是<strong>輸入需要很仔細地做Mask</strong>，非Recurrent模型有個問題，就是輸入長度、大小都必須要是固定的，不管句子長短，要輸入至模型都需要截長補短至固定長度，所以當句子短時候，後面會補上PAD來填滿長度，但是些部分是不能參與至注意力過程的，所以我們每次去做矩陣相成後，需要把某些部分遮起來</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">output = torch.bmm(Q,K.transpose(<span class="number">1</span>,<span class="number">2</span>))</span><br><span class="line">output = output / ( self.hidden_size**<span class="number">0.5</span>)</span><br><span class="line"></span><br><span class="line">queries_mask_ = torch.cat([queries_mask]*self.num_head,<span class="number">0</span>).float()</span><br><span class="line">keys_mask_ = torch.cat([keys_mask]*self.num_head,<span class="number">0</span>).float()</span><br><span class="line">output_mask = <span class="number">1</span> - queries_mask_.bmm(keys_mask_.transpose(<span class="number">1</span>,<span class="number">2</span>)).float()</span><br><span class="line">output_ = output.masked_fill(output_mask.byte() , <span class="number">-2</span>**<span class="number">32</span>)</span><br></pre></td></tr></table></figure>
+<p>這部分可以配合實作一起看會比較清楚，queries_mask_與keys_mask_是輸入時候給的，告訴模型這個序列的長度資訊，是PAD地方為0其餘為1</p>
+<p>既然output是Q,K相乘，我們如果把他們的mask也相乘，就可以得到正確的mask，mask為0的地方代表是PAD去做注意力過程，應該要被忽略</p>
+<p>最後用masked_fill來把要忽略的位置填上一個很小的數值，因為masked_fill是把為1的地方填上，所以之前算出來的mask要做反轉，至於為何要填上很小的負數值是因為等一下要做softmax，如果單純填上0，經過softmax可能不為0</p>
+<h3 id="Causality-is-important"><a href="#Causality-is-important" class="headerlink" title="Causality is important"></a>Causality is important</h3><p>Decoder在解碼的時候是基於過去的序列來預測下一個位置，當然不能看到未來的訊息，所以Decoder裡做Self attention要把未來資訊遮蔽，實作上很簡單就是做一個上三角矩陣，但是要保留對角線部分</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">if self.causality:</span><br><span class="line">    bs,s1,s2 = output_mask.size()</span><br><span class="line">    tri = np.triu(np.ones((s1,s2))) - np.eye(s1,s2)</span><br><span class="line">    tri = torch.from_numpy(tri).to(output_mask.device)</span><br><span class="line">    tri = torch.stack([tri]*bs,0).byte()</span><br><span class="line">    output_ = output_.masked_fill(tri , -2**32)</span><br></pre></td></tr></table></figure>
+<p>這樣就能保證Decoder訓練過程不會去偷看到下一個位置，只能用自己現在與過去的位置資訊來預測</p>
+<h2 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h2><ul>
+<li><a href="https://arxiv.org/abs/1706.03762" target="_blank" rel="noopener">Attention Is All You Need</a></li>
+<li><a href="http://jalammar.github.io/illustrated-transformer/" target="_blank" rel="noopener">The Illustrated Transformer</a></li>
+<li><a href="http://nlp.seas.harvard.edu/2018/04/03/attention.html" target="_blank" rel="noopener">The Annotated Transformer</a></li>
+<li><a href="https://github.com/Kyubyong/transformer" target="_blank" rel="noopener">Kyubyong/transformer</a></li>
+<li><a href="https://github.com/jadore801120/attention-is-all-you-need-pytorch" target="_blank" rel="noopener">jadore801120/attention-is-all-you-need-pytorch</a></li>
+</ul>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/08/21/vi-1/" rel="next" title="漫談 Variational Inference (一)">
+                <i class="fa fa-chevron-left"></i> 漫談 Variational Inference (一)
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目錄
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            本站概要
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">odie</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">6</span>
+                    <span class="site-state-item-name">文章</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">10</span>
+                    <span class="site-state-item-name">分類</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">0</span>
+                    <span class="site-state-item-name">標籤</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Model-Architecture"><span class="nav-number">1.</span> <span class="nav-text">Model Architecture</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Scaled-Dot-Product-Attention"><span class="nav-number">1.1.</span> <span class="nav-text">Scaled Dot-Product Attention</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Multi-Head-Attention"><span class="nav-number">1.2.</span> <span class="nav-text">Multi-Head Attention</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Encoder-amp-Decoder"><span class="nav-number">1.3.</span> <span class="nav-text">Encoder &amp; Decoder</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Implement-and-Tricks"><span class="nav-number">2.</span> <span class="nav-text">Implement and Tricks</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Data-preprocessing"><span class="nav-number">2.1.</span> <span class="nav-text">Data preprocessing</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Mask-is-important"><span class="nav-number">2.2.</span> <span class="nav-text">Mask is important</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Causality-is-important"><span class="nav-number">2.3.</span> <span class="nav-text">Causality is important</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Reference"><span class="nav-number">3.</span> <span class="nav-text">Reference</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love" id="animate"> 
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">odie</span>
+
+  
+
+  
+</div>
+
+
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 強力驅動</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主題 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Muse</a> v6.0.6</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.0.6"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.0.6"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.0.6"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.0.6"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.0.6"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+
+  
+    
+      <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+    
+  
+
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
