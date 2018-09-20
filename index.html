@@ -599,35 +599,50 @@
             <p>Variational Inference 是一種近似複雜分佈的數學方法，我們假設一類計算簡單的<strong>候選分佈</strong>$q(z)$，並有另一個複雜難以計算的後驗分佈$p(z|x)$，我們希望從候選分佈中找一個最接近$p(z|x)$的$q^*(z)$，這個等同於最小化$KL(q(z) | p(z|x))$</p>
 <p>不過為什麼我們要近似後驗分佈$p(z|x)$呢？或是$q(z)$可以怎麼定義？與深度學習怎麼結合？本篇或接下來的幾篇文章就來跟大家漫談一下VI，整理了自己看過有關的資料，從幾個角度切入推導，並來看看跟其他生成模型有什麼關係</p>
 <h2 id="Latent-variable-model"><a href="#Latent-variable-model" class="headerlink" title="Latent variable model"></a>Latent variable model</h2><p>要談VI之前要先講一下隱變量模型(Latent variable model)，因為VI就是拿來求解隱變量模型方法之一，我們假設可觀測的隨機變數$x$與無法觀測的隱變量$z$聯合機率分佈為：</p>
-<p>$<br>p_{\theta}(x,z) = p_{\theta}(x|z)p(z) \tag{1}<br>$</p>
+<p>$$<br>p_{\theta}(x,z) = p_{\theta}(x|z)p(z)<br>$$</p>
 <p>其中$p_{\theta}(x|z)$為一個參數化的模型來表示條件機率，再透過把$z$積分，我們可以得到$p(x)$：</p>
-<p>$<br>p_{\theta}(x) = \int p_{\theta}(x,z)dz \tag{2}<br>$</p>
+<p>$$<br>p_{\theta}(x) = \int p_{\theta}(x,z)dz<br>$$</p>
 <p>看來很完美，我們得到$p(x)$式子接著就能直接去用MLE去學習 $\theta$ 囉！</p>
 <p>這裡再多討論一下為何要使用隱變量模型，從上面式子來看，引入隱變量可以幫助我們定義出一個能計算的$p(x)$，解決了不知道怎麼假設$p(x)$的問題；另外，隱變量能捕捉資料所隱含的特性，例如「星座」是人們所加上的隱變量，有時候透過「星座」可以更快掌握你是個怎樣的人或是個性，或是說從你的行為來猜測你是什麼星座之類的，都是生活中常見的隱變量應用</p>
 <p>不過更多時候，隱變量於表徵學習任務上扮演重要的角色，像是這個<a href="https://arxiv.org/abs/1704.03477" target="_blank" rel="noopener">手繪塗鴉</a>的例子，所學習到的隱變量於低維度可以形成<a href="https://zh.wikipedia.org/wiki/流形" target="_blank" rel="noopener">流型(Manifolds)</a>，隱變量能捕捉資料的變異性，形成一個漸變的空間且具有泛化能力，代表隱變量能更好的表示資料特性，是很好的表徵學習方法</p>
 <p><img src="/media/15342296556201.png" alt="-w401"></p>
 <h2 id="計算後驗機率困難"><a href="#計算後驗機率困難" class="headerlink" title="計算後驗機率困難"></a>計算後驗機率困難</h2><p>我們先來看看為什麼要近似$p(z|x)$，從隱變量模型，我們有一個可以計算的$p(x,z)$，現在把$p(x)$重新寫成：</p>
-<p>$<br>p(x) = \frac{p(x,z)}{p(z|x)} \tag{3}<br>$</p>
+<p>$$<br>p(x) = \frac{p(x,z)}{p(z|x)}<br>$$</p>
 <p>又是另一片天地，我們想要能計算$p(x)$，那只要$p(x,z)$與$p(z|x)$都可以被計算，那一切就太好了；只可惜，$p(z|x)$是無法被計算的，原因是：</p>
-<p>$<br>p(z|x) = \frac{p(x,z)}{p(x)} \tag{4}<br>$</p>
+<p>$$<br>p(z|x) = \frac{p(x,z)}{p(x)}<br>$$</p>
 <p>又導回來了，我們就是苦於沒有$p(x)$呀，那只好直接用另一個$q(z)$來偽裝成$p(z|x)$了，如果他們兩個夠相似，$p(x)$應該是可以被近似求出來的，這裡就用上VI想法了！</p>
-<h2 id="Evidence-Lower-Bound"><a href="#Evidence-Lower-Bound" class="headerlink" title="Evidence Lower Bound"></a>Evidence Lower Bound</h2><p>我們希望用上$q_{\phi}(z)$來取代$p(z|x)$解決後驗計算困難問題，所以引入$q_{\phi}(z)$至$p(x)$得到：</p>
-<p>$<br>\begin{split}<br>\log p_{\theta}(x) &amp;= \mathbb{E}_{q_{\phi}(z)} \left[ \log p_{\theta}(x) \right] \\<br>          &amp;= \mathbb{E}_{q_{\phi}(z)} \left[ \log \frac{p_{\theta}(x,z)}{p(z|x)} \right] \\<br>&amp;= \mathbb{E}_{q_{\phi}(z)}<br>          \left[<br>          \log \frac{p_{\theta}(x,z)}{q_{\phi}(z)} \frac{q_{\phi}(z)}{p_{\theta}(z|x)}<br>          \right] \\<br>&amp;= \mathbb{E}_{q_{\phi}(z)}<br>          \left[<br>          \log \frac{p_{\theta}(x,z)}{q_{\phi}(z)}\right] + \mathbb{E}_{q_{\phi}(z)} \left[ \log \frac{q_{\phi}(z)}{p_{\theta}(z|x)}<br>          \right] \\<br>&amp;= \mathbb{E}_{q_{\phi}(z)}<br>        \left[<br>          \log \frac{p_{\theta}(x,z)}             {q_{\phi}(z)}\right] + KL(q_{\theta}(z)|| p_{\theta}(z|x))<br>\end{split}$</p>
-<p>我們將原本$\log p(x)$拆成兩項，先來看第二項，為我們VI方法裡面的候選分佈$q_{\phi}(z)$與後驗分佈$p_{\theta}(z|x)$的KL距離，一定大於等於0，但我們依然無法直接去最小化之間差距</p>
-<p>所以轉看第一項，又因$\log p(x)$為一個定值，第一項就成為了一個下界(Lower Bound)並稱為Evidence Lower Bound(ELBO)，如果我們最大化第一項，不就等同於最小化第二項了嗎！而且第一項完全是可以算的！我們能透過訓練參數$\theta , \phi$來最大化ELBO，等同於最大化$\log p(x)$與使得$q_{\phi}(z)$近似$p_{\theta}(z|x)$</p>
-<p>整理成一般常看到ELBO形式：</p>
-<p>$<br>\mathbb{E}_{q_{\phi}(z)}<br>        \left[<br>          \log \frac{p_{\theta}(x,z)}             {q_{\phi}(z)}\right] = \mathbb{E}\left[ \log p(x|z) \right] - KL(q(z) || p(z)) \tag{1}<br>$</p>
-<h2 id="Importance-Sampling-to-ELBO"><a href="#Importance-Sampling-to-ELBO" class="headerlink" title="Importance Sampling to ELBO"></a>Importance Sampling to ELBO</h2><p>剛剛我們由計算後驗分佈困難而推導出了ELBO，這次我們從 Importance Sampling 出發來推出ELBO，計算$p_{\theta}(x)$是求解一個複雜的積分：<br>$<br>p_{\theta}(x) = \int p_{\theta}(x|z)p(z)dz \tag{1}<br>$</p>
-<p>我們可以用 Importance Sampling 來近似這個積分，用一個簡單的$q(z)$來抽樣出$z$，並且根據$\frac{q(z)}{p(z)}$來決定抽樣出的樣本權重：</p>
-<p>$<br>\begin{split}<br>p_{\theta}(x) &amp;= \int p_{\theta}(x|z) \frac{p(z)}{q(z)} q(z)dz \\<br>&amp;= \int p_{\theta}(x|z)w^{(s)}q(z)dz \quad w^{(s)} = \frac{p(z)}{q(z)} \\<br>&amp;\approx \frac{1}{S} \sum w^{(s)}p(x|z^{(s)})<br>\end{split}$</p>
+<h2 id="Evidence-Lower-Bound"><a href="#Evidence-Lower-Bound" class="headerlink" title="Evidence Lower Bound"></a>Evidence Lower Bound</h2><p>我們希望用上$q_{\phi}(z)$來取代$p_{\theta}(z|x)$解決後驗計算困難問題，所以引入$q_{\phi}(z)$至$p(x)$得到：</p>
+<p>$<br>\begin{split}<br>\log p_{\theta}(x) &amp;= \mathbb{E}_{q_{\phi}(z)} \left[ \log p_{\theta}(x) \right] \\<br>          &amp;= \mathbb{E}_{q_{\phi}(z)} \left[ \log \frac{p_{\theta}(x,z)}{p_{\theta}(z|x)} \right] \\<br>&amp;= \mathbb{E}_{q_{\phi}(z)}<br>          \left[<br>          \log \frac{p_{\theta}(x,z)}{q_{\phi}(z)} \frac{q_{\phi}(z)}{p_{\theta}(z|x)}<br>          \right] \\<br>&amp;= \mathbb{E}_{q_{\phi}(z)}<br>          \left[<br>          \log \frac{p_{\theta}(x,z)}{q_{\phi}(z)}\right] + \mathbb{E}_{q_{\phi}(z)} \left[ \log \frac{q_{\phi}(z)}{p_{\theta}(z|x)}<br>          \right] \\<br>&amp;= \mathbb{E}_{q_{\phi}(z)}<br>        \left[<br>          \log \frac{p_{\theta}(x,z)}             {q_{\phi}(z)}\right] + KL(q_{\phi}(z)|| p_{\theta}(z|x))<br>\end{split}$</p>
+<p>我們將原本$\log_{\theta} p(x)$拆成兩項，先來看第二項，為我們VI方法裡面的候選分佈$q_{\phi}(z)$與後驗分佈$p_{\theta}(z|x)$的KL距離，一定大於等於0，但我們依然無法直接去最小化之間差距</p>
+<p>所以轉看第一項，又因$\log p(x)$為一個定值，第一項就成為了一個下界(Lower Bound)並稱為Evidence Lower Bound(ELBO)，如果我們最大化第一項，不就等同於最小化第二項了嗎！而且第一項完全是可以算的！我們能透過訓練參數$\theta , \phi$來最大化ELBO，同時也減少$q_{\phi}(z)$與$p_{\theta}(z|x)$KL距離</p>
+<p>最後整理成一般常看到ELBO形式</p>
+<p>$$<br>\mathbb{E}_{q_{\phi}(z)}<br>        \left[<br>          \log \frac{p_{\theta}(x,z)}             {q_{\phi}(z)}\right] = \mathbb{E}\left[ \log p_{\theta}(x|z) \right] - KL(q_{\phi}(z) || p(z))<br>$$</p>
+<h2 id="Importance-Sampling-to-ELBO"><a href="#Importance-Sampling-to-ELBO" class="headerlink" title="Importance Sampling to ELBO"></a>Importance Sampling to ELBO</h2><p>剛剛我們由計算後驗分佈困難而推導出了ELBO，這次我們從 Importance Sampling 出發來推出ELBO，計算$p_{\theta}(x)$是求解一個複雜的積分：<br>$$<br>p_{\theta}(x) = \int p_{\theta}(x|z)p(z)dz<br>$$</p>
+<p>我們可以用 Importance Sampling 來近似這個積分，用一個簡單的$q_{\phi}(z)$來抽樣出$z$，並且根據$\frac{q_{\phi}(z)}{p(z)}$來決定抽樣出的樣本權重：</p>
+<p>$<br>\begin{split}<br>p_{\theta}(x) &amp;= \int p_{\theta}(x|z) \frac{p(z)}{q_{\phi}(z)} q_{\phi}(z)dz \\<br>&amp;= \int p_{\theta}(x|z)w^{(s)}q_{\phi}(z)dz \quad w^{(s)} = \frac{p(z)}{q_{\phi}(z)} \\<br>&amp;\approx \frac{1}{S} \sum w^{(s)}p(x|z^{(s)})<br>\end{split}$</p>
 <p>這裡用上<a href="https://zh.wikipedia.org/wiki/延森不等式" target="_blank" rel="noopener">Jensen’s inequality</a>：</p>
-<p>$<br>\log \int p(x)g(x) dx \ge \int p(x) \log g(x) dx \tag{2}<br>$</p>
+<p>$$<br>\log \int p(x)g(x) dx \ge \int p(x) \log g(x) dx<br>$$</p>
 <p>代入得到：</p>
-<p>$<br>\begin{split}<br>\log p(x) &amp;= log \int p(x|z) \frac{p(z)}{q(z)} q(z) dz \\<br>&amp;\ge \int q(z) \log \left[ p(x|z)\frac{p(z)}{q(z)}  \right] dz = \int q(z) \log(x|z) - \int q(z) \log \frac{q(z)}{p(z)} \\<br>\end{split}$</p>
+<p>$<br>\begin{split}<br>\log p_{\theta}(x) &amp;= log \int p_{\theta}(x|z) \frac{p(z)}{q_{\phi}(z)} q(z) dz \\<br>&amp;\ge \int q_{\phi}(z) \log \left[ p_{\theta}(x|z)\frac{p(z)}{q_{\phi}(z)}  \right] dz = \int q_{\phi}(z) \log_{\theta}(x|z) - \int q_{\phi}(z) \log \frac{q_{\phi}(z)}{p(z)} \\<br>\end{split}$</p>
 <p>最後將式子整理成：</p>
-<p>$<br>\int q(z) \log(x|z) - \int q(z) \log \frac{q(z)}{p(z)} = \mathbb{E}\left[ \log p(x|z) \right] - KL(q(z) || p(z)) \tag{3}<br>$</p>
-<h2 id="結語"><a href="#結語" class="headerlink" title="結語"></a>結語</h2><p>本篇是漫談VI方法的第一篇，介紹了隱變量模型與其求解困難，並用上VI方法來求解模型，最後得出可以透過最大化ELBO來求解訓練參數</p>
-<p>第一篇算是基礎介紹，也是我論文裡文獻回顧又回顧一次，介紹了兩種角度推導出ELBO，下一篇我打算來介紹與深度學習如何結合，成為生成模型中一個重要的方法</p>
+<p>$$<br>\int q_{\phi}(z) \log_{\theta}(x|z) - \int q_{\phi}(z) \log \frac{q_{\phi}(z)}{p(z)} = \mathbb{E}\left[ \log p_{\theta}(x|z) \right] - KL(q_{\phi}(z) || p(z))<br>$$</p>
+<h2 id="Variational-EM"><a href="#Variational-EM" class="headerlink" title="Variational EM"></a>Variational EM</h2><p>最後我們來給一個具體常用來求解隱變量模型的演算法，最大期望演算法(Expectation-Maximization Algorithm,EM)，這裡不打算從頭講起EM，但是這個演算法相當重要，值得深入了解，我推薦最近剛結束的<a href="http://deepbayes.ru/#materials" target="_blank" rel="noopener">DeepBayes課程</a>，裡面非常詳細介紹了EM方法，本小節也有參考課程資料</p>
+<p>用EM求解高斯混和模型(Gaussian Mixed Model)時候，因為高斯分佈良好的性質，所以能很方便地得到公式解：</p>
+<ul>
+<li>E-step：$q(z) = p(z|x,\theta)$</li>
+<li>Ｍ-step：$\max\limits_{\theta} \mathbb{E}\left[ \log p_{\theta}(x,z) - \log q(z) \right]$</li>
+</ul>
+<p>可以看到在E-step時候，$q(z)$總是有公式解，故我們是有一個最優的$q(z)$恰好等於$p(z|x)$，也就等於最小化$KL(q(z)|p(z|x))$為0，M-step訓練參數$\theta$來最大化$\log p_{\theta}(x)$，此時ELBO直接等於$\log p_{\theta}(x)$</p>
+<p>但很多時候我們無法寫出E-step的公式解，所以我們就用上VI方法，並且假設候選分佈為一個簡單且每個分量皆為獨立的分佈$q(z)=\prod q(z_i)$，稱為Mean-Field Approximation，我們帶入回ELBO中可以得到</p>
+<p>$<br>\begin{split}<br>ELBO(q, \theta) &amp; = \int \prod_i q_i(z_i) \Big[ \log p_{\theta}(x,z) - \sum_i \log q_i(z_i) \Big ]dz \\<br>&amp; = \int q_j(z_j) \Big [ \int \log p_{\theta}(x,z) \prod_{i \neq j} q_i(z_i)dz_i \Big ] dz_j - \int \sum_{i \neq j} \log q_i(z_i) \prod_{i \neq j} q_i(z_i)dz_i - \int q_i(z_i) \log q_i(z_i)dz_i \\<br>&amp; = \int q_j(z_j) \log \tilde p(x,z_j)dz_j - \int q_j(z_j) \log q_j(z_j) dz_j + const \\<br>&amp; = -KL(q_j(z_j) || \tilde p(x,z_j))<br>\end{split}<br>$</p>
+<p>最後 Variational EM 我們可以寫成</p>
+<ul>
+<li>E-step：$q_j(z_j) = \tilde p(x,z_j)$</li>
+<li>Ｍ-step：$\max\limits_{\theta} \mathbb{E}\left[ \log p_{\theta}(x,z) - \log q(z) \right]$</li>
+</ul>
+<p>計算$q_j(z_j) = \mathbb{E}_{i \neq j}\left[ \log p(x,z) \right]$，固定$z_j$然後將j以外的維度進行積分，白話一點就是固定一個維度，把其他維度的所有組合都試過一次來計算這個維度的機率分佈，涉及非常大量的計算，雖然Mean-Field Approximation一定能寫成這樣的解，但是很多時候依然無法計算</p>
+<h2 id="結語"><a href="#結語" class="headerlink" title="結語"></a>結語</h2><p>本篇是漫談VI方法的第一篇，介紹了隱變量模型與其求解困難，並用上VI方法來求解模型，得出可以透過最大化ELBO來求解訓練參數，最後介紹了Variational EM方法與限制</p>
+<p>第一篇算是基礎介紹，也是我論文裡文獻回顧又再回顧一次，介紹了兩種角度推導出ELBO，下一篇我打算來介紹與深度學習如何結合，突破Mean-Field Approximation限制，成為生成模型中一個重要的方法</p>
 <h2 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h2><ul>
 <li>NIPS 2016 Tutorial，很完整介紹VI的發展歷史 <a href="https://media.nips.cc/Conferences/2016/Slides/6199-Slides.pdf" target="_blank" rel="noopener">Variational Inference: Foundations and Modern Methods</a></li>
 <li>Shakir Mohamed 大神的教學投影片<a href="https://www.shakirm.com/papers/VITutorial.pdf" target="_blank" rel="noopener">Variational Inference for Machine Learning</a></li>
