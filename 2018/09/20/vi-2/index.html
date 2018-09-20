@@ -108,7 +108,7 @@
 <meta property="og:locale" content="zh-TW">
 <meta property="og:image" content="http://yoursite.com/media/C8CD4EAE-330B-4369-BB79-BA974B69EA45.png">
 <meta property="og:image" content="http://yoursite.com/media/7A9ABDDC-52AA-4946-961C-F2CE320DAA8F.png">
-<meta property="og:updated_time" content="2018-09-20T09:21:57.538Z">
+<meta property="og:updated_time" content="2018-09-20T09:52:06.667Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="漫談 Variational Inference (二)">
 <meta name="twitter:description" content="本篇是漫談 Variational Inference 系列第二篇，前一篇介紹了隱變量模型並推導出了ELBO，而我們知道只要有辦法最大化ELBO，就可以去近似$\log_{\theta}p(x)$，但具體而言我們該如何計算呢？ 今天我們來細談一下Auto-encoding variational Bayes這篇論文，基於最大化ELBO，引入深度神經網路、低變異的梯度訓練方法提出 Variation">
@@ -430,7 +430,7 @@
 <p><img src="/media/7A9ABDDC-52AA-4946-961C-F2CE320DAA8F.png" alt="7A9ABDDC-52AA-4946-961C-F2CE320DAA8F"><br>圖片來源：<a href="https://www.dropbox.com/s/dl/v6ua3d9yt44vgb3/cover_and_thesis.pdf" target="_blank" rel="noopener">VARIATIONAL INFERENCE &amp; DEEP LEARNING: A NEW SYNTHESIS
 </a></p>
 <p>抽樣會使得梯度無法傳遞，就像左邊那張圖一樣，Z是一個隨機計算節點，經過Z後我們無法對之前的計算有任何資訊，自然也無法計算梯度，但改成Reparameterized form後，梯度就能順利回傳至參數上；另一點是有效減少梯度變異，原本梯度計算過程受$n \log p_{\theta}(x|z)$影響而造成變異過大，而現在我們只需要計算$\nabla_\phi f$的期望值，兩者數值大小差異很大，因此減少梯度變異使訓練過程穩定，才能用在複雜的資料集上</p>
-<p>$$<br>\nabla_\phi \mathbb{E}<em>{z \sim q(z\mid x)}\left[ f(x,z) \right] = \nabla</em>\phi \mathbb{E}<em>{\epsilon \sim p(\epsilon)}\left[ f(x,g(\epsilon, x)) \right] = \mathbb{E}</em>{\epsilon \sim p(\epsilon)}\left[ \nabla_\phi f(x,g(\epsilon, x)) \right].<br>$$</p>
+<p>$$<br>\mathbb{E}_{\epsilon \sim p(\epsilon)} \left[ \nabla _{\phi} f(x,g(\epsilon, x))\right]<br>$$</p>
 <h2 id="結語"><a href="#結語" class="headerlink" title="結語"></a>結語</h2><p>本篇是漫談VI方法的第二篇，細談了VAE模型基礎，如何從ELBO對應到自編碼器架構，且$KL(q_{\phi}(z|x)||p(z))$也可以看成是一種正規化項，並提出改進的梯度估計方法，才能使得訓練模型成為可能，VAE是非常好的表徵學習方法，訓練穩定並能結合<a href="https://arxiv.org/abs/1406.5298" target="_blank" rel="noopener">半監督式學習</a>、<a href="https://arxiv.org/pdf/1803.10122.pdf" target="_blank" rel="noopener">增強學習</a>等技術，後續很多的理論改進應用延伸，值得關注與學習</p>
 <p>下一篇會討論VAE與其他生成模型的關係，最近有一些工作討論將各種生成模型放入同一個框架內討論，敬請期待</p>
 <h2 id="Refernece"><a href="#Refernece" class="headerlink" title="Refernece"></a>Refernece</h2><ul>
