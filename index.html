@@ -309,6 +309,199 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/01/16/free-energy-1/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="odie">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="odie's whisper">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2019/01/16/free-energy-1/" itemprop="url">漫談 Free energy principle (ㄧ)</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">發表於</span>
+              
+              <time title="創建於" itemprop="dateCreated datePublished" datetime="2019-01-16T17:15:18+08:00">2019-01-16</time>
+            
+
+            
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分類於</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/generative-model/" itemprop="url" rel="index"><span itemprop="name">generative model</span></a></span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/generative-model/probabilistic-graphical-model/" itemprop="url" rel="index"><span itemprop="name">probabilistic graphical model</span></a></span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/generative-model/probabilistic-graphical-model/free-energy/" itemprop="url" rel="index"><span itemprop="name">free energy</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>之前漫談了 Variational Inference ，基本上從機器學習與機率分佈近似的角度出發來談了理論與應用，我們旨在最小化ELBO，來最大化對於資料的解釋，而且從中學習到隱變量，且隱變量還能捕捉到資料潛在資訊，這樣的演算法非常精緻優雅，是我個人非常欣賞的模型；我們的大腦，或是更廣泛來說，一個需要與環境交互的生物或自組織系統，<em>隨時都在對抗失序(resisting a tendency to disorder)</em>，生命需要維持一定的秩序才能生存，各種生理運作都必須精準穩定維持某種秩序，<em>簡言之，維持穩定是生存的要務之一</em>。</p>
+<p>對於大腦來說，所謂的穩定就是對於各種輸入大腦都能給予解釋，<em>大腦討厭surprise！</em>大腦討厭無法解釋的東西，或是與自己預期差異很大的狀況，所以大腦的任務就是解釋或是預測各種輸入，來減少遇到surprise，<strong>這個概念為 The free energy principle</strong>。</p>
+<p>The free energy principle 跟 Variational Inference 非常有關係，核心數學概念是相同的，由Karl Friston於2005提出，2010年於Nature上有一篇完整的概念描述 <strong>The free-energy principle:a unified brain theory ?</strong>，本篇會基於此文章來跟大家介紹這個概念；另外，2017年 Rafal Bogacz 寫了一篇 <strong>A tutorial on the free-energy framework for modelling perception and learning</strong>，這篇帶領讀者入門一些計算細節，本系列會基於這兩篇文章內容與大家分享。</p>
+<h2 id="The-free-energy-principle"><a href="#The-free-energy-principle" class="headerlink" title="The free energy principle"></a>The free energy principle</h2><p><img src="/media/15476205423036.jpg" alt="-w974"></p>
+<ul>
+<li>外部狀態(External states)：會依agent產生的action與隱變量$\vartheta$改變，同時受到隨機干擾$\tilde {w}$的影響</li>
+<li>感知(Sensation)：觀測外部狀態$\tilde{x}$與隱變量$\vartheta$得到感知$\tilde{s}$</li>
+<li>內部狀態(Internal states)：最小化Free energy得到最佳的解釋$\mu$</li>
+<li>決策行為：最小化Free energy來得到最佳的行為$a$</li>
+</ul>
+<p>整個流程是一個動態的過程，每個變數都有初始值，透過這樣的循環，agent可以最大化對於環境狀態的了解，內部狀態$\mu$一開始可能完全是隨機的，但透過感知與行為來最小化Free energy，最後內部狀態會從外部狀態中獲取最多資訊</p>
+<h3 id="Free-energy"><a href="#Free-energy" class="headerlink" title="Free energy"></a>Free energy</h3><p>其實Free energy就是我們之前提到過的ELBO，差異在於負號，我們希望最小化Free energy，而要最大化ELBO，不過其實從優化角度來看其實一樣</p>
+<p>回顧一下ELBO，並且寫成另一個形式<br>$$<br>\begin{split}<br>\mathbb{E}_{q_{\phi}(z)}<br>        \left[<br>          \log \frac{p_{\theta}(x,z)}             {q_{\phi}(z)}\right] &amp;= \mathbb{E}\left[ \log p_{\theta}(x|z) \right] - KL(q_{\phi}(z) || p(z)) \\<br>          &amp;= \mathbb{E}\left[ \log p_{\theta}(x,z) \right] - \mathbb{H}\left[ q_{\phi}(z) \right]<br>\end{split}<br>$$</p>
+<p>上述是以ELBO的角度，需要最大化ELBO，換到Free energy就加上負號，得到下圖的公式，接下來的描述也是以圖上的符號來說明：</p>
+<p><img src="/media/15476226757989.jpg" alt="-w873"></p>
+<h3 id="Free-energy-bound-on-suprise"><a href="#Free-energy-bound-on-suprise" class="headerlink" title="Free-energy bound on suprise"></a>Free-energy bound on suprise</h3><ul>
+<li>$q(\vartheta | \mu)$ 係指給定內部狀態解釋$\mu$對環境隱變量$\vartheta$的條件機率，跟VI想法一樣，我們無法精確知道隱變量的分佈，只好用一個近似的分佈來估計，所以我們如果對環境有好的解釋，我們應該可以把隱變量估計得比較好</li>
+<li>$p(\tilde { s } , \vartheta|m)$ 給定目前模型$m$，生成$\tilde{s},\vartheta$聯合機率分佈</li>
+<li>可以對照上述ELBO式子，是完全對應的，整個Free energy 可以寫成 $F ( \tilde { s } , \mu )$，我們可以分別針對兩個變量來最小化</li>
+</ul>
+<h3 id="Perception-optimizes-predictions"><a href="#Perception-optimizes-predictions" class="headerlink" title="Perception optimizes predictions"></a>Perception optimizes predictions</h3><ul>
+<li>$\mu = \arg \min F ( \tilde { s } , \mu )$</li>
+<li>根據現在輸入的感知，調整內部狀態$\mu$來最小化$F$，這個跟VI做的事情一樣，去學習好的表徵</li>
+</ul>
+<h3 id="Action-minimizes-prediction-errors"><a href="#Action-minimizes-prediction-errors" class="headerlink" title="Action minimizes prediction errors"></a>Action minimizes prediction errors</h3><ul>
+<li>$a = \arg \min F ( \tilde { s } , \mu )$</li>
+<li>這裡就是有趣的地方了，其實除了可以透過改變解釋來減少$F$，agent也可以透過改變輸入的感知來優化，<em>意思是agent會去選擇比較符合期待感知輸入</em>，這個也稱為<strong>active inference</strong></li>
+</ul>
+<p>Agent長期而言希望能最小化surprise，其實就是在最小化Free energy，透過改變自己對於感知輸入的解釋，透過主動選擇感知輸入來源與行為，讓agent能快速的了解適應環境；Free energy 是很有機會做為大腦學習、控制的基礎理論，在 <strong>The free-energy principle:a unified brain theory ?</strong> 文中有介紹與其他現有理論的關係，像是 Neural coding、Bayesian brain hypothesis 等等</p>
+<h2 id="結語"><a href="#結語" class="headerlink" title="結語"></a>結語</h2><p>智慧的本質到底是什麼？我們到底是如何快速的學習？又為何要學習？本篇介紹了The free energy principle，我想我們為了要生存，必須要抵抗<em>失序</em>，我們必須讓自己維持在一種認知穩地的狀態，這樣帶來的附加效益就是讓我們有快速的學習能力，最終我們成了一個強大的解釋與預測機器</p>
+<p>下一篇會介紹 <strong>A tutorial on the free-energy framework for modelling perception and learning</strong> 這篇文章，提出一個神經網路的框架能執行基於Free energy principle的計算，相當有趣！敬請期待</p>
+<h2 id="Refernece"><a href="#Refernece" class="headerlink" title="Refernece"></a>Refernece</h2><ul>
+<li><a href="https://en.wikipedia.org/wiki/Free_energy_principle" target="_blank" rel="noopener">Free energy principle - Wiki</a></li>
+<li><a href="https://www.researchgate.net/publication/41001209_Friston_KJ_The_free-energy_principle_a_unified_brain_theory_Nat_Rev_Neurosci_11_127-138" target="_blank" rel="noopener">The free-energy principle: a unified brain theory?</a></li>
+<li><a href="https://www.sciencedirect.com/science/article/pii/S0022249615000759" target="_blank" rel="noopener">A tutorial on the free-energy framework for modelling perception and learning</a></li>
+<li><a href="">Karl Friston 15分鐘訪談 - Free Energy Principle</a></li>
+<li><a href="https://www.youtube.com/watch?v=dLXKFA33SSM&amp;t=2642s" target="_blank" rel="noopener">Karl Friston 演講影片 - Free energy and active inference</a></li>
+</ul>
+
+          
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/09/20/vi-2/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -428,7 +621,7 @@
 <p><img src="/media/7A9ABDDC-52AA-4946-961C-F2CE320DAA8F.png" alt="7A9ABDDC-52AA-4946-961C-F2CE320DAA8F"><br>圖片來源：<a href="https://www.dropbox.com/s/dl/v6ua3d9yt44vgb3/cover_and_thesis.pdf" target="_blank" rel="noopener">VARIATIONAL INFERENCE &amp; DEEP LEARNING: A NEW SYNTHESIS
 </a></p>
 <p>抽樣會使得梯度無法傳遞，就像左邊那張圖一樣，Z是一個隨機計算節點，經過Z後我們無法對之前的計算有任何資訊，自然也無法計算梯度，但改成Reparameterized form後，梯度就能順利回傳至參數上；另一點是有效減少梯度變異，原本梯度計算過程受$n \log p_{\theta}(x|z)$影響而造成變異過大，而現在我們只需要計算$\nabla_\phi f$的期望值，兩者數值大小差異很大，因此減少梯度變異使訓練過程穩定，才能用在複雜的資料集上</p>
-<p>$$<br>\mathbb{E}_{\epsilon \sim p(\epsilon)} \left[ \nabla _{\phi} f(x,g(\epsilon, x))\right]<br>$$</p>
+<p>$$<br>\nabla_\phi \mathbb{E}<em>{z \sim q(z\mid x)}\left[ f(x,z) \right] = \mathbb{E}</em>{\epsilon \sim p(\epsilon)} \left[ \nabla _{\phi} f(x,g(\epsilon, x))\right]<br>$$</p>
 <h2 id="結語"><a href="#結語" class="headerlink" title="結語"></a>結語</h2><p>本篇是漫談VI方法的第二篇，細談了VAE模型基礎，如何從ELBO對應到自編碼器架構，且$KL(q_{\phi}(z|x)||p(z))$也可以看成是一種正規化項，並提出改進的梯度估計方法，才能使得訓練模型成為可能，VAE是非常好的表徵學習方法，訓練穩定並能結合<a href="https://arxiv.org/abs/1406.5298" target="_blank" rel="noopener">半監督式學習</a>、<a href="https://arxiv.org/pdf/1803.10122.pdf" target="_blank" rel="noopener">增強學習</a>等技術，後續很多的理論改進應用延伸，值得關注與學習</p>
 <p>下一篇會討論VAE與其他生成模型的關係，最近有一些工作討論將各種生成模型放入同一個框架內討論，敬請期待</p>
 <h2 id="Refernece"><a href="#Refernece" class="headerlink" title="Refernece"></a>Refernece</h2><ul>
@@ -1654,7 +1847,7 @@
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">7</span>
+                    <span class="site-state-item-count">8</span>
                     <span class="site-state-item-name">文章</span>
                   </a>
                 </div>
@@ -1687,7 +1880,9 @@
                     
                       
                     
-                    <span class="site-state-item-count">10</span>
+                      
+                    
+                    <span class="site-state-item-count">11</span>
                     <span class="site-state-item-name">分類</span>
                   </a>
                 </div>
@@ -1744,7 +1939,7 @@
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
   <span class="with-love" id="animate"> 
     <i class="fa fa-user"></i>
   </span>
@@ -1909,6 +2104,8 @@
 
   
   
+    
+      
     
       
     

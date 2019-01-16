@@ -99,28 +99,27 @@
 
 
 
-  <meta name="description" content="WaveNet: A Generative Model for Raw Audio 是 DeepMind所提出的一種用於聲音的生成模型，例如最近發布的CLOUD TEXT-TO-SPEECH用的模型架構就是以這個為基礎，還有Making a Neural Synthesizer Instrument裡面都有用上類似WaveNet的結構 Autoregressive model統計上常用來處理時間序">
+  <meta name="description" content="之前漫談了 Variational Inference ，基本上從機器學習與機率分佈近似的角度出發來談了理論與應用，我們旨在最小化ELBO，來最大化對於資料的解釋，而且從中學習到隱變量，且隱變量還能捕捉到資料潛在資訊，這樣的演算法非常精緻優雅，是我個人非常欣賞的模型；我們的大腦，或是更廣泛來說，一個需要與環境交互的生物或自組織系統，隨時都在對抗失序(resisting a tendency to">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Ｗavenet">
-<meta property="og:url" content="http://yoursite.com/2018/04/01/wavenet/index.html">
+<meta property="og:title" content="漫談 Free energy principle (ㄧ)">
+<meta property="og:url" content="http://yoursite.com/2019/01/16/free-energy-1/index.html">
 <meta property="og:site_name" content="odie&#39;s whisper">
-<meta property="og:description" content="WaveNet: A Generative Model for Raw Audio 是 DeepMind所提出的一種用於聲音的生成模型，例如最近發布的CLOUD TEXT-TO-SPEECH用的模型架構就是以這個為基礎，還有Making a Neural Synthesizer Instrument裡面都有用上類似WaveNet的結構 Autoregressive model統計上常用來處理時間序">
+<meta property="og:description" content="之前漫談了 Variational Inference ，基本上從機器學習與機率分佈近似的角度出發來談了理論與應用，我們旨在最小化ELBO，來最大化對於資料的解釋，而且從中學習到隱變量，且隱變量還能捕捉到資料潛在資訊，這樣的演算法非常精緻優雅，是我個人非常欣賞的模型；我們的大腦，或是更廣泛來說，一個需要與環境交互的生物或自組織系統，隨時都在對抗失序(resisting a tendency to">
 <meta property="og:locale" content="zh-TW">
-<meta property="og:image" content="http://yoursite.com/media/15228972877719.gif">
-<meta property="og:image" content="http://yoursite.com/media/15228552689393.png">
-<meta property="og:image" content="http://yoursite.com/media/15228902504332.png">
-<meta property="og:updated_time" content="2018-08-15T13:59:39.279Z">
+<meta property="og:image" content="http://yoursite.com/media/15476205423036.jpg">
+<meta property="og:image" content="http://yoursite.com/media/15476226757989.jpg">
+<meta property="og:updated_time" content="2019-01-16T09:15:18.468Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Ｗavenet">
-<meta name="twitter:description" content="WaveNet: A Generative Model for Raw Audio 是 DeepMind所提出的一種用於聲音的生成模型，例如最近發布的CLOUD TEXT-TO-SPEECH用的模型架構就是以這個為基礎，還有Making a Neural Synthesizer Instrument裡面都有用上類似WaveNet的結構 Autoregressive model統計上常用來處理時間序">
-<meta name="twitter:image" content="http://yoursite.com/media/15228972877719.gif">
+<meta name="twitter:title" content="漫談 Free energy principle (ㄧ)">
+<meta name="twitter:description" content="之前漫談了 Variational Inference ，基本上從機器學習與機率分佈近似的角度出發來談了理論與應用，我們旨在最小化ELBO，來最大化對於資料的解釋，而且從中學習到隱變量，且隱變量還能捕捉到資料潛在資訊，這樣的演算法非常精緻優雅，是我個人非常欣賞的模型；我們的大腦，或是更廣泛來說，一個需要與環境交互的生物或自組織系統，隨時都在對抗失序(resisting a tendency to">
+<meta name="twitter:image" content="http://yoursite.com/media/15476205423036.jpg">
 
 
 
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2018/04/01/wavenet/"/>
+  <link rel="canonical" href="http://yoursite.com/2019/01/16/free-energy-1/"/>
 
 
 
@@ -130,7 +129,7 @@
   };
 </script>
 
-  <title>Ｗavenet | odie's whisper</title>
+  <title>漫談 Free energy principle (ㄧ) | odie's whisper</title>
   
 
 
@@ -316,7 +315,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/04/01/wavenet/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/01/16/free-energy-1/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="odie">
@@ -333,7 +332,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">Ｗavenet</h1>
+          <h1 class="post-title" itemprop="name headline">漫談 Free energy principle (ㄧ)</h1>
         
 
         <div class="post-meta">
@@ -345,7 +344,7 @@
               
                 <span class="post-meta-item-text">發表於</span>
               
-              <time title="創建於" itemprop="dateCreated datePublished" datetime="2018-04-01T20:20:53+08:00">2018-04-01</time>
+              <time title="創建於" itemprop="dateCreated datePublished" datetime="2019-01-16T17:15:18+08:00">2019-01-16</time>
             
 
             
@@ -373,21 +372,14 @@
                   ， 
                 
               
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/generative-model/pytorch/" itemprop="url" rel="index"><span itemprop="name">pytorch</span></a></span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/generative-model/probabilistic-graphical-model/" itemprop="url" rel="index"><span itemprop="name">probabilistic graphical model</span></a></span>
 
                 
                 
                   ， 
                 
               
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/generative-model/pytorch/paper-implement/" itemprop="url" rel="index"><span itemprop="name">paper implement</span></a></span>
-
-                
-                
-                  ， 
-                
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/generative-model/pytorch/paper-implement/sequence-model/" itemprop="url" rel="index"><span itemprop="name">sequence model</span></a></span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/generative-model/probabilistic-graphical-model/free-energy/" itemprop="url" rel="index"><span itemprop="name">free energy</span></a></span>
 
                 
                 
@@ -421,35 +413,44 @@
       
 
       
-        <p><a href="https://deepmind.com/blog/wavenet-generative-model-raw-audio/" target="_blank" rel="noopener">WaveNet: A Generative Model for Raw Audio</a> 是 DeepMind所提出的一種用於聲音的生成模型，例如最近發布的<a href="https://cloud.google.com/text-to-speech/" target="_blank" rel="noopener">CLOUD TEXT-TO-SPEECH</a>用的模型架構就是以這個為基礎，還有<a href="https://magenta.tensorflow.org/nsynth-instrument" target="_blank" rel="noopener">Making a Neural Synthesizer Instrument</a>裡面都有用上類似WaveNet的結構</p>
-<h2 id="Autoregressive-model"><a href="#Autoregressive-model" class="headerlink" title="Autoregressive model"></a>Autoregressive model</h2><p>統計上常用來處理時間序列的方法，用過去歷史資料 $x_{1:t-1}$來預測現在$x_t$，可以看成過去的自己對現在的自己做回歸，所以被稱為自回歸模型</p>
-<p>本模型也是用過去的聲音訊號來預測現在的訊號點，這樣的缺點是要生成新樣本的時候效率很差，因為資料有序列關係，總是要等待前面產生，才可以依序產生新的點，算是這類模型的問題</p>
-<h2 id="Fully-observed-model"><a href="#Fully-observed-model" class="headerlink" title="Fully observed model"></a>Fully observed model</h2><p>本模型沒有任何的Latent variable，沒有需要估計或是近似的未知變量，任何資訊都是完全可見的，都是從過去歷史資料來的，這樣的模型架構上更為直接簡單，不需要處理隱變量問題，用上繁瑣的近似演算法等等，而可以直接做MLE訓練</p>
-<h2 id="Implement-and-Tricks"><a href="#Implement-and-Tricks" class="headerlink" title="Implement and Tricks"></a>Implement and Tricks</h2><p>我的<a href="https://github.com/odie2630463/WaveNet" target="_blank" rel="noopener">實作版本</a>，以Pytorch實作，僅有針對單一人語音訓練，沒有做多人訓練或是TTS等，但實作上相對透明簡單，可以比較深入看看實作過程</p>
-<h3 id="Causal-amp-Dilated-Conv1d"><a href="#Causal-amp-Dilated-Conv1d" class="headerlink" title="Causal &amp; Dilated Conv1d"></a>Causal &amp; Dilated Conv1d</h3><p><img src="/media/15228972877719.gif" alt=""><br>圖片來源：<a href="https://deepmind.com/blog/wavenet-generative-model-raw-audio/" target="_blank" rel="noopener">WaveNet: A Generative Model for Raw Audio</a></p>
+        <p>之前漫談了 Variational Inference ，基本上從機器學習與機率分佈近似的角度出發來談了理論與應用，我們旨在最小化ELBO，來最大化對於資料的解釋，而且從中學習到隱變量，且隱變量還能捕捉到資料潛在資訊，這樣的演算法非常精緻優雅，是我個人非常欣賞的模型；我們的大腦，或是更廣泛來說，一個需要與環境交互的生物或自組織系統，<em>隨時都在對抗失序(resisting a tendency to disorder)</em>，生命需要維持一定的秩序才能生存，各種生理運作都必須精準穩定維持某種秩序，<em>簡言之，維持穩定是生存的要務之一</em>。</p>
+<p>對於大腦來說，所謂的穩定就是對於各種輸入大腦都能給予解釋，<em>大腦討厭surprise！</em>大腦討厭無法解釋的東西，或是與自己預期差異很大的狀況，所以大腦的任務就是解釋或是預測各種輸入，來減少遇到surprise，<strong>這個概念為 The free energy principle</strong>。</p>
+<p>The free energy principle 跟 Variational Inference 非常有關係，核心數學概念是相同的，由Karl Friston於2005提出，2010年於Nature上有一篇完整的概念描述 <strong>The free-energy principle:a unified brain theory ?</strong>，本篇會基於此文章來跟大家介紹這個概念；另外，2017年 Rafal Bogacz 寫了一篇 <strong>A tutorial on the free-energy framework for modelling perception and learning</strong>，這篇帶領讀者入門一些計算細節，本系列會基於這兩篇文章內容與大家分享。</p>
+<h2 id="The-free-energy-principle"><a href="#The-free-energy-principle" class="headerlink" title="The free energy principle"></a>The free energy principle</h2><p><img src="/media/15476205423036.jpg" alt="-w974"></p>
 <ul>
-<li>Causal:不能用到未來的資訊，例如在實作 PixelCNN時，要把Kernel的一部分mask起來，但是在本實作1D conv時，Kernel直接是2，意思為要預測$x_{t}$時，僅用到$x_{t-2}$與$x_{t-1}$，不過要記得把最後一個時間去掉</li>
-<li>Dilated: 讓Kernel看遠一點，不要只看鄰居，如果Dilated設定大一些時，就會看$x_{t}$與$x_{t-N}$，大幅增加視野域，我猜音訊鄰近的時間點值都差不多，不如看遠一點可能會有比較多變化，提供模型更多有用訊息；建議參考<a href="http://sergeiturukin.com/2017/03/02/wavenet.html" target="_blank" rel="noopener">這篇</a>來了解Dilated Conv</li>
+<li>外部狀態(External states)：會依agent產生的action與隱變量$\vartheta$改變，同時受到隨機干擾$\tilde {w}$的影響</li>
+<li>感知(Sensation)：觀測外部狀態$\tilde{x}$與隱變量$\vartheta$得到感知$\tilde{s}$</li>
+<li>內部狀態(Internal states)：最小化Free energy得到最佳的解釋$\mu$</li>
+<li>決策行為：最小化Free energy來得到最佳的行為$a$</li>
 </ul>
-<h3 id="Residual-amp-Stack-block"><a href="#Residual-amp-Stack-block" class="headerlink" title="Residual &amp; Stack block"></a>Residual &amp; Stack block</h3><p><img src="/media/15228552689393.png" alt=""><br>圖片來源：<a href="http://musyoku.github.io/2016/09/18/wavenet-a-generative-model-for-raw-audio/" target="_blank" rel="noopener">ご注文は機械学習ですか</a></p>
-<p><img src="/media/15228902504332.png" alt=""><br>圖片來源：<a href="https://arxiv.org/abs/1609.03499" target="_blank" rel="noopener">WaveNet: A Generative Model for Raw Audio</a></p>
-<ul>
-<li>模型以多個Block堆疊在一起，每個Block含有多個Dilated Conv，並且加入Residual link來幫助梯度傳遞</li>
-<li>把每一個Block的輸出匯集並加起來，每個Block計算視野不同，越往上層越大，代表資料不同的resolution，最後加總在經過轉換輸出得到下一個時間點的預測</li>
+<p>整個流程是一個動態的過程，每個變數都有初始值，透過這樣的循環，agent可以最大化對於環境狀態的了解，內部狀態$\mu$一開始可能完全是隨機的，但透過感知與行為來最小化Free energy，最後內部狀態會從外部狀態中獲取最多資訊</p>
+<h3 id="Free-energy"><a href="#Free-energy" class="headerlink" title="Free energy"></a>Free energy</h3><p>其實Free energy就是我們之前提到過的ELBO，差異在於負號，我們希望最小化Free energy，而要最大化ELBO，不過其實從優化角度來看其實一樣</p>
+<p>回顧一下ELBO，並且寫成另一個形式<br>$$<br>\begin{split}<br>\mathbb{E}_{q_{\phi}(z)}<br>        \left[<br>          \log \frac{p_{\theta}(x,z)}             {q_{\phi}(z)}\right] &amp;= \mathbb{E}\left[ \log p_{\theta}(x|z) \right] - KL(q_{\phi}(z) || p(z)) \\<br>          &amp;= \mathbb{E}\left[ \log p_{\theta}(x,z) \right] - \mathbb{H}\left[ q_{\phi}(z) \right]<br>\end{split}<br>$$</p>
+<p>上述是以ELBO的角度，需要最大化ELBO，換到Free energy就加上負號，得到下圖的公式，接下來的描述也是以圖上的符號來說明：</p>
+<p><img src="/media/15476226757989.jpg" alt="-w873"></p>
+<h3 id="Free-energy-bound-on-suprise"><a href="#Free-energy-bound-on-suprise" class="headerlink" title="Free-energy bound on suprise"></a>Free-energy bound on suprise</h3><ul>
+<li>$q(\vartheta | \mu)$ 係指給定內部狀態解釋$\mu$對環境隱變量$\vartheta$的條件機率，跟VI想法一樣，我們無法精確知道隱變量的分佈，只好用一個近似的分佈來估計，所以我們如果對環境有好的解釋，我們應該可以把隱變量估計得比較好</li>
+<li>$p(\tilde { s } , \vartheta|m)$ 給定目前模型$m$，生成$\tilde{s},\vartheta$聯合機率分佈</li>
+<li>可以對照上述ELBO式子，是完全對應的，整個Free energy 可以寫成 $F ( \tilde { s } , \mu )$，我們可以分別針對兩個變量來最小化</li>
 </ul>
-<h3 id="Data-processing-amp-Training"><a href="#Data-processing-amp-Training" class="headerlink" title="Data processing &amp; Training"></a>Data processing &amp; Training</h3><ul>
-<li><a href="http://homepages.inf.ed.ac.uk/jyamagis/page3/page58/page58.html" target="_blank" rel="noopener">VCTK</a>資料集有多人的語音與文字內容，可以用來訓練TTS系統</li>
-<li>語音資料處理我用上<a href="https://github.com/pytorch/audio" target="_blank" rel="noopener">torchaudio</a>、<a href="https://librosa.github.io/librosa/" target="_blank" rel="noopener">librosa</a>，但不知道為什麼用兩個套件讀出來的有點差異，我最後用librosa來讀取音訊，還有把<strong>無聲部分去掉</strong>，這個步驟非常重要！不然訓練到最後只會一直產生靜音，再用torchaudio做Mulaw encoding</li>
-<li>訓練batch size為1，一次給一段語音來訓練，基本上因為訓練資料長度差異很大，要做padding很浪費與不好做，再且顯卡記憶體也不夠大，所以一次訓練一個語音檔是合理的做法</li>
-<li>訓練大概要2天，而且頗慢的，建議做learning rate scheduling從0.001往下到0.00001，我訓練在p225這個語音上，最後得到loss約2左右，可以得到還可以的結果</li>
-<li>計算視野其實蠻簡單，就餵給模型資料來測試看多長的資料，模型剛好輸出為1，就是模型的視野，代表要預測下一個時間點，需要往前看多長的資料</li>
-<li>產生新樣本非常慢的，請耐心等待，所以這一篇頂多只能說是開一個研究開頭，而且也無法直接做到TTS或其他應用，而是一個好的音訊產生網路結構，後續很多聲音產生都是基於此</li>
+<h3 id="Perception-optimizes-predictions"><a href="#Perception-optimizes-predictions" class="headerlink" title="Perception optimizes predictions"></a>Perception optimizes predictions</h3><ul>
+<li>$\mu = \arg \min F ( \tilde { s } , \mu )$</li>
+<li>根據現在輸入的感知，調整內部狀態$\mu$來最小化$F$，這個跟VI做的事情一樣，去學習好的表徵</li>
 </ul>
-<h2 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h2><ol>
-<li><a href="http://sergeiturukin.com/2017/03/02/wavenet.html" target="_blank" rel="noopener">Sergei Turukin blog</a></li>
-<li><a href="https://lirnli.wordpress.com/2017/10/16/pytorch-wavenet/" target="_blank" rel="noopener">winter plum blog</a></li>
-<li><a href="http://musyoku.github.io/2016/09/18/wavenet-a-generative-model-for-raw-audio/" target="_blank" rel="noopener">ご注文は機械学習ですか</a></li>
-</ol>
+<h3 id="Action-minimizes-prediction-errors"><a href="#Action-minimizes-prediction-errors" class="headerlink" title="Action minimizes prediction errors"></a>Action minimizes prediction errors</h3><ul>
+<li>$a = \arg \min F ( \tilde { s } , \mu )$</li>
+<li>這裡就是有趣的地方了，其實除了可以透過改變解釋來減少$F$，agent也可以透過改變輸入的感知來優化，<em>意思是agent會去選擇比較符合期待感知輸入</em>，這個也稱為<strong>active inference</strong></li>
+</ul>
+<p>Agent長期而言希望能最小化surprise，其實就是在最小化Free energy，透過改變自己對於感知輸入的解釋，透過主動選擇感知輸入來源與行為，讓agent能快速的了解適應環境；Free energy 是很有機會做為大腦學習、控制的基礎理論，在 <strong>The free-energy principle:a unified brain theory ?</strong> 文中有介紹與其他現有理論的關係，像是 Neural coding、Bayesian brain hypothesis 等等</p>
+<h2 id="結語"><a href="#結語" class="headerlink" title="結語"></a>結語</h2><p>智慧的本質到底是什麼？我們到底是如何快速的學習？又為何要學習？本篇介紹了The free energy principle，我想我們為了要生存，必須要抵抗<em>失序</em>，我們必須讓自己維持在一種認知穩地的狀態，這樣帶來的附加效益就是讓我們有快速的學習能力，最終我們成了一個強大的解釋與預測機器</p>
+<p>下一篇會介紹 <strong>A tutorial on the free-energy framework for modelling perception and learning</strong> 這篇文章，提出一個神經網路的框架能執行基於Free energy principle的計算，相當有趣！敬請期待</p>
+<h2 id="Refernece"><a href="#Refernece" class="headerlink" title="Refernece"></a>Refernece</h2><ul>
+<li><a href="https://en.wikipedia.org/wiki/Free_energy_principle" target="_blank" rel="noopener">Free energy principle - Wiki</a></li>
+<li><a href="https://www.researchgate.net/publication/41001209_Friston_KJ_The_free-energy_principle_a_unified_brain_theory_Nat_Rev_Neurosci_11_127-138" target="_blank" rel="noopener">The free-energy principle: a unified brain theory?</a></li>
+<li><a href="https://www.sciencedirect.com/science/article/pii/S0022249615000759" target="_blank" rel="noopener">A tutorial on the free-energy framework for modelling perception and learning</a></li>
+<li><a href="">Karl Friston 15分鐘訪談 - Free Energy Principle</a></li>
+<li><a href="https://www.youtube.com/watch?v=dLXKFA33SSM&amp;t=2642s" target="_blank" rel="noopener">Karl Friston 演講影片 - Free energy and active inference</a></li>
+</ul>
 
       
     </div>
@@ -477,15 +478,15 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
+              <a href="/2018/09/20/vi-2/" rel="next" title="漫談 Variational Inference (二)">
+                <i class="fa fa-chevron-left"></i> 漫談 Variational Inference (二)
+              </a>
+            
           </div>
 
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2018/04/15/sketchrnn/" rel="prev" title="SketchRNN">
-                SketchRNN <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -647,7 +648,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Autoregressive-model"><span class="nav-number">1.</span> <span class="nav-text">Autoregressive model</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Fully-observed-model"><span class="nav-number">2.</span> <span class="nav-text">Fully observed model</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Implement-and-Tricks"><span class="nav-number">3.</span> <span class="nav-text">Implement and Tricks</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Causal-amp-Dilated-Conv1d"><span class="nav-number">3.1.</span> <span class="nav-text">Causal &amp; Dilated Conv1d</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Residual-amp-Stack-block"><span class="nav-number">3.2.</span> <span class="nav-text">Residual &amp; Stack block</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Data-processing-amp-Training"><span class="nav-number">3.3.</span> <span class="nav-text">Data processing &amp; Training</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Reference"><span class="nav-number">4.</span> <span class="nav-text">Reference</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#The-free-energy-principle"><span class="nav-number">1.</span> <span class="nav-text">The free energy principle</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Free-energy"><span class="nav-number">1.1.</span> <span class="nav-text">Free energy</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Free-energy-bound-on-suprise"><span class="nav-number">1.2.</span> <span class="nav-text">Free-energy bound on suprise</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Perception-optimizes-predictions"><span class="nav-number">1.3.</span> <span class="nav-text">Perception optimizes predictions</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Action-minimizes-prediction-errors"><span class="nav-number">1.4.</span> <span class="nav-text">Action minimizes prediction errors</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#結語"><span class="nav-number">2.</span> <span class="nav-text">結語</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Refernece"><span class="nav-number">3.</span> <span class="nav-text">Refernece</span></a></li></ol></div>
             
 
           </div>
