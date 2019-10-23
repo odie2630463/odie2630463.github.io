@@ -100,28 +100,29 @@
 
 
   <meta name="description" content="序列資料模型我們常用LSTM、或是各種RNN的變形，在主流的各種任務上都取得了非常好的結果，如機器翻譯、序列生成等；但因為遞迴特性，訓練過程很難平行化計算，難以利用硬體加速，此外，RNN模型依然存在記憶遺忘問題，很難捕捉序列的長期關係 近年來出現不少不是基於RNN序列模型，這篇When Recurrent Models Don’t Need to be Recurrent分析兩種模型於序列模型上的">
+<meta name="keywords" content="sequence">
 <meta property="og:type" content="article">
 <meta property="og:title" content="實作 Attention Is All You Need">
-<meta property="og:url" content="http://yoursite.com/2018/09/09/transformer/index.html">
+<meta property="og:url" content="https://odie2630463.github.io/2018/09/09/transformer/index.html">
 <meta property="og:site_name" content="odie&#39;s whisper">
 <meta property="og:description" content="序列資料模型我們常用LSTM、或是各種RNN的變形，在主流的各種任務上都取得了非常好的結果，如機器翻譯、序列生成等；但因為遞迴特性，訓練過程很難平行化計算，難以利用硬體加速，此外，RNN模型依然存在記憶遺忘問題，很難捕捉序列的長期關係 近年來出現不少不是基於RNN序列模型，這篇When Recurrent Models Don’t Need to be Recurrent分析兩種模型於序列模型上的">
 <meta property="og:locale" content="zh-TW">
-<meta property="og:image" content="http://yoursite.com/media/4656352C-84F1-47B2-9360-729C9EBF2546.png">
-<meta property="og:image" content="http://yoursite.com/media/EB3EFE51-9300-4E2B-A8D3-D61BF81FA0C1.png">
-<meta property="og:image" content="http://yoursite.com/media/3F201427-F154-4297-A0C7-5C4FB3F050CF.png">
-<meta property="og:image" content="http://yoursite.com/media/02EF842C-2429-4EF7-B08C-9A4331288E02.png">
-<meta property="og:updated_time" content="2018-09-09T08:18:25.126Z">
+<meta property="og:image" content="https://odie2630463.github.io/media/4656352C-84F1-47B2-9360-729C9EBF2546.png">
+<meta property="og:image" content="https://odie2630463.github.io/media/EB3EFE51-9300-4E2B-A8D3-D61BF81FA0C1.png">
+<meta property="og:image" content="https://odie2630463.github.io/media/3F201427-F154-4297-A0C7-5C4FB3F050CF.png">
+<meta property="og:image" content="https://odie2630463.github.io/media/02EF842C-2429-4EF7-B08C-9A4331288E02.png">
+<meta property="og:updated_time" content="2019-10-23T15:50:28.621Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="實作 Attention Is All You Need">
 <meta name="twitter:description" content="序列資料模型我們常用LSTM、或是各種RNN的變形，在主流的各種任務上都取得了非常好的結果，如機器翻譯、序列生成等；但因為遞迴特性，訓練過程很難平行化計算，難以利用硬體加速，此外，RNN模型依然存在記憶遺忘問題，很難捕捉序列的長期關係 近年來出現不少不是基於RNN序列模型，這篇When Recurrent Models Don’t Need to be Recurrent分析兩種模型於序列模型上的">
-<meta name="twitter:image" content="http://yoursite.com/media/4656352C-84F1-47B2-9360-729C9EBF2546.png">
+<meta name="twitter:image" content="https://odie2630463.github.io/media/4656352C-84F1-47B2-9360-729C9EBF2546.png">
 
 
 
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2018/09/09/transformer/"/>
+  <link rel="canonical" href="https://odie2630463.github.io/2018/09/09/transformer/"/>
 
 
 
@@ -236,6 +237,15 @@
         
         
           
+  <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />標籤</a>
+</li>
+
+      
+        
+        
+          
   <li class="menu-item menu-item-categories">
     <a href="/categories/" rel="section">
       <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分類</a>
@@ -260,6 +270,9 @@
     
 
     
+    
+      
+      
     
       
       
@@ -317,7 +330,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/09/09/transformer/">
+    <link itemprop="mainEntityOfPage" href="https://odie2630463.github.io/2018/09/09/transformer/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="odie">
@@ -367,21 +380,7 @@
                 <span class="post-meta-item-text">分類於</span>
               
               
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/pytorch/" itemprop="url" rel="index"><span itemprop="name">pytorch</span></a></span>
-
-                
-                
-                  ， 
-                
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/pytorch/sequence-model/" itemprop="url" rel="index"><span itemprop="name">sequence model</span></a></span>
-
-                
-                
-                  ， 
-                
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/pytorch/sequence-model/paper-implement/" itemprop="url" rel="index"><span itemprop="name">paper implement</span></a></span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/paper/" itemprop="url" rel="index"><span itemprop="name">paper</span></a></span>
 
                 
                 
@@ -416,7 +415,7 @@
 
       
         <p>序列資料模型我們常用LSTM、或是各種RNN的變形，在主流的各種任務上都取得了非常好的結果，如機器翻譯、序列生成等；但因為遞迴特性，訓練過程很難平行化計算，難以利用硬體加速，此外，RNN模型依然存在記憶遺忘問題，很難捕捉序列的長期關係</p>
-<p>近年來出現不少不是基於RNN序列模型，這篇<a href="https://bair.berkeley.edu/blog/2018/08/06/recurrent/" target="_blank" rel="noopener">When Recurrent Models Don’t Need to be Recurrent</a>分析兩種模型於序列模型上的差異，非基於RNN模型如<a href="https://odie2630463.github.io/2018/04/01/wavenet/" target="_blank" rel="noopener">之前介紹的Wavenet</a>，是一種Feed-Forward序列生成的模型，本篇要介紹的是<a href="https://arxiv.org/abs/1706.03762" target="_blank" rel="noopener">Attention Is All You Need</a>，論文名稱很霸氣，果然有實力要叫什麼名字都可以XD，模型完全只使用注意力機制來做序列模型，在機器翻譯任務上，不僅訓練速度快且效果也非常好，很值得來實作的一篇論文；在後續研究上，注意力機制被用在更多的領域上，例如<a href="https://arxiv.org/abs/1805.08318" target="_blank" rel="noopener">Self-Attention Generative Adversarial Networks</a>，本篇論文也是扮演重要的承先啟後角色</p>
+<p>近年來出現不少不是基於RNN序列模型，這篇<a href="https://bair.berkeley.edu/blog/2018/08/06/recurrent/" target="_blank" rel="noopener">When Recurrent Models Don’t Need to be Recurrent</a>分析兩種模型於序列模型上的差異，非基於RNN模型如<a href="https://odie2630463.github.io/2018/04/01/wavenet/">之前介紹的Wavenet</a>，是一種Feed-Forward序列生成的模型，本篇要介紹的是<a href="https://arxiv.org/abs/1706.03762" target="_blank" rel="noopener">Attention Is All You Need</a>，論文名稱很霸氣，果然有實力要叫什麼名字都可以XD，模型完全只使用注意力機制來做序列模型，在機器翻譯任務上，不僅訓練速度快且效果也非常好，很值得來實作的一篇論文；在後續研究上，注意力機制被用在更多的領域上，例如<a href="https://arxiv.org/abs/1805.08318" target="_blank" rel="noopener">Self-Attention Generative Adversarial Networks</a>，本篇論文也是扮演重要的承先啟後角色</p>
 <h2 id="Model-Architecture"><a href="#Model-Architecture" class="headerlink" title="Model Architecture"></a>Model Architecture</h2><p>論文提出模型稱為Transformer，這篇<a href="http://jalammar.github.io/illustrated-transformer/" target="_blank" rel="noopener">The Illustrated Transformer</a>介紹非常完整，而且還有動畫來說明，強烈建議先看看這篇，本篇文章就稍微偷懶只簡單談一下其中一些細節心得與看法</p>
 <p><img src="/media/4656352C-84F1-47B2-9360-729C9EBF2546.png" alt="4656352C-84F1-47B2-9360-729C9EBF2546"></p>
 <h3 id="Scaled-Dot-Product-Attention"><a href="#Scaled-Dot-Product-Attention" class="headerlink" title="Scaled Dot-Product Attention"></a>Scaled Dot-Product Attention</h3><p>注意力機制可以視為類似搜尋的過程，給一個你想搜尋的Query，Query去跟Key做內積看看相近程度，然後用softmax來正規化來得到注意力分佈，最後根據這個注意力分佈來加權Value得到結果，整個過程公式簡單明瞭，僅是矩陣相乘</p>
@@ -469,6 +468,12 @@
     
 
     <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/sequence/" rel="tag"># sequence</a>
+          
+        </div>
       
 
       
@@ -565,7 +570,7 @@
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">8</span>
+                    <span class="site-state-item-count">9</span>
                     <span class="site-state-item-name">文章</span>
                   </a>
                 </div>
@@ -594,13 +599,7 @@
                     
                       
                     
-                      
-                    
-                      
-                    
-                      
-                    
-                    <span class="site-state-item-count">11</span>
+                    <span class="site-state-item-count">5</span>
                     <span class="site-state-item-name">分類</span>
                   </a>
                 </div>
@@ -617,7 +616,13 @@
                     
                       
                     
-                    <span class="site-state-item-count">0</span>
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">4</span>
                     <span class="site-state-item-name">標籤</span>
                   </a>
                 </div>

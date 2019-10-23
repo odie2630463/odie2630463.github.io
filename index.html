@@ -101,7 +101,7 @@
 
   <meta property="og:type" content="website">
 <meta property="og:title" content="odie&#39;s whisper">
-<meta property="og:url" content="http://yoursite.com/index.html">
+<meta property="og:url" content="https://odie2630463.github.io/index.html">
 <meta property="og:site_name" content="odie&#39;s whisper">
 <meta property="og:locale" content="zh-TW">
 <meta name="twitter:card" content="summary">
@@ -112,7 +112,7 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/"/>
+  <link rel="canonical" href="https://odie2630463.github.io/"/>
 
 
 
@@ -228,6 +228,15 @@
         
         
           
+  <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />標籤</a>
+</li>
+
+      
+        
+        
+          
   <li class="menu-item menu-item-categories">
     <a href="/categories/" rel="section">
       <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分類</a>
@@ -252,6 +261,9 @@
     
 
     
+    
+      
+      
     
       
       
@@ -309,7 +321,153 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/01/16/free-energy-1/">
+    <link itemprop="mainEntityOfPage" href="https://odie2630463.github.io/2019/10/23/pycon-pyro/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="odie">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="odie's whisper">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2019/10/23/pycon-pyro/" itemprop="url">Introduction to Deep  Probabilistic Programming with Pyro</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">發表於</span>
+              
+              <time title="創建於" itemprop="dateCreated datePublished" datetime="2019-10-23T23:51:50+08:00">2019-10-23</time>
+            
+
+            
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分類於</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/probabilistic-programming/" itemprop="url" rel="index"><span itemprop="name">probabilistic programming</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>今年在 PyconTW 給的演講，主題是關於機率程式語言與Pyro，機器學習核心問題其中之一是如何建立機率模型，我們想要足夠複雜但又可以推論、訓練的模型，且方法要夠通用兼顧效率；如果有一個生成模型，我們能不斷的從模型抽樣產生樣本，我們就會知道說模型的哪些「設定或是輸入」會產出好的或是跟真實資料相似的樣本，我們可以透過抽樣來推估給定真實資料下，一些隱藏變量或是我們想估計的變數</p>
+<p>用機率程式語言來描述一個生成模型或是資料產生的過程，我們可以很容易得去抽樣或是計算機率值，甚至不用去寫複雜的推論過程，機率語言很自然的提供了相對應的推論方法，這些設計都是嵌入在程式語言的設計中</p>
+<p>機率程式語言除了建立生成模型，本質上它還是一個通用的程式語言，我們依然可以用它來寫各種複雜程式，例如下西洋棋或是影像渲染等等，這大幅擴展了生成模型所能定義的事，我們不只能去生成影像、語音等等資料，更可以去生成一連串的動作、或是經過渲染的影像，但這些因為都是用機率程式語言所寫的，完全都可以去推估程式中的變量，模型也當然能夠生成新的資料用於預測；認知科學家研究人類如何做決策的過程，常用機率程式語言去假設人類做決策的生成模型，並且給一些人類決策過程的資料，透過這樣來研究所假設的模型是否合理，除此之外，模型在輸出每次的決策同時都可以給出相對應的機率值，與程式內部的變量值，我們可以知道模型為何做這樣的決策，或是如何犯錯的</p>
+<p>近年來結合深度學習與自動微分工具，有不少機率程式語言的研究相繼提出，雖然還尚未有殺手級的應用，但是我想這個領域一定會提供人工智慧領域發展很多的新觀點</p>
+<iframe src="https://docs.google.com/presentation/d/e/2PACX-1vTb6LflvI1Q5kS5i3ZEuKQjwuKUTB5VhobSoQIzBtmt2FYRbySQmMpomlJzdS5-tkHEpwncroOT_U6t/embed?start=false&loop=false&delayms=3000" frameborder="0" width="960" height="569" allowfullscreen="true" mozallowfullscreen="true" webkitallowfullscreen="true"></iframe>
+
+          
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://odie2630463.github.io/2019/01/16/free-energy-1/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="odie">
@@ -361,21 +519,7 @@
                 <span class="post-meta-item-text">分類於</span>
               
               
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/generative-model/" itemprop="url" rel="index"><span itemprop="name">generative model</span></a></span>
-
-                
-                
-                  ， 
-                
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/generative-model/probabilistic-graphical-model/" itemprop="url" rel="index"><span itemprop="name">probabilistic graphical model</span></a></span>
-
-                
-                
-                  ， 
-                
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/generative-model/probabilistic-graphical-model/free-energy/" itemprop="url" rel="index"><span itemprop="name">free energy</span></a></span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/free-energy/" itemprop="url" rel="index"><span itemprop="name">free energy</span></a></span>
 
                 
                 
@@ -502,7 +646,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/09/20/vi-2/">
+    <link itemprop="mainEntityOfPage" href="https://odie2630463.github.io/2018/09/20/vi-2/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="odie">
@@ -554,14 +698,7 @@
                 <span class="post-meta-item-text">分類於</span>
               
               
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/generative-model/" itemprop="url" rel="index"><span itemprop="name">generative model</span></a></span>
-
-                
-                
-                  ， 
-                
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/generative-model/probabilistic-graphical-model/" itemprop="url" rel="index"><span itemprop="name">probabilistic graphical model</span></a></span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/variational-inference/" itemprop="url" rel="index"><span itemprop="name">variational inference</span></a></span>
 
                 
                 
@@ -597,7 +734,7 @@
       
         
           
-            <p>本篇是漫談 Variational Inference 系列第二篇，<a href="https://odie2630463.github.io/2018/08/21/vi-1/" target="_blank" rel="noopener">前一篇</a>介紹了隱變量模型並推導出了ELBO，而我們知道只要有辦法最大化ELBO，就可以去近似$\log_{\theta}p(x)$，但具體而言我們該如何計算呢？</p>
+            <p>本篇是漫談 Variational Inference 系列第二篇，<a href="https://odie2630463.github.io/2018/08/21/vi-1/">前一篇</a>介紹了隱變量模型並推導出了ELBO，而我們知道只要有辦法最大化ELBO，就可以去近似$\log_{\theta}p(x)$，但具體而言我們該如何計算呢？</p>
 <p>今天我們來細談一下<a href="https://arxiv.org/abs/1312.6114" target="_blank" rel="noopener">Auto-encoding variational Bayes</a>這篇論文，基於最大化ELBO，引入深度神經網路、低變異的梯度訓練方法提出 <strong>Variational Autoencoder(VAE)</strong>，把VI方法應用推展至複雜真實資料上，並且有大規模訓練的優化方法，是一篇非常重要且值得一讀的論文！</p>
 <h2 id="Auto-encoding-variational-Bayes"><a href="#Auto-encoding-variational-Bayes" class="headerlink" title="Auto-encoding variational Bayes"></a>Auto-encoding variational Bayes</h2><h3 id="Amortized-inference"><a href="#Amortized-inference" class="headerlink" title="Amortized inference"></a>Amortized inference</h3><p>隱變量模型假設下，每個訓練資料中的觀測變量$x^i$，都對應各自隱變量分佈$z^i \sim q_{\phi_i}(z)$，$z^i$我們稱為<strong>局部變數</strong>，而$\phi_i$為<strong>局部變數的參數</strong>；但是當有一個不在訓練資料的新觀測變量$x^j$時，我們沒有對應的隱變量$z^j$的分佈呀！而且訓練過程中需要儲存大量的局部變量，訓練資料集中每一個觀測資料都要分配一組參數來訓練，用這種方法大幅限制了隱變量模型的應用範圍</p>
 <p>局部變量$(x^i ,z^i \sim q_{\phi_i}(z))$是個瓶頸，我們引入一個神經網路來直接從觀測變量去預測出隱變量$(x^i ,z^i \sim q_{\phi}(z|x))$，這個神經網路通常也稱為Inference network或是Encoder，此時$\phi$不在是局部變數的參數了，對於計算每個隱變量$z$都是用同樣一組$\phi$，所以是變成<strong>全局變量參數</strong>，再也不用去儲存每個隱變量，而是可以透過觀測變量來預測，就算對於新的資料也一樣，這個技巧稱為Amortized inference</p>
@@ -681,7 +818,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/09/09/transformer/">
+    <link itemprop="mainEntityOfPage" href="https://odie2630463.github.io/2018/09/09/transformer/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="odie">
@@ -733,21 +870,7 @@
                 <span class="post-meta-item-text">分類於</span>
               
               
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/pytorch/" itemprop="url" rel="index"><span itemprop="name">pytorch</span></a></span>
-
-                
-                
-                  ， 
-                
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/pytorch/sequence-model/" itemprop="url" rel="index"><span itemprop="name">sequence model</span></a></span>
-
-                
-                
-                  ， 
-                
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/pytorch/sequence-model/paper-implement/" itemprop="url" rel="index"><span itemprop="name">paper implement</span></a></span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/paper/" itemprop="url" rel="index"><span itemprop="name">paper</span></a></span>
 
                 
                 
@@ -784,7 +907,7 @@
         
           
             <p>序列資料模型我們常用LSTM、或是各種RNN的變形，在主流的各種任務上都取得了非常好的結果，如機器翻譯、序列生成等；但因為遞迴特性，訓練過程很難平行化計算，難以利用硬體加速，此外，RNN模型依然存在記憶遺忘問題，很難捕捉序列的長期關係</p>
-<p>近年來出現不少不是基於RNN序列模型，這篇<a href="https://bair.berkeley.edu/blog/2018/08/06/recurrent/" target="_blank" rel="noopener">When Recurrent Models Don’t Need to be Recurrent</a>分析兩種模型於序列模型上的差異，非基於RNN模型如<a href="https://odie2630463.github.io/2018/04/01/wavenet/" target="_blank" rel="noopener">之前介紹的Wavenet</a>，是一種Feed-Forward序列生成的模型，本篇要介紹的是<a href="https://arxiv.org/abs/1706.03762" target="_blank" rel="noopener">Attention Is All You Need</a>，論文名稱很霸氣，果然有實力要叫什麼名字都可以XD，模型完全只使用注意力機制來做序列模型，在機器翻譯任務上，不僅訓練速度快且效果也非常好，很值得來實作的一篇論文；在後續研究上，注意力機制被用在更多的領域上，例如<a href="https://arxiv.org/abs/1805.08318" target="_blank" rel="noopener">Self-Attention Generative Adversarial Networks</a>，本篇論文也是扮演重要的承先啟後角色</p>
+<p>近年來出現不少不是基於RNN序列模型，這篇<a href="https://bair.berkeley.edu/blog/2018/08/06/recurrent/" target="_blank" rel="noopener">When Recurrent Models Don’t Need to be Recurrent</a>分析兩種模型於序列模型上的差異，非基於RNN模型如<a href="https://odie2630463.github.io/2018/04/01/wavenet/">之前介紹的Wavenet</a>，是一種Feed-Forward序列生成的模型，本篇要介紹的是<a href="https://arxiv.org/abs/1706.03762" target="_blank" rel="noopener">Attention Is All You Need</a>，論文名稱很霸氣，果然有實力要叫什麼名字都可以XD，模型完全只使用注意力機制來做序列模型，在機器翻譯任務上，不僅訓練速度快且效果也非常好，很值得來實作的一篇論文；在後續研究上，注意力機制被用在更多的領域上，例如<a href="https://arxiv.org/abs/1805.08318" target="_blank" rel="noopener">Self-Attention Generative Adversarial Networks</a>，本篇論文也是扮演重要的承先啟後角色</p>
 <h2 id="Model-Architecture"><a href="#Model-Architecture" class="headerlink" title="Model Architecture"></a>Model Architecture</h2><p>論文提出模型稱為Transformer，這篇<a href="http://jalammar.github.io/illustrated-transformer/" target="_blank" rel="noopener">The Illustrated Transformer</a>介紹非常完整，而且還有動畫來說明，強烈建議先看看這篇，本篇文章就稍微偷懶只簡單談一下其中一些細節心得與看法</p>
 <p><img src="/media/4656352C-84F1-47B2-9360-729C9EBF2546.png" alt="4656352C-84F1-47B2-9360-729C9EBF2546"></p>
 <h3 id="Scaled-Dot-Product-Attention"><a href="#Scaled-Dot-Product-Attention" class="headerlink" title="Scaled Dot-Product Attention"></a>Scaled Dot-Product Attention</h3><p>注意力機制可以視為類似搜尋的過程，給一個你想搜尋的Query，Query去跟Key做內積看看相近程度，然後用softmax來正規化來得到注意力分佈，最後根據這個注意力分佈來加權Value得到結果，整個過程公式簡單明瞭，僅是矩陣相乘</p>
@@ -873,7 +996,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/08/21/vi-1/">
+    <link itemprop="mainEntityOfPage" href="https://odie2630463.github.io/2018/08/21/vi-1/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="odie">
@@ -925,14 +1048,7 @@
                 <span class="post-meta-item-text">分類於</span>
               
               
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/generative-model/" itemprop="url" rel="index"><span itemprop="name">generative model</span></a></span>
-
-                
-                
-                  ， 
-                
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/generative-model/probabilistic-graphical-model/" itemprop="url" rel="index"><span itemprop="name">probabilistic graphical model</span></a></span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/variational-inference/" itemprop="url" rel="index"><span itemprop="name">variational inference</span></a></span>
 
                 
                 
@@ -1075,7 +1191,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/07/28/pyro-lda/">
+    <link itemprop="mainEntityOfPage" href="https://odie2630463.github.io/2018/07/28/pyro-lda/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="odie">
@@ -1127,21 +1243,7 @@
                 <span class="post-meta-item-text">分類於</span>
               
               
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/generative-model/" itemprop="url" rel="index"><span itemprop="name">generative model</span></a></span>
-
-                
-                
-                  ， 
-                
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/generative-model/pyro/" itemprop="url" rel="index"><span itemprop="name">pyro</span></a></span>
-
-                
-                
-                  ， 
-                
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/generative-model/pyro/probabilistic-graphical-model/" itemprop="url" rel="index"><span itemprop="name">probabilistic graphical model</span></a></span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/probabilistic-programming/" itemprop="url" rel="index"><span itemprop="name">probabilistic programming</span></a></span>
 
                 
                 
@@ -1186,7 +1288,7 @@
 <li>Minimal: Pyro is implemented with a small core of powerful, composable abstractions.</li>
 <li>Flexible: Pyro aims for automation when you want it, control when you need it. </li>
 </ul>
-<p>基於Pytorch開發，所以深度學習那些當然都可以整合一起用上，並且語法非常的Pythonic，也用上了很多高階特性，例如context manager，機率推斷演算法主要提供Stochastic Variational Inference(SVI)，可以用上SGD來訓練模型，整體上的確以最小需要、高彈性、透明為主要設計，相較於基於Tensorflow的<a href="http://edwardlib.org" target="_blank" rel="noopener">Edward</a>、<a href="https://github.com/tensorflow/probability" target="_blank" rel="noopener">Tensorflow_probability</a>，提供不只VI相關演算法，還有很多MCMC相關的，或是<a href="https://odie2630463.github.io/2018/07/11/flow/" target="_blank" rel="noopener">前一篇提到的NF</a>，更多工具可以使用，但也相對不是那麼容易上手；不過結合更多機率特性是趨勢之一，這兩個主流的Deep PPL都很值得關注與學習。</p>
+<p>基於Pytorch開發，所以深度學習那些當然都可以整合一起用上，並且語法非常的Pythonic，也用上了很多高階特性，例如context manager，機率推斷演算法主要提供Stochastic Variational Inference(SVI)，可以用上SGD來訓練模型，整體上的確以最小需要、高彈性、透明為主要設計，相較於基於Tensorflow的<a href="http://edwardlib.org" target="_blank" rel="noopener">Edward</a>、<a href="https://github.com/tensorflow/probability" target="_blank" rel="noopener">Tensorflow_probability</a>，提供不只VI相關演算法，還有很多MCMC相關的，或是<a href="https://odie2630463.github.io/2018/07/11/flow/">前一篇提到的NF</a>，更多工具可以使用，但也相對不是那麼容易上手；不過結合更多機率特性是趨勢之一，這兩個主流的Deep PPL都很值得關注與學習。</p>
 <h2 id="Implement-LDA-model"><a href="#Implement-LDA-model" class="headerlink" title="Implement LDA model"></a>Implement LDA model</h2><p>以上介紹了Pyro，接著就來實作Latent Dirichlet allocation(LDA)模型，常用文本主題分析，且為圖機率模型的經典模型！接著用Pyro與SVI來實作並求解參數，本文並不會從頭介紹Pyro基礎，建議可以先看<a href="http://pyro.ai/examples/index.html" target="_blank" rel="noopener">官網教學</a>，程式碼我放在<a href="https://colab.research.google.com/drive/11NIOR7Ix2pxkQPw_m0zZaai9Fi935-l7" target="_blank" rel="noopener">Colab</a>，大家可以直接跑看看</p>
 <h4 id="Model"><a href="#Model" class="headerlink" title="Model"></a>Model</h4><p>我們就直接從模型看起，先來看一下LDA式子長怎樣，$\phi$指每個字對應個主題的機率分佈，$\theta_d$指每一文件對應主題的機率分佈，$z$指每個字被分配到的主題，式子可以寫成：</p>
 <p>$$<br>p(\phi,\theta,z,w) = p(\phi) \prod_{d=1}^D \prod_{n=1}^{N_d} p(z_{dn}|\theta_d)p(w_{dn}|z_{dn},\phi)<br>$$</p>
@@ -1258,7 +1360,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/07/11/flow/">
+    <link itemprop="mainEntityOfPage" href="https://odie2630463.github.io/2018/07/11/flow/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="odie">
@@ -1310,7 +1412,7 @@
                 <span class="post-meta-item-text">分類於</span>
               
               
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/generative-model/" itemprop="url" rel="index"><span itemprop="name">generative model</span></a></span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/flow/" itemprop="url" rel="index"><span itemprop="name">flow</span></a></span>
 
                 
                 
@@ -1433,7 +1535,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/04/15/sketchrnn/">
+    <link itemprop="mainEntityOfPage" href="https://odie2630463.github.io/2018/04/15/sketchrnn/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="odie">
@@ -1485,28 +1587,7 @@
                 <span class="post-meta-item-text">分類於</span>
               
               
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/generative-model/" itemprop="url" rel="index"><span itemprop="name">generative model</span></a></span>
-
-                
-                
-                  ， 
-                
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/generative-model/pytorch/" itemprop="url" rel="index"><span itemprop="name">pytorch</span></a></span>
-
-                
-                
-                  ， 
-                
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/generative-model/pytorch/paper-implement/" itemprop="url" rel="index"><span itemprop="name">paper implement</span></a></span>
-
-                
-                
-                  ， 
-                
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/generative-model/pytorch/paper-implement/sequence-model/" itemprop="url" rel="index"><span itemprop="name">sequence model</span></a></span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/paper/" itemprop="url" rel="index"><span itemprop="name">paper</span></a></span>
 
                 
                 
@@ -1628,7 +1709,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/04/01/wavenet/">
+    <link itemprop="mainEntityOfPage" href="https://odie2630463.github.io/2018/04/01/wavenet/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="odie">
@@ -1680,28 +1761,7 @@
                 <span class="post-meta-item-text">分類於</span>
               
               
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/generative-model/" itemprop="url" rel="index"><span itemprop="name">generative model</span></a></span>
-
-                
-                
-                  ， 
-                
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/generative-model/pytorch/" itemprop="url" rel="index"><span itemprop="name">pytorch</span></a></span>
-
-                
-                
-                  ， 
-                
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/generative-model/pytorch/paper-implement/" itemprop="url" rel="index"><span itemprop="name">paper implement</span></a></span>
-
-                
-                
-                  ， 
-                
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/generative-model/pytorch/paper-implement/sequence-model/" itemprop="url" rel="index"><span itemprop="name">sequence model</span></a></span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/paper/" itemprop="url" rel="index"><span itemprop="name">paper</span></a></span>
 
                 
                 
@@ -1847,7 +1907,7 @@
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">8</span>
+                    <span class="site-state-item-count">9</span>
                     <span class="site-state-item-name">文章</span>
                   </a>
                 </div>
@@ -1876,13 +1936,7 @@
                     
                       
                     
-                      
-                    
-                      
-                    
-                      
-                    
-                    <span class="site-state-item-count">11</span>
+                    <span class="site-state-item-count">5</span>
                     <span class="site-state-item-name">分類</span>
                   </a>
                 </div>
@@ -1899,7 +1953,13 @@
                     
                       
                     
-                    <span class="site-state-item-count">0</span>
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">4</span>
                     <span class="site-state-item-name">標籤</span>
                   </a>
                 </div>
@@ -2104,6 +2164,8 @@
 
   
   
+    
+      
     
       
     

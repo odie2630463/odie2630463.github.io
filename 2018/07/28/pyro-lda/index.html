@@ -100,13 +100,14 @@
 
 
   <meta name="description" content="Pyro 是一個由Uber AI Lab所開發的Probabilistic Programming Language(PPL)，用程式語言來描述具有隨機性的程序或是過程；從另一個角度來看，圖機率模型(PGM)是用圖的方式來描述一個機率過程，而PPL則是可以讓你用上程式語言來描述，條件、迴圈等等都可以用上，能描述更為複雜的機率過程 PPL也存在好一陣子了，像是MIT基於LISP所開發的Church、">
+<meta name="keywords" content="generative model,variational inference">
 <meta property="og:type" content="article">
 <meta property="og:title" content="LDA model use Pyro">
-<meta property="og:url" content="http://yoursite.com/2018/07/28/pyro-lda/index.html">
+<meta property="og:url" content="https://odie2630463.github.io/2018/07/28/pyro-lda/index.html">
 <meta property="og:site_name" content="odie&#39;s whisper">
 <meta property="og:description" content="Pyro 是一個由Uber AI Lab所開發的Probabilistic Programming Language(PPL)，用程式語言來描述具有隨機性的程序或是過程；從另一個角度來看，圖機率模型(PGM)是用圖的方式來描述一個機率過程，而PPL則是可以讓你用上程式語言來描述，條件、迴圈等等都可以用上，能描述更為複雜的機率過程 PPL也存在好一陣子了，像是MIT基於LISP所開發的Church、">
 <meta property="og:locale" content="zh-TW">
-<meta property="og:updated_time" content="2018-07-28T13:21:44.347Z">
+<meta property="og:updated_time" content="2019-10-23T15:53:27.956Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="LDA model use Pyro">
 <meta name="twitter:description" content="Pyro 是一個由Uber AI Lab所開發的Probabilistic Programming Language(PPL)，用程式語言來描述具有隨機性的程序或是過程；從另一個角度來看，圖機率模型(PGM)是用圖的方式來描述一個機率過程，而PPL則是可以讓你用上程式語言來描述，條件、迴圈等等都可以用上，能描述更為複雜的機率過程 PPL也存在好一陣子了，像是MIT基於LISP所開發的Church、">
@@ -116,7 +117,7 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2018/07/28/pyro-lda/"/>
+  <link rel="canonical" href="https://odie2630463.github.io/2018/07/28/pyro-lda/"/>
 
 
 
@@ -231,6 +232,15 @@
         
         
           
+  <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />標籤</a>
+</li>
+
+      
+        
+        
+          
   <li class="menu-item menu-item-categories">
     <a href="/categories/" rel="section">
       <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分類</a>
@@ -255,6 +265,9 @@
     
 
     
+    
+      
+      
     
       
       
@@ -312,7 +325,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/07/28/pyro-lda/">
+    <link itemprop="mainEntityOfPage" href="https://odie2630463.github.io/2018/07/28/pyro-lda/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="odie">
@@ -362,21 +375,7 @@
                 <span class="post-meta-item-text">分類於</span>
               
               
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/generative-model/" itemprop="url" rel="index"><span itemprop="name">generative model</span></a></span>
-
-                
-                
-                  ， 
-                
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/generative-model/pyro/" itemprop="url" rel="index"><span itemprop="name">pyro</span></a></span>
-
-                
-                
-                  ， 
-                
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/generative-model/pyro/probabilistic-graphical-model/" itemprop="url" rel="index"><span itemprop="name">probabilistic graphical model</span></a></span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/probabilistic-programming/" itemprop="url" rel="index"><span itemprop="name">probabilistic programming</span></a></span>
 
                 
                 
@@ -419,7 +418,7 @@
 <li>Minimal: Pyro is implemented with a small core of powerful, composable abstractions.</li>
 <li>Flexible: Pyro aims for automation when you want it, control when you need it. </li>
 </ul>
-<p>基於Pytorch開發，所以深度學習那些當然都可以整合一起用上，並且語法非常的Pythonic，也用上了很多高階特性，例如context manager，機率推斷演算法主要提供Stochastic Variational Inference(SVI)，可以用上SGD來訓練模型，整體上的確以最小需要、高彈性、透明為主要設計，相較於基於Tensorflow的<a href="http://edwardlib.org" target="_blank" rel="noopener">Edward</a>、<a href="https://github.com/tensorflow/probability" target="_blank" rel="noopener">Tensorflow_probability</a>，提供不只VI相關演算法，還有很多MCMC相關的，或是<a href="https://odie2630463.github.io/2018/07/11/flow/" target="_blank" rel="noopener">前一篇提到的NF</a>，更多工具可以使用，但也相對不是那麼容易上手；不過結合更多機率特性是趨勢之一，這兩個主流的Deep PPL都很值得關注與學習。</p>
+<p>基於Pytorch開發，所以深度學習那些當然都可以整合一起用上，並且語法非常的Pythonic，也用上了很多高階特性，例如context manager，機率推斷演算法主要提供Stochastic Variational Inference(SVI)，可以用上SGD來訓練模型，整體上的確以最小需要、高彈性、透明為主要設計，相較於基於Tensorflow的<a href="http://edwardlib.org" target="_blank" rel="noopener">Edward</a>、<a href="https://github.com/tensorflow/probability" target="_blank" rel="noopener">Tensorflow_probability</a>，提供不只VI相關演算法，還有很多MCMC相關的，或是<a href="https://odie2630463.github.io/2018/07/11/flow/">前一篇提到的NF</a>，更多工具可以使用，但也相對不是那麼容易上手；不過結合更多機率特性是趨勢之一，這兩個主流的Deep PPL都很值得關注與學習。</p>
 <h2 id="Implement-LDA-model"><a href="#Implement-LDA-model" class="headerlink" title="Implement LDA model"></a>Implement LDA model</h2><p>以上介紹了Pyro，接著就來實作Latent Dirichlet allocation(LDA)模型，常用文本主題分析，且為圖機率模型的經典模型！接著用Pyro與SVI來實作並求解參數，本文並不會從頭介紹Pyro基礎，建議可以先看<a href="http://pyro.ai/examples/index.html" target="_blank" rel="noopener">官網教學</a>，程式碼我放在<a href="https://colab.research.google.com/drive/11NIOR7Ix2pxkQPw_m0zZaai9Fi935-l7" target="_blank" rel="noopener">Colab</a>，大家可以直接跑看看</p>
 <h4 id="Model"><a href="#Model" class="headerlink" title="Model"></a>Model</h4><p>我們就直接從模型看起，先來看一下LDA式子長怎樣，$\phi$指每個字對應個主題的機率分佈，$\theta_d$指每一文件對應主題的機率分佈，$z$指每個字被分配到的主題，式子可以寫成：</p>
 <p>$$<br>p(\phi,\theta,z,w) = p(\phi) \prod_{d=1}^D \prod_{n=1}^{N_d} p(z_{dn}|\theta_d)p(w_{dn}|z_{dn},\phi)<br>$$</p>
@@ -455,6 +454,14 @@
     
 
     <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/generative-model/" rel="tag"># generative model</a>
+          
+            <a href="/tags/variational-inference/" rel="tag"># variational inference</a>
+          
+        </div>
       
 
       
@@ -551,7 +558,7 @@
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">8</span>
+                    <span class="site-state-item-count">9</span>
                     <span class="site-state-item-name">文章</span>
                   </a>
                 </div>
@@ -580,13 +587,7 @@
                     
                       
                     
-                      
-                    
-                      
-                    
-                      
-                    
-                    <span class="site-state-item-count">11</span>
+                    <span class="site-state-item-count">5</span>
                     <span class="site-state-item-name">分類</span>
                   </a>
                 </div>
@@ -603,7 +604,13 @@
                     
                       
                     
-                    <span class="site-state-item-count">0</span>
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">4</span>
                     <span class="site-state-item-name">標籤</span>
                   </a>
                 </div>

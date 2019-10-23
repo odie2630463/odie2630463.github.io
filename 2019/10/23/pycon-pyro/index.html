@@ -99,20 +99,25 @@
 
 
 
-  <meta property="og:type" content="website">
-<meta property="og:title" content="odie&#39;s whisper">
-<meta property="og:url" content="http://yoursite.com/categories/generative-model/probabilistic-graphical-model/index.html">
+  <meta name="description" content="今年在 PyconTW 給的演講，主題是關於機率程式語言與Pyro，機器學習核心問題其中之一是如何建立機率模型，我們想要足夠複雜但又可以推論、訓練的模型，且方法要夠通用兼顧效率；如果有一個生成模型，我們能不斷的從模型抽樣產生樣本，我們就會知道說模型的哪些「設定或是輸入」會產出好的或是跟真實資料相似的樣本，我們可以透過抽樣來推估給定真實資料下，一些隱藏變量或是我們想估計的變數 用機率程式語言來描述一">
+<meta name="keywords" content="generative model,talk">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Introduction to Deep  Probabilistic Programming with Pyro">
+<meta property="og:url" content="https://odie2630463.github.io/2019/10/23/pycon-pyro/index.html">
 <meta property="og:site_name" content="odie&#39;s whisper">
+<meta property="og:description" content="今年在 PyconTW 給的演講，主題是關於機率程式語言與Pyro，機器學習核心問題其中之一是如何建立機率模型，我們想要足夠複雜但又可以推論、訓練的模型，且方法要夠通用兼顧效率；如果有一個生成模型，我們能不斷的從模型抽樣產生樣本，我們就會知道說模型的哪些「設定或是輸入」會產出好的或是跟真實資料相似的樣本，我們可以透過抽樣來推估給定真實資料下，一些隱藏變量或是我們想估計的變數 用機率程式語言來描述一">
 <meta property="og:locale" content="zh-TW">
+<meta property="og:updated_time" content="2019-10-23T15:53:25.325Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="odie&#39;s whisper">
+<meta name="twitter:title" content="Introduction to Deep  Probabilistic Programming with Pyro">
+<meta name="twitter:description" content="今年在 PyconTW 給的演講，主題是關於機率程式語言與Pyro，機器學習核心問題其中之一是如何建立機率模型，我們想要足夠複雜但又可以推論、訓練的模型，且方法要夠通用兼顧效率；如果有一個生成模型，我們能不斷的從模型抽樣產生樣本，我們就會知道說模型的哪些「設定或是輸入」會產出好的或是跟真實資料相似的樣本，我們可以透過抽樣來推估給定真實資料下，一些隱藏變量或是我們想估計的變數 用機率程式語言來描述一">
 
 
 
 
 
 
-  <link rel="canonical" href="http://yoursite.com/categories/generative-model/probabilistic-graphical-model/"/>
+  <link rel="canonical" href="https://odie2630463.github.io/2019/10/23/pycon-pyro/"/>
 
 
 
@@ -122,7 +127,7 @@
   };
 </script>
 
-  <title>分類: probabilistic graphical model | odie's whisper</title>
+  <title>Introduction to Deep  Probabilistic Programming with Pyro | odie's whisper</title>
   
 
 
@@ -169,7 +174,7 @@
     
   
 
-  <div class="container sidebar-position-left ">
+  <div class="container sidebar-position-left page-post-detail">
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
@@ -227,6 +232,15 @@
         
         
           
+  <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />標籤</a>
+</li>
+
+      
+        
+        
+          
   <li class="menu-item menu-item-categories">
     <a href="/categories/" rel="section">
       <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分類</a>
@@ -251,6 +265,9 @@
     
 
     
+    
+      
+      
     
       
       
@@ -292,115 +309,183 @@
           <div id="content" class="content">
             
 
+  <div id="posts" class="posts-expand">
+    
+
+  
+
   
   
   
-  <div class="post-block category">
 
-    <div id="posts" class="posts-collapse">
-      <div class="collection-title">
-        <h1>probabilistic graphical model<small>分類</small>
-        </h1>
-      </div>
-
-      
-        
+  
 
   <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://odie2630463.github.io/2019/10/23/pycon-pyro/">
 
-      <h2 class="post-title">
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="odie">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="odie's whisper">
+    </span>
+
+    
+      <header class="post-header">
+
         
-            <a class="post-title-link" href="/2019/01/16/free-energy-1/" itemprop="url">
-              
-                <span itemprop="name">漫談 Free energy principle (ㄧ)</span>
-              
-            </a>
         
-      </h2>
+          <h1 class="post-title" itemprop="name headline">Introduction to Deep  Probabilistic Programming with Pyro</h1>
+        
 
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated"
-              datetime="2019-01-16T17:15:18+08:00"
-              content="2019-01-16" >
-          01-16
-        </time>
-      </div>
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">發表於</span>
+              
+              <time title="創建於" itemprop="dateCreated datePublished" datetime="2019-10-23T23:51:50+08:00">2019-10-23</time>
+            
 
-    </header>
-  </article>
+            
+            
 
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分類於</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/probabilistic-programming/" itemprop="url" rel="index"><span itemprop="name">probabilistic programming</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
 
       
-        
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h2 class="post-title">
-        
-            <a class="post-title-link" href="/2018/09/20/vi-2/" itemprop="url">
-              
-                <span itemprop="name">漫談 Variational Inference (二)</span>
-              
-            </a>
-        
-      </h2>
-
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated"
-              datetime="2018-09-20T17:21:57+08:00"
-              content="2018-09-20" >
-          09-20
-        </time>
-      </div>
-
-    </header>
-  </article>
-
+      
 
       
-        
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h2 class="post-title">
-        
-            <a class="post-title-link" href="/2018/08/21/vi-1/" itemprop="url">
-              
-                <span itemprop="name">漫談 Variational Inference (一)</span>
-              
-            </a>
-        
-      </h2>
-
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated"
-              datetime="2018-08-21T16:13:27+08:00"
-              content="2018-08-21" >
-          08-21
-        </time>
-      </div>
-
-    </header>
-  </article>
-
+        <p>今年在 PyconTW 給的演講，主題是關於機率程式語言與Pyro，機器學習核心問題其中之一是如何建立機率模型，我們想要足夠複雜但又可以推論、訓練的模型，且方法要夠通用兼顧效率；如果有一個生成模型，我們能不斷的從模型抽樣產生樣本，我們就會知道說模型的哪些「設定或是輸入」會產出好的或是跟真實資料相似的樣本，我們可以透過抽樣來推估給定真實資料下，一些隱藏變量或是我們想估計的變數</p>
+<p>用機率程式語言來描述一個生成模型或是資料產生的過程，我們可以很容易得去抽樣或是計算機率值，甚至不用去寫複雜的推論過程，機率語言很自然的提供了相對應的推論方法，這些設計都是嵌入在程式語言的設計中</p>
+<p>機率程式語言除了建立生成模型，本質上它還是一個通用的程式語言，我們依然可以用它來寫各種複雜程式，例如下西洋棋或是影像渲染等等，這大幅擴展了生成模型所能定義的事，我們不只能去生成影像、語音等等資料，更可以去生成一連串的動作、或是經過渲染的影像，但這些因為都是用機率程式語言所寫的，完全都可以去推估程式中的變量，模型也當然能夠生成新的資料用於預測；認知科學家研究人類如何做決策的過程，常用機率程式語言去假設人類做決策的生成模型，並且給一些人類決策過程的資料，透過這樣來研究所假設的模型是否合理，除此之外，模型在輸出每次的決策同時都可以給出相對應的機率值，與程式內部的變量值，我們可以知道模型為何做這樣的決策，或是如何犯錯的</p>
+<p>近年來結合深度學習與自動微分工具，有不少機率程式語言的研究相繼提出，雖然還尚未有殺手級的應用，但是我想這個領域一定會提供人工智慧領域發展很多的新觀點</p>
+<iframe src="https://docs.google.com/presentation/d/e/2PACX-1vTb6LflvI1Q5kS5i3ZEuKQjwuKUTB5VhobSoQIzBtmt2FYRbySQmMpomlJzdS5-tkHEpwncroOT_U6t/embed?start=false&loop=false&delayms=3000" frameborder="0" width="960" height="569" allowfullscreen="true" mozallowfullscreen="true" webkitallowfullscreen="true"></iframe>
 
       
     </div>
 
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/generative-model/" rel="tag"># generative model</a>
+          
+            <a href="/tags/talk/" rel="tag"># talk</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/01/16/free-energy-1/" rel="next" title="漫談 Free energy principle (ㄧ)">
+                <i class="fa fa-chevron-left"></i> 漫談 Free energy principle (ㄧ)
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
   </div>
   
   
   
+  </article>
 
-  
 
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
 
 
           </div>
           
+
+  
+
+
 
         </div>
         
@@ -437,7 +522,7 @@
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">8</span>
+                    <span class="site-state-item-count">9</span>
                     <span class="site-state-item-name">文章</span>
                   </a>
                 </div>
@@ -466,13 +551,7 @@
                     
                       
                     
-                      
-                    
-                      
-                    
-                      
-                    
-                    <span class="site-state-item-count">11</span>
+                    <span class="site-state-item-count">5</span>
                     <span class="site-state-item-name">分類</span>
                   </a>
                 </div>
@@ -489,7 +568,13 @@
                     
                       
                     
-                    <span class="site-state-item-count">0</span>
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">4</span>
                     <span class="site-state-item-name">標籤</span>
                   </a>
                 </div>
@@ -642,6 +727,10 @@
   
 
   
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.0.6"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.0.6"></script>
+
+
 
   
 

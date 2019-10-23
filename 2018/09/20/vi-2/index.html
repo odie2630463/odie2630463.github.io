@@ -100,26 +100,27 @@
 
 
   <meta name="description" content="本篇是漫談 Variational Inference 系列第二篇，前一篇介紹了隱變量模型並推導出了ELBO，而我們知道只要有辦法最大化ELBO，就可以去近似$\log_{\theta}p(x)$，但具體而言我們該如何計算呢？ 今天我們來細談一下Auto-encoding variational Bayes這篇論文，基於最大化ELBO，引入深度神經網路、低變異的梯度訓練方法提出 Variation">
+<meta name="keywords" content="generative model,variational inference">
 <meta property="og:type" content="article">
 <meta property="og:title" content="漫談 Variational Inference (二)">
-<meta property="og:url" content="http://yoursite.com/2018/09/20/vi-2/index.html">
+<meta property="og:url" content="https://odie2630463.github.io/2018/09/20/vi-2/index.html">
 <meta property="og:site_name" content="odie&#39;s whisper">
 <meta property="og:description" content="本篇是漫談 Variational Inference 系列第二篇，前一篇介紹了隱變量模型並推導出了ELBO，而我們知道只要有辦法最大化ELBO，就可以去近似$\log_{\theta}p(x)$，但具體而言我們該如何計算呢？ 今天我們來細談一下Auto-encoding variational Bayes這篇論文，基於最大化ELBO，引入深度神經網路、低變異的梯度訓練方法提出 Variation">
 <meta property="og:locale" content="zh-TW">
-<meta property="og:image" content="http://yoursite.com/media/C8CD4EAE-330B-4369-BB79-BA974B69EA45.png">
-<meta property="og:image" content="http://yoursite.com/media/7A9ABDDC-52AA-4946-961C-F2CE320DAA8F.png">
-<meta property="og:updated_time" content="2018-09-20T09:55:08.608Z">
+<meta property="og:image" content="https://odie2630463.github.io/media/C8CD4EAE-330B-4369-BB79-BA974B69EA45.png">
+<meta property="og:image" content="https://odie2630463.github.io/media/7A9ABDDC-52AA-4946-961C-F2CE320DAA8F.png">
+<meta property="og:updated_time" content="2019-10-23T15:51:01.771Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="漫談 Variational Inference (二)">
 <meta name="twitter:description" content="本篇是漫談 Variational Inference 系列第二篇，前一篇介紹了隱變量模型並推導出了ELBO，而我們知道只要有辦法最大化ELBO，就可以去近似$\log_{\theta}p(x)$，但具體而言我們該如何計算呢？ 今天我們來細談一下Auto-encoding variational Bayes這篇論文，基於最大化ELBO，引入深度神經網路、低變異的梯度訓練方法提出 Variation">
-<meta name="twitter:image" content="http://yoursite.com/media/C8CD4EAE-330B-4369-BB79-BA974B69EA45.png">
+<meta name="twitter:image" content="https://odie2630463.github.io/media/C8CD4EAE-330B-4369-BB79-BA974B69EA45.png">
 
 
 
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2018/09/20/vi-2/"/>
+  <link rel="canonical" href="https://odie2630463.github.io/2018/09/20/vi-2/"/>
 
 
 
@@ -234,6 +235,15 @@
         
         
           
+  <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />標籤</a>
+</li>
+
+      
+        
+        
+          
   <li class="menu-item menu-item-categories">
     <a href="/categories/" rel="section">
       <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分類</a>
@@ -258,6 +268,9 @@
     
 
     
+    
+      
+      
     
       
       
@@ -315,7 +328,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/09/20/vi-2/">
+    <link itemprop="mainEntityOfPage" href="https://odie2630463.github.io/2018/09/20/vi-2/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="odie">
@@ -365,14 +378,7 @@
                 <span class="post-meta-item-text">分類於</span>
               
               
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/generative-model/" itemprop="url" rel="index"><span itemprop="name">generative model</span></a></span>
-
-                
-                
-                  ， 
-                
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/generative-model/probabilistic-graphical-model/" itemprop="url" rel="index"><span itemprop="name">probabilistic graphical model</span></a></span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/variational-inference/" itemprop="url" rel="index"><span itemprop="name">variational inference</span></a></span>
 
                 
                 
@@ -406,7 +412,7 @@
       
 
       
-        <p>本篇是漫談 Variational Inference 系列第二篇，<a href="https://odie2630463.github.io/2018/08/21/vi-1/" target="_blank" rel="noopener">前一篇</a>介紹了隱變量模型並推導出了ELBO，而我們知道只要有辦法最大化ELBO，就可以去近似$\log_{\theta}p(x)$，但具體而言我們該如何計算呢？</p>
+        <p>本篇是漫談 Variational Inference 系列第二篇，<a href="https://odie2630463.github.io/2018/08/21/vi-1/">前一篇</a>介紹了隱變量模型並推導出了ELBO，而我們知道只要有辦法最大化ELBO，就可以去近似$\log_{\theta}p(x)$，但具體而言我們該如何計算呢？</p>
 <p>今天我們來細談一下<a href="https://arxiv.org/abs/1312.6114" target="_blank" rel="noopener">Auto-encoding variational Bayes</a>這篇論文，基於最大化ELBO，引入深度神經網路、低變異的梯度訓練方法提出 <strong>Variational Autoencoder(VAE)</strong>，把VI方法應用推展至複雜真實資料上，並且有大規模訓練的優化方法，是一篇非常重要且值得一讀的論文！</p>
 <h2 id="Auto-encoding-variational-Bayes"><a href="#Auto-encoding-variational-Bayes" class="headerlink" title="Auto-encoding variational Bayes"></a>Auto-encoding variational Bayes</h2><h3 id="Amortized-inference"><a href="#Amortized-inference" class="headerlink" title="Amortized inference"></a>Amortized inference</h3><p>隱變量模型假設下，每個訓練資料中的觀測變量$x^i$，都對應各自隱變量分佈$z^i \sim q_{\phi_i}(z)$，$z^i$我們稱為<strong>局部變數</strong>，而$\phi_i$為<strong>局部變數的參數</strong>；但是當有一個不在訓練資料的新觀測變量$x^j$時，我們沒有對應的隱變量$z^j$的分佈呀！而且訓練過程中需要儲存大量的局部變量，訓練資料集中每一個觀測資料都要分配一組參數來訓練，用這種方法大幅限制了隱變量模型的應用範圍</p>
 <p>局部變量$(x^i ,z^i \sim q_{\phi_i}(z))$是個瓶頸，我們引入一個神經網路來直接從觀測變量去預測出隱變量$(x^i ,z^i \sim q_{\phi}(z|x))$，這個神經網路通常也稱為Inference network或是Encoder，此時$\phi$不在是局部變數的參數了，對於計算每個隱變量$z$都是用同樣一組$\phi$，所以是變成<strong>全局變量參數</strong>，再也不用去儲存每個隱變量，而是可以透過觀測變量來預測，就算對於新的資料也一樣，這個技巧稱為Amortized inference</p>
@@ -454,6 +460,14 @@
     
 
     <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/generative-model/" rel="tag"># generative model</a>
+          
+            <a href="/tags/variational-inference/" rel="tag"># variational inference</a>
+          
+        </div>
       
 
       
@@ -550,7 +564,7 @@
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">8</span>
+                    <span class="site-state-item-count">9</span>
                     <span class="site-state-item-name">文章</span>
                   </a>
                 </div>
@@ -579,13 +593,7 @@
                     
                       
                     
-                      
-                    
-                      
-                    
-                      
-                    
-                    <span class="site-state-item-count">11</span>
+                    <span class="site-state-item-count">5</span>
                     <span class="site-state-item-name">分類</span>
                   </a>
                 </div>
@@ -602,7 +610,13 @@
                     
                       
                     
-                    <span class="site-state-item-count">0</span>
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">4</span>
                     <span class="site-state-item-name">標籤</span>
                   </a>
                 </div>

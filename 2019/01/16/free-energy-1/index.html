@@ -100,26 +100,27 @@
 
 
   <meta name="description" content="之前漫談了 Variational Inference ，基本上從機器學習與機率分佈近似的角度出發來談了理論與應用，我們旨在最小化ELBO，來最大化對於資料的解釋，而且從中學習到隱變量，且隱變量還能捕捉到資料潛在資訊，這樣的演算法非常精緻優雅，是我個人非常欣賞的模型；我們的大腦，或是更廣泛來說，一個需要與環境交互的生物或自組織系統，隨時都在對抗失序(resisting a tendency to">
+<meta name="keywords" content="generative model,variational inference">
 <meta property="og:type" content="article">
 <meta property="og:title" content="漫談 Free energy principle (ㄧ)">
-<meta property="og:url" content="http://yoursite.com/2019/01/16/free-energy-1/index.html">
+<meta property="og:url" content="https://odie2630463.github.io/2019/01/16/free-energy-1/index.html">
 <meta property="og:site_name" content="odie&#39;s whisper">
 <meta property="og:description" content="之前漫談了 Variational Inference ，基本上從機器學習與機率分佈近似的角度出發來談了理論與應用，我們旨在最小化ELBO，來最大化對於資料的解釋，而且從中學習到隱變量，且隱變量還能捕捉到資料潛在資訊，這樣的演算法非常精緻優雅，是我個人非常欣賞的模型；我們的大腦，或是更廣泛來說，一個需要與環境交互的生物或自組織系統，隨時都在對抗失序(resisting a tendency to">
 <meta property="og:locale" content="zh-TW">
-<meta property="og:image" content="http://yoursite.com/media/15476205423036.jpg">
-<meta property="og:image" content="http://yoursite.com/media/15476226757989.jpg">
-<meta property="og:updated_time" content="2019-01-16T09:15:18.468Z">
+<meta property="og:image" content="https://odie2630463.github.io/media/15476205423036.jpg">
+<meta property="og:image" content="https://odie2630463.github.io/media/15476226757989.jpg">
+<meta property="og:updated_time" content="2019-10-23T15:51:07.508Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="漫談 Free energy principle (ㄧ)">
 <meta name="twitter:description" content="之前漫談了 Variational Inference ，基本上從機器學習與機率分佈近似的角度出發來談了理論與應用，我們旨在最小化ELBO，來最大化對於資料的解釋，而且從中學習到隱變量，且隱變量還能捕捉到資料潛在資訊，這樣的演算法非常精緻優雅，是我個人非常欣賞的模型；我們的大腦，或是更廣泛來說，一個需要與環境交互的生物或自組織系統，隨時都在對抗失序(resisting a tendency to">
-<meta name="twitter:image" content="http://yoursite.com/media/15476205423036.jpg">
+<meta name="twitter:image" content="https://odie2630463.github.io/media/15476205423036.jpg">
 
 
 
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2019/01/16/free-energy-1/"/>
+  <link rel="canonical" href="https://odie2630463.github.io/2019/01/16/free-energy-1/"/>
 
 
 
@@ -234,6 +235,15 @@
         
         
           
+  <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />標籤</a>
+</li>
+
+      
+        
+        
+          
   <li class="menu-item menu-item-categories">
     <a href="/categories/" rel="section">
       <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分類</a>
@@ -258,6 +268,9 @@
     
 
     
+    
+      
+      
     
       
       
@@ -315,7 +328,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/01/16/free-energy-1/">
+    <link itemprop="mainEntityOfPage" href="https://odie2630463.github.io/2019/01/16/free-energy-1/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="odie">
@@ -365,21 +378,7 @@
                 <span class="post-meta-item-text">分類於</span>
               
               
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/generative-model/" itemprop="url" rel="index"><span itemprop="name">generative model</span></a></span>
-
-                
-                
-                  ， 
-                
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/generative-model/probabilistic-graphical-model/" itemprop="url" rel="index"><span itemprop="name">probabilistic graphical model</span></a></span>
-
-                
-                
-                  ， 
-                
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/generative-model/probabilistic-graphical-model/free-energy/" itemprop="url" rel="index"><span itemprop="name">free energy</span></a></span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/free-energy/" itemprop="url" rel="index"><span itemprop="name">free energy</span></a></span>
 
                 
                 
@@ -469,6 +468,14 @@
 
     <footer class="post-footer">
       
+        <div class="post-tags">
+          
+            <a href="/tags/generative-model/" rel="tag"># generative model</a>
+          
+            <a href="/tags/variational-inference/" rel="tag"># variational inference</a>
+          
+        </div>
+      
 
       
       
@@ -487,6 +494,10 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/10/23/pycon-pyro/" rel="prev" title="Introduction to Deep  Probabilistic Programming with Pyro">
+                Introduction to Deep  Probabilistic Programming with Pyro <i class="fa fa-chevron-right"></i>
+              </a>
             
           </div>
         </div>
@@ -560,7 +571,7 @@
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">8</span>
+                    <span class="site-state-item-count">9</span>
                     <span class="site-state-item-name">文章</span>
                   </a>
                 </div>
@@ -589,13 +600,7 @@
                     
                       
                     
-                      
-                    
-                      
-                    
-                      
-                    
-                    <span class="site-state-item-count">11</span>
+                    <span class="site-state-item-count">5</span>
                     <span class="site-state-item-name">分類</span>
                   </a>
                 </div>
@@ -612,7 +617,13 @@
                     
                       
                     
-                    <span class="site-state-item-count">0</span>
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">4</span>
                     <span class="site-state-item-name">標籤</span>
                   </a>
                 </div>
