@@ -99,28 +99,27 @@
 
 
 
-  <meta name="description" content="本篇是漫談 Variational Inference 系列第二篇，前一篇介紹了隱變量模型並推導出了ELBO，而我們知道只要有辦法最大化ELBO，就可以去近似$\log_{\theta}p(x)$，但具體而言我們該如何計算呢？ 今天我們來細談一下Auto-encoding variational Bayes這篇論文，基於最大化ELBO，引入深度神經網路、低變異的梯度訓練方法提出 Variation">
+  <meta name="description" content="沒想到一晃眼就是一年了，但自己挖的坑還是要填完，希望又能開始恢復寫部落格的習慣，也把自己關注的研究陸續整理上來，期待能獲得一些新想法，要訓練自己能用多個角度去看同一個問題，能把多個問題歸納成同一個框架 本篇是漫談 Variational Inference 系列第三篇，第二篇介紹了VAE，把深度學習與VI做個結合，也引領出了很多後續的研究；而本篇來談談VI方法跟一些其他生成模型的關係，用一致的框架">
 <meta name="keywords" content="variational inference,generative model">
 <meta property="og:type" content="article">
-<meta property="og:title" content="漫談 Variational Inference (二)">
-<meta property="og:url" content="https://odie2630463.github.io/2018/09/20/vi-2/index.html">
+<meta property="og:title" content="漫談 Variational Inference (三)">
+<meta property="og:url" content="https://odie2630463.github.io/2019/12/03/vi-3/index.html">
 <meta property="og:site_name" content="odie&#39;s whisper">
-<meta property="og:description" content="本篇是漫談 Variational Inference 系列第二篇，前一篇介紹了隱變量模型並推導出了ELBO，而我們知道只要有辦法最大化ELBO，就可以去近似$\log_{\theta}p(x)$，但具體而言我們該如何計算呢？ 今天我們來細談一下Auto-encoding variational Bayes這篇論文，基於最大化ELBO，引入深度神經網路、低變異的梯度訓練方法提出 Variation">
+<meta property="og:description" content="沒想到一晃眼就是一年了，但自己挖的坑還是要填完，希望又能開始恢復寫部落格的習慣，也把自己關注的研究陸續整理上來，期待能獲得一些新想法，要訓練自己能用多個角度去看同一個問題，能把多個問題歸納成同一個框架 本篇是漫談 Variational Inference 系列第三篇，第二篇介紹了VAE，把深度學習與VI做個結合，也引領出了很多後續的研究；而本篇來談談VI方法跟一些其他生成模型的關係，用一致的框架">
 <meta property="og:locale" content="zh-TW">
-<meta property="og:image" content="https://odie2630463.github.io/media/C8CD4EAE-330B-4369-BB79-BA974B69EA45.png">
-<meta property="og:image" content="https://odie2630463.github.io/media/7A9ABDDC-52AA-4946-961C-F2CE320DAA8F.png">
-<meta property="og:updated_time" content="2019-12-03T14:06:28.993Z">
+<meta property="og:image" content="https://odie2630463.github.io/media/15753578381818.jpg">
+<meta property="og:updated_time" content="2019-12-03T14:04:12.397Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="漫談 Variational Inference (二)">
-<meta name="twitter:description" content="本篇是漫談 Variational Inference 系列第二篇，前一篇介紹了隱變量模型並推導出了ELBO，而我們知道只要有辦法最大化ELBO，就可以去近似$\log_{\theta}p(x)$，但具體而言我們該如何計算呢？ 今天我們來細談一下Auto-encoding variational Bayes這篇論文，基於最大化ELBO，引入深度神經網路、低變異的梯度訓練方法提出 Variation">
-<meta name="twitter:image" content="https://odie2630463.github.io/media/C8CD4EAE-330B-4369-BB79-BA974B69EA45.png">
+<meta name="twitter:title" content="漫談 Variational Inference (三)">
+<meta name="twitter:description" content="沒想到一晃眼就是一年了，但自己挖的坑還是要填完，希望又能開始恢復寫部落格的習慣，也把自己關注的研究陸續整理上來，期待能獲得一些新想法，要訓練自己能用多個角度去看同一個問題，能把多個問題歸納成同一個框架 本篇是漫談 Variational Inference 系列第三篇，第二篇介紹了VAE，把深度學習與VI做個結合，也引領出了很多後續的研究；而本篇來談談VI方法跟一些其他生成模型的關係，用一致的框架">
+<meta name="twitter:image" content="https://odie2630463.github.io/media/15753578381818.jpg">
 
 
 
 
 
 
-  <link rel="canonical" href="https://odie2630463.github.io/2018/09/20/vi-2/"/>
+  <link rel="canonical" href="https://odie2630463.github.io/2019/12/03/vi-3/"/>
 
 
 
@@ -130,7 +129,7 @@
   };
 </script>
 
-  <title>漫談 Variational Inference (二) | odie's whisper</title>
+  <title>漫談 Variational Inference (三) | odie's whisper</title>
   
 
 
@@ -328,7 +327,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://odie2630463.github.io/2018/09/20/vi-2/">
+    <link itemprop="mainEntityOfPage" href="https://odie2630463.github.io/2019/12/03/vi-3/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="odie">
@@ -345,7 +344,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">漫談 Variational Inference (二)</h1>
+          <h1 class="post-title" itemprop="name headline">漫談 Variational Inference (三)</h1>
         
 
         <div class="post-meta">
@@ -357,7 +356,7 @@
               
                 <span class="post-meta-item-text">發表於</span>
               
-              <time title="創建於" itemprop="dateCreated datePublished" datetime="2018-09-20T17:21:57+08:00">2018-09-20</time>
+              <time title="創建於" itemprop="dateCreated datePublished" datetime="2019-12-03T17:24:52+08:00">2019-12-03</time>
             
 
             
@@ -412,36 +411,47 @@
       
 
       
-        <p>本篇是漫談 Variational Inference 系列第二篇，<a href="https://odie2630463.github.io/2018/08/21/vi-1/">前一篇</a>介紹了隱變量模型並推導出了ELBO，而我們知道只要有辦法最大化ELBO，就可以去近似$\log_{\theta}p(x)$，但具體而言我們該如何計算呢？</p>
-<p>今天我們來細談一下<a href="https://arxiv.org/abs/1312.6114" target="_blank" rel="noopener">Auto-encoding variational Bayes</a>這篇論文，基於最大化ELBO，引入深度神經網路、低變異的梯度訓練方法提出 <strong>Variational Autoencoder(VAE)</strong>，把VI方法應用推展至複雜真實資料上，並且有大規模訓練的優化方法，是一篇非常重要且值得一讀的論文！</p>
-<h2 id="Auto-encoding-variational-Bayes"><a href="#Auto-encoding-variational-Bayes" class="headerlink" title="Auto-encoding variational Bayes"></a>Auto-encoding variational Bayes</h2><h3 id="Amortized-inference"><a href="#Amortized-inference" class="headerlink" title="Amortized inference"></a>Amortized inference</h3><p>隱變量模型假設下，每個訓練資料中的觀測變量$x^i$，都對應各自隱變量分佈$z^i \sim q_{\phi_i}(z)$，$z^i$我們稱為<strong>局部變數</strong>，而$\phi_i$為<strong>局部變數的參數</strong>；但是當有一個不在訓練資料的新觀測變量$x^j$時，我們沒有對應的隱變量$z^j$的分佈呀！而且訓練過程中需要儲存大量的局部變量，訓練資料集中每一個觀測資料都要分配一組參數來訓練，用這種方法大幅限制了隱變量模型的應用範圍</p>
-<p>局部變量$(x^i ,z^i \sim q_{\phi_i}(z))$是個瓶頸，我們引入一個神經網路來直接從觀測變量去預測出隱變量$(x^i ,z^i \sim q_{\phi}(z|x))$，這個神經網路通常也稱為Inference network或是Encoder，此時$\phi$不在是局部變數的參數了，對於計算每個隱變量$z$都是用同樣一組$\phi$，所以是變成<strong>全局變量參數</strong>，再也不用去儲存每個隱變量，而是可以透過觀測變量來預測，就算對於新的資料也一樣，這個技巧稱為Amortized inference</p>
-<p>所以我們把ELBO改成<br>$$<br>\mathbb{E}_{q_{\phi}(z|x)}\left[ \log p_{\theta}(x|z) \right] - KL(q_{\phi}(z|x) || p(z))<br>$$</p>
-<p>$q_{\phi}(z|x)$把觀測變量轉換至隱變量，而$p_{\theta}(x|z)$則把隱變量轉換回觀測變量，這樣的架構組成為Encoder-Decoder自編碼器架構，故ELBO的第一項其實就是自編碼器的還原誤差，一個觀測變量經過編碼、解碼後要跟輸入盡可能相同</p>
-<p><img src="/media/C8CD4EAE-330B-4369-BB79-BA974B69EA45.png" alt="C8CD4EAE-330B-4369-BB79-BA974B69EA45"><br>圖片來源：<a href="https://www.dropbox.com/s/dl/v6ua3d9yt44vgb3/cover_and_thesis.pdf" target="_blank" rel="noopener">VARIATIONAL INFERENCE &amp; DEEP LEARNING: A NEW SYNTHESIS
-</a></p>
-<h3 id="Black-Box-Variational-Inference"><a href="#Black-Box-Variational-Inference" class="headerlink" title="Black Box Variational Inference"></a>Black Box Variational Inference</h3><p>我們已經得到一個可以求解優化的式子，並且引入神經網路至框架中，最後就要來看看到底要怎麼訓練這個模型，當然拿出最常用的方法<strong>隨機梯度下降(SGD)</strong>來試看看囉</p>
-<p>要用上SGD，要先知道$\theta,\phi$對目標函數的梯度該如何計算，首先來回憶一下目標函數：<br>$$<br>L(\phi,\theta) = \mathbb{E}_{q_{\phi}(z|x)}\left[ \log p_{\theta}(x|z) \right] - KL(q_{\phi}(z|x) || p(z))<br>$$</p>
-<p>先來看$\nabla_{\theta}L(\phi,\theta)$長什麼樣子</p>
-<p>$$<br>\nabla_{\theta} L(\phi,\theta)=  \mathbb{E}_{q_{\phi}(z|x)}\left[\nabla_{\theta} \log p_{\theta}(x|z) \right]<br>$$</p>
-<p>因為$\theta$只跟$L(\phi,\theta)$的第一項有關係，所以直接對期望內的$\log p_{\theta}(x|z)$取微分，而第二項無關$\theta$直接為0</p>
-<p>再來看$\nabla_{\phi}L(\phi,\theta)$，$\phi$同時跟兩個項都有關係，但仔細看第二項，當$q_{\phi}(z|x)$與$p(z)$都是高斯分佈時，其KL距離可以有公式解，故其對$\phi$的微分也有公式解，所以只有第一項是需要使用抽樣來近似梯度</p>
-<p>$<br>\begin{split}<br>\nabla_{\phi}L(\phi,\theta) &amp;= \nabla_{\phi} \mathbb{E}_{q_{\phi}(z|x)}\left[\log p_{\theta}(x|z) \right] + \nabla_{\phi}KL(\dots)\\<br>&amp;\approx \nabla_{\phi} \int q_{\phi}(z|x) \log p_{\theta}(x|z) dz \\<br>&amp;\approx \int \nabla_{\phi}q_{\phi}(z|x) \log p_{\theta}(x|z) dz \\<br>&amp;\approx \int q_{\phi}(z|x)\nabla_{\phi}\log q_{\phi}(z|x) \log p(x|z) dz \\<br>&amp;\approx n \log p_{\theta}(x|z)\nabla_{\phi}\log q_{\phi}(z|x) \quad z \sim q_{\phi}(z|x)<br>\end{split}<br>$</p>
-<p>推導過程中用上了一個技巧，稱為<strong>log-derivative trick</strong></p>
-<p>$$<br>\nabla_{\phi}\log q_{\phi}(z|x) = \frac{\nabla_{\phi}q_{\phi}(z|x)}{q_{\phi}(z|x)}<br>$$</p>
-<p>所以可以把$\nabla_{\phi}q_{\phi}(z|x)$代換掉，得到一個能用抽樣近似的式子。所以總結一下上述的推導，$\nabla_{\theta}L(\phi,\theta)$是在訓練我們的生成模型，也可以說是Decoder，最大化$p_{\theta}(x)=p_{\theta}(x|z)p(z)$，這裡等同於EM演算法中的M步驟；而$\nabla_{\phi}L(\phi,\theta)$含有兩個部分，一個部分是KL的微分項，有解析公式容易計算，但另一項的積分就只能靠抽樣來近似，抽樣出$z$並計算對$\phi$梯度與資料似然加總，得到沒有偏差(Unbiased)的梯度估計</p>
-<h3 id="Reparametrization-based-low-variance-gradient-estimator"><a href="#Reparametrization-based-low-variance-gradient-estimator" class="headerlink" title="Reparametrization-based low-variance gradient estimator"></a>Reparametrization-based low-variance gradient estimator</h3><p>上一小節我們得到了參數對於目標函數的梯度，但還有個問題，就是$\nabla_{\phi}L(\phi,\theta)$的變異(variance)非常的大，$n \log p_{\theta}(x|z)$有可能會是非常大的值而使得梯度過大；梯度是向量來描述要往哪邊走，才會使得目標函數最小，當變異很大時，就像是每個人都說要往不同的方向走，到最後這些方向加總在一起反而依然在原地打轉，或是有一個人說要往某個方向走非常大的一步，大過於其他人而造成梯度是有偏誤的，雖然期望上$\nabla_{\phi}L(\phi,\theta)$是個不偏估計，但是梯度變異過大使得訓練參數很困難</p>
-<p>本篇論文的另一個重點就是用上<strong>Reparametrization trick</strong>於梯度估計上，提出一個低變異的梯度估計方法，才使得VAE能穩定訓練；我們將隨機的抽樣過程 $z \sim q_{\phi}(z|x)$，改成一個決定性的計算過程，例如要從高斯分佈中抽樣，我們可以改成</p>
-<p>$$<br>z = g_{\mu, \sigma}(\epsilon) = \mu + \epsilon \cdot \sigma, \quad \epsilon \sim N(0,1)<br>$$</p>
-<p><img src="/media/7A9ABDDC-52AA-4946-961C-F2CE320DAA8F.png" alt="7A9ABDDC-52AA-4946-961C-F2CE320DAA8F"><br>圖片來源：<a href="https://www.dropbox.com/s/dl/v6ua3d9yt44vgb3/cover_and_thesis.pdf" target="_blank" rel="noopener">VARIATIONAL INFERENCE &amp; DEEP LEARNING: A NEW SYNTHESIS
-</a></p>
-<p>抽樣會使得梯度無法傳遞，就像左邊那張圖一樣，Z是一個隨機計算節點，經過Z後我們無法對之前的計算有任何資訊，自然也無法計算梯度，但改成Reparameterized form後，梯度就能順利回傳至參數上；另一點是有效減少梯度變異，原本梯度計算過程受$n \log p_{\theta}(x|z)$影響而造成變異過大，而現在我們只需要計算$\nabla_\phi f$的期望值，兩者數值大小差異很大，因此減少梯度變異使訓練過程穩定，才能用在複雜的資料集上</p>
-<p>$$<br>\nabla_\phi \mathbb{E}_{z \sim q(z\mid x)}\left[ f(x,z) \right] = \mathbb{E}_{\epsilon \sim p(\epsilon)} \left[ \nabla _{\phi} f(x,g(\epsilon, x))\right]<br>$$</p>
-<h2 id="結語"><a href="#結語" class="headerlink" title="結語"></a>結語</h2><p>本篇是漫談VI方法的第二篇，細談了VAE模型基礎，如何從ELBO對應到自編碼器架構，且$KL(q_{\phi}(z|x)||p(z))$也可以看成是一種正規化項，並提出改進的梯度估計方法，才能使得訓練模型成為可能，VAE是非常好的表徵學習方法，訓練穩定並能結合<a href="https://arxiv.org/abs/1406.5298" target="_blank" rel="noopener">半監督式學習</a>、<a href="https://arxiv.org/pdf/1803.10122.pdf" target="_blank" rel="noopener">增強學習</a>等技術，後續很多的理論改進應用延伸，值得關注與學習</p>
-<p>下一篇會討論VAE與其他生成模型的關係，最近有一些工作討論將各種生成模型放入同一個框架內討論，敬請期待</p>
+        <p>沒想到一晃眼就是一年了，但自己挖的坑還是要填完，希望又能開始恢復寫部落格的習慣，也把自己關注的研究陸續整理上來，期待能獲得一些新想法，要訓練<strong>自己能用多個角度去看同一個問題，能把多個問題歸納成同一個框架</strong></p>
+<p>本篇是漫談 Variational Inference 系列第三篇，<a href="https://odie2630463.github.io/2018/09/20/vi-2/">第二篇</a>介紹了VAE，把深度學習與VI做個結合，也引領出了很多後續的研究；而本篇來談談VI方法跟一些其他生成模型的關係，用一致的框架來討論VAE與GAN</p>
+<h2 id="New-formulation-of-VAE"><a href="#New-formulation-of-VAE" class="headerlink" title="New formulation of VAE"></a>New formulation of VAE</h2><p>首先我們有 $q_{\phi}(x,z)=q_{\phi}(z|x)p(x)$ 與 $p_{\theta}(x,z)=p_{\theta}(x|z)p(z)$，那來對上一篇VAE的ELBO計算期望值</p>
+<p>$<br>\begin{split}<br>E_x \left[<br>    E_{q_{\phi}(z|x)}<br>        \left[ \log \frac{p_{\theta}(x,z)}          {q_{\phi}(z|x)}\right]<br>        \right] &amp;= E_{q_{\phi}(x,z)}<br>        \left[ \log \frac{p_{\theta}(x,z)}          {q_{\phi}(z|x)}\right]  \\<br>          &amp;= E_{q_{\phi}(x,z)}<br>        \left[ \log \frac{p_{\theta}(x,z)}          {q_{\phi}(z|x)} + \log p(x) - \log p(x) \right] \\<br>        &amp;= E_{q_{\phi}(x,z)}<br>        \left[ \log \frac{p_{\theta}(x,z)}          {q_{\phi}(x,z)} + \log p(x) \right]  \\<br>        &amp;= KL(q_{\phi}(x,z) || p_{\theta}(x,z)) + C<br>\end{split}<br>$</p>
+<p>做了一些變換後，可以把ELBO表示成兩個聯合機率分布的KL距離，我們關注的是 $p_{\theta}(x,z)$，希望可以生成很真實的樣本，KL是個非對稱的divergence，交換位置是完全不同的效果，生成器$p_{\theta}(x,z)$於計算KL的位置會影響優化的目標，這也導致了VAE生成樣本比較模糊，但不容易<strong>Mode collapse</strong>的原因，我們接著來看GAN的形式如何，再來一起討論其異同</p>
+<h2 id="New-formulation-of-GAN"><a href="#New-formulation-of-GAN" class="headerlink" title="New formulation of GAN"></a>New formulation of GAN</h2><p>接著我們也是看看把GAN整理成類似的形式，方便後續的分析比較，$y$代表真實資料(y=1)或是生成樣本(y=0)，現在我們換個角度來看，<strong>把$x$當作隱變量而$y$視為可觀測的輸入</strong>，我們想用一個候選分佈$p_{\theta}(x|y)$，希望去優化$q_{\phi}(y|x)$這個條件機率(判別器)，GAN訓練過程我們會輸入真實資料與生成樣本給判別器去，我們現在的候選分佈應該是由$g_{\theta}(x)$生成與$p_{\text data}(x)$混合而成，所以把$p_{\theta}(x|y)$寫成：</p>
+<!--
+![](/media/15753671192197.jpg)
+-->
+
+<p>$$<br>p_{\theta}(x | y)=\left \{<br>\begin{array}{ll}<br>{p_{g_{\theta}}(x)} &amp; {y=0} \\<br>{p_{\text {data}}(x)} &amp; {y=1}<br>\end{array}\right.<br>$$</p>
+<p>優化的目標也會依訓練過程不同，兩個階段是相反的，候選分佈會隨機給真實資料或是生成樣本，訓練$q_{\phi}(y|x)$判別器分類正確</p>
+<p>$$<br>\max_{\boldsymbol{\phi}} L_{\phi} = \mathbb{E}_{p_{\theta}(\boldsymbol{x} | y)p(y)}\left[\log q_{\phi}(y | \boldsymbol{x})\right]<br>$$</p>
+<p>於訓練$g_{\theta}(x)$生成器階段，我們希望$q_{\phi}(y|x)$分類錯誤，$q_{\phi}^r(y|x)$表示相反的$y$，優化目標變成</p>
+<p>$$<br>\max_{\boldsymbol{\theta}} \mathcal{L}_{\theta}=\mathbb{E}_{p_{\theta}(\boldsymbol{x} | y) p(y)}\left[\log q_{\phi}^r(y | \boldsymbol{x})\right]<br>$$</p>
+<p>跟VAE不同，兩個階段優化的目標並不一樣，這也導致訓練更為困難，我們對訓練生成器階段做個推導整理，並且加上負號來改成最小化</p>
+<p>$<br>\begin{split}<br>E_{p(y)}\left[<br>    E_{p_{\theta}(x|y)}<br>        \left[ - \log q_{\phi}^r(y | x)\right]<br>        \right] &amp;= E_{p(y)p_{\theta}(x|y)}\left[ \log \frac{q_{\phi}^r(y | x)p_{\theta^\prime}(x)}{p_{\theta}(x|y)p(y)} - \log \frac{p_{\theta}(x|y)p(y)}{p_{\theta^\prime}(x)} \right] \\<br>        &amp;= KL(p_{\theta}(x,y) || q_{\phi}^r(x,y)) - KL(p_{\theta}(x,y) || p_{\theta^\prime}(x))<br>\end{split}<br>$</p>
+<p>推導過程中我們加入$x$的先驗分佈$p_{\theta^\prime}(x)= \sum_y p_{\theta^\prime}(y|x)p(y)$，訓練生成器時候，我們會由上一輪訓練出來的$g_{\theta^\prime}$生成樣本與真實資料去訓練新的$g_{\theta}$，所以每次先驗分佈都在改變，最後我們得到一個跟VAE類似的結果，但是$p_{\theta}(x,y)$在KL中的位置是相反的</p>
+<h2 id="Compare-VAE-and-GAN"><a href="#Compare-VAE-and-GAN" class="headerlink" title="Compare VAE and GAN"></a>Compare VAE and GAN</h2><h3 id="Mode-covering-and-collapse"><a href="#Mode-covering-and-collapse" class="headerlink" title="Mode covering and collapse"></a>Mode covering and collapse</h3><p>我們看到兩種模型的優化目標是相反的KL divergence，VAE傾向去<strong>覆蓋</strong>整個分佈，但也可能會覆蓋到一些機率密度低的位置，而使得有時候抽樣出來的影像不夠真實，所以VAE除了使用L2 loss去計算影像還原損失，本身就會導致模糊外，更深一層本質上是KL的特性所導致</p>
+<p>GAN則為相反，傾向去學好一個Mode，認真顧好一個部分就好，所以能產生非常真實的資料，但會有Mode collapse</p>
+<p><img src="/media/15753578381818.jpg" alt="-w824"></p>
+<h3 id="Different-prior"><a href="#Different-prior" class="headerlink" title="Different prior"></a>Different prior</h3><p>推導過程中我們都有引入$x$的先驗分佈，</p>
+<ul>
+<li>VAE：$p(x)$代表的是真實資料分布</li>
+<li>GAN：$p_{\theta^\prime}(x)$代表的是混和分佈</li>
+</ul>
+<h4 id="Mixed-prior"><a href="#Mixed-prior" class="headerlink" title="Mixed prior"></a>Mixed prior</h4><p>我們換從訓練判別器階段來分析，我們嘗試把$p_{\theta^\prime}(x)$當作先驗分佈引入在拆解$q_{\phi}(x,y)$時</p>
+<p>$<br>\begin{split}<br>KL(p_{\theta}(x,y) || q_{\phi}(x,y))<br>&amp;= \int p_{data}(x) \log \frac{p_{data}(x)}{q_{\phi}(x,y=1)} + \int p_{g_{\theta}}(x) \log \frac{p_{g_{\theta}}(x)}{q_{\phi}(x,y=0)} \\<br>&amp;= \int p_{data}(x) \log \frac{p_{data}(x)}{q_{\phi}(y=1|x)p_{data}(x)} + \int p_{g_{\theta}}(x) \log \frac{p_{g_{\theta}}(x)}{q_{\phi}(y=0|x)p_{g_{\theta}}(x)} \\<br>&amp;= \int p_{data}(x) \log \frac{1}{q_{\phi}(y=1|x)} + \int p_{g_{\theta}}(x) \log \frac{1}{q_{\phi}(y=0|x)} \\<br>&amp;= E_{p_{data}(x)}\left[ \log D(x) \right] + E_{p_{g_{\theta}}(x)}\left[ \log (1-D(x)) \right]<br>\end{split}<br>$</p>
+<p>我們得到跟原始GAN paper上熟悉的式子！</p>
+<h4 id="Data-prior"><a href="#Data-prior" class="headerlink" title="Data prior"></a>Data prior</h4><p><a href="https://kexue.fm/archives/5716#一般框架" target="_blank" rel="noopener">用变分推断统一理解生成模型（VAE、GAN、AAE、ALI）By 苏剑林</a>文章中引入了$p(x)$當作先驗分佈，一開始不太理解文章與原始GAN的關係，後來經過一番梳理，發現原來只是先驗分佈的不同</p>
+<p>$<br>\begin{split}<br>KL(p_{\theta}(x,y) || q_{\phi}(x,y))<br>&amp;= \int p_{data}(x) \log \frac{p_{data}(x)}{q_{\phi}(x,y=1)} + \int p_{g_{\theta}}(x) \log \frac{p_{g_{\theta}}(x)}{q_{\phi}(x,y=0)} \\<br>&amp;= \int p_{data}(x) \log \frac{p_{data}(x)}{q_{\phi}(y=1|x)p_{data}(x)} + \int p_{g_{\theta}}(x) \log \frac{p_{g_{\theta}}(x)}{q_{\phi}(y=0|x)p_{data}(x)} \\<br>&amp;= \int p_{data}(x) \log \frac{1}{q_{\phi}(y=1|x)} + \int p_{g_{\theta}}(x) \log \frac{1}{q_{\phi}(y=0|x)} + \int  p_{g_{\theta}}(x) \log \frac{p_{g_{\theta}}(x)}{p_{data}(x)} \\<br>&amp;= E_{p_{data}(x)}\left[ \log D(x) \right] +  E_{p_{g_{\theta}}(x)}\left[ \log (1-D(x)) \right] + KL(p_{g_{\theta}}(x) || p_{data}(x))<br>\end{split}<br>$</p>
+<p>實務上，我們訓練生成器都只去優化第二項，引入Data prior後，整個優化項變成</p>
+<p>$$<br>\mathbb{E}_{p_{g_{\theta}}(x)}\left[ \log (D(x)) \right] + KL(p_{g_{\theta}}(x) || p_{data}(x))<br>$$</p>
+<p>我們假設$p_{data}(x)$可以由上一輪的$p_{g_{\theta^\prime}}(x)$近似，故帶入式子</p>
+<p>$$<br>\mathbb{E}_{p_{g_{\theta}}(x)}\left[ \log (D(x)) \right] + KL(p_{g_{\theta}}(x) || p_{g_{\theta^\prime}}(x))<br>$$</p>
+<p>生成器除了要去騙過判別器外，我們還要求生成器要跟過去的自己接近，意思就是不要更新太快，這個跟一些訓練GAN常用的技巧是相同的，例如gradient penalty，在<a href="https://kexue.fm/archives/5716#正则项" target="_blank" rel="noopener">蘇大神的文章中有做實驗</a>，真的會幫助GAN的訓練與結果</p>
+<h2 id="結語"><a href="#結語" class="headerlink" title="結語"></a>結語</h2><p>這篇花了不少時間讀懂參考資料，用自己的理解再重新詮釋過，能用一致的角度來看這兩個模型，還是很有收穫的，也更能看清楚模型根本優劣，下一篇還沒想到要寫什麼，敬請期待！</p>
 <h2 id="Refernece"><a href="#Refernece" class="headerlink" title="Refernece"></a>Refernece</h2><ul>
-<li><a href="https://ermongroup.github.io/cs228-notes/extras/vae/" target="_blank" rel="noopener">CS228/The variational auto-encoder</a></li>
-<li><a href="http://www.cs.columbia.edu/~blei/papers/RanganathGerrishBlei2014.pdf" target="_blank" rel="noopener">Black Box Variational Inference</a></li>
+<li><a href="https://kexue.fm/archives/5716/" target="_blank" rel="noopener">用变分推断统一理解生成模型（VAE、GAN、AAE、ALI）By 苏剑林</a></li>
+<li><a href="https://sailinglab.github.io/pgm-spring-2019/lectures/" target="_blank" rel="noopener">Lecture #17 (Eric): Deep generative models (part 1): Overview of the theoretical basis and connections of deep generative models</a></li>
+<li><a href="https://arxiv.org/pdf/1706.00550.pdf" target="_blank" rel="noopener">On Unifying Deep Generative Models</a></li>
 </ul>
 
       
@@ -478,8 +488,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2018/09/09/transformer/" rel="next" title="實作 Attention Is All You Need">
-                <i class="fa fa-chevron-left"></i> 實作 Attention Is All You Need
+              <a href="/2019/10/23/pycon-pyro/" rel="next" title="Introduction to Deep  Probabilistic Programming with Pyro">
+                <i class="fa fa-chevron-left"></i> Introduction to Deep  Probabilistic Programming with Pyro
               </a>
             
           </div>
@@ -487,10 +497,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2019/01/16/free-energy-1/" rel="prev" title="漫談 Free energy principle (ㄧ)">
-                漫談 Free energy principle (ㄧ) <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -652,7 +658,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Auto-encoding-variational-Bayes"><span class="nav-number">1.</span> <span class="nav-text">Auto-encoding variational Bayes</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Amortized-inference"><span class="nav-number">1.1.</span> <span class="nav-text">Amortized inference</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Black-Box-Variational-Inference"><span class="nav-number">1.2.</span> <span class="nav-text">Black Box Variational Inference</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Reparametrization-based-low-variance-gradient-estimator"><span class="nav-number">1.3.</span> <span class="nav-text">Reparametrization-based low-variance gradient estimator</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#結語"><span class="nav-number">2.</span> <span class="nav-text">結語</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Refernece"><span class="nav-number">3.</span> <span class="nav-text">Refernece</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#New-formulation-of-VAE"><span class="nav-number">1.</span> <span class="nav-text">New formulation of VAE</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#New-formulation-of-GAN"><span class="nav-number">2.</span> <span class="nav-text">New formulation of GAN</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Compare-VAE-and-GAN"><span class="nav-number">3.</span> <span class="nav-text">Compare VAE and GAN</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Mode-covering-and-collapse"><span class="nav-number">3.1.</span> <span class="nav-text">Mode covering and collapse</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Different-prior"><span class="nav-number">3.2.</span> <span class="nav-text">Different prior</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Mixed-prior"><span class="nav-number">3.2.1.</span> <span class="nav-text">Mixed prior</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Data-prior"><span class="nav-number">3.2.2.</span> <span class="nav-text">Data prior</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#結語"><span class="nav-number">4.</span> <span class="nav-text">結語</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Refernece"><span class="nav-number">5.</span> <span class="nav-text">Refernece</span></a></li></ol></div>
             
 
           </div>

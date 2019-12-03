@@ -7,7 +7,7 @@
 
 <html class="theme-next muse use-motion" lang="zh-TW">
 <head>
-  <meta charset="UTF-8"/>
+  <!-- hexo-inject:begin --><!-- hexo-inject:end --><meta charset="UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=edge" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2"/>
 <meta name="theme-color" content="#222">
@@ -163,7 +163,7 @@
       .logo-line-after i { right: initial; }
     }
   </style>
-</noscript>
+</noscript><!-- hexo-inject:begin --><!-- hexo-inject:end -->
 
 </head>
 
@@ -174,7 +174,7 @@
     
   
 
-  <div class="container sidebar-position-left page-post-detail">
+  <!-- hexo-inject:begin --><!-- hexo-inject:end --><div class="container sidebar-position-left page-post-detail">
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
@@ -423,10 +423,10 @@
 </ul>
 <p>還有最近由OpenAI剛發佈的<a href="https://arxiv.org/abs/1807.03039" target="_blank" rel="noopener">Glow: Generative Flow with Invertible 1x1 Convolutions</a>，基於Normalizing Flows的一種生成模型，也能生成高品質影像與表徵解構</p>
 <h2 id="Normalizing-Flows"><a href="#Normalizing-Flows" class="headerlink" title="Normalizing Flows"></a>Normalizing Flows</h2><p>假設隨機變量$x \in \mathbb{R}^d$且$x \sim p(x)$，與一個可逆函數$f:\mathbb{R}^d \mapsto \mathbb{R}^d$，我們用$f$來轉換$p(x)$，可以得到另一個經過轉換的隨機變量$y=f(x)$與其機率分佈：</p>
-<p>$<br>p(y) = p(x) \left|<br>    \mathrm{det} \frac{<br>      \partial f^{-1}<br>    }{<br>      \partial x\<br>    }<br>  \right|<br>  = p(x) \left|<br>    \mathrm{det} \frac{<br>      \partial f<br>    }{<br>      \partial x\<br>    }<br>  \right| ^{-1} \tag{1}<br>$</p>
+<p>$<br>p(y) = p(x) \left|<br>    \mathrm{det} \frac{<br>      \partial f^{-1}<br>    }{<br>      \partial x<br>    }<br>  \right|<br>  = p(x) \left|<br>    \mathrm{det} \frac{<br>      \partial f<br>    }{<br>      \partial x<br>    }<br>  \right| ^{-1} \tag{1}<br>$</p>
 <p>行列式直觀上是面積或是體積的<strong>縮放比例</strong>，機率為機率密度函數底下的面積，轉換函數$f$可是視為一種面積的縮放變形，所以$p(y)$由轉換前$p(x)$底下的面積，乘上行列式表示的面積縮放比例，因為是計算$f^{-1}$，這個面積縮放的比例係指$y$對於$x$影響，意思是說，給$y$來反推回去$x$，並調整$p(x)$底下的面積大小，但也可以計算向前過程的行列式來取倒數。</p>
 <p>假設轉換由多個轉換函數$f_1 \dots f_K$組成，$z_k$為轉換過程的中間變量，最後得到的隨機變量$y = f_K \circ \dots\circ f_1(x)$，計算$\log p(y)$為：</p>
-<p>$<br>\log p(y) = \log p(x) - \sum_{k=1}^K<br>  \log<br>    \left|<br>    \mathrm{det} \frac{<br>      \partial f_k<br>    }{<br>      \partial \mathbf{x}_{k-1}\<br>    }<br>  \right| \tag{2}<br>$</p>
+<p>$<br>\log p(y) = \log p(x) - \sum_{k=1}^K<br>  \log<br>    \left|<br>    \mathrm{det} \frac{<br>      \partial f_k<br>    }{<br>      \partial \mathbf{x}_{k-1}<br>    }<br>  \right| \tag{2}<br>$</p>
 <p>綜上所述，NF有兩種計算，<strong>第一是向前抽樣計算</strong>，從$x$計算$y = f(x)$，<strong>第二是向後機率機算</strong>，給一個$y$要一步步往後做逆運算，計算轉換的行列式總和，最後求出$x$。</p>
 <p>計算行列式最差時候需要<a href="https://en.wikipedia.org/wiki/Computational_complexity_of_mathematical_operations" target="_blank" rel="noopener">$O(n^3)$</a>，所以就需要設計比較容易計算行列式的轉換，例如 Masked Autoregressive Flow、Inversed Autoregressive Flow、RealNVP等等模型，有用到Autoregressive的特性，所以行列式會很容易計算，這些方法會在後續的文章中介紹。</p>
 <h2 id="Training-and-sampling"><a href="#Training-and-sampling" class="headerlink" title="Training and sampling"></a>Training and sampling</h2><p><strong>向後機率計算</strong>，我們可以直接對$\log p(y)$最大化機率似然，給$y$透過一系列反函數得到$x$與行列式總和</p>
@@ -562,7 +562,7 @@
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">9</span>
+                    <span class="site-state-item-count">10</span>
                     <span class="site-state-item-name">文章</span>
                   </a>
                 </div>
@@ -860,7 +860,7 @@
         }
     });
 </script>
-<script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/npm/mathjax@2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><!-- hexo-inject:begin --><!-- hexo-inject:end -->
 
     
   

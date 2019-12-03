@@ -7,7 +7,7 @@
 
 <html class="theme-next muse use-motion" lang="zh-TW">
 <head>
-  <meta charset="UTF-8"/>
+  <!-- hexo-inject:begin --><!-- hexo-inject:end --><meta charset="UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=edge" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2"/>
 <meta name="theme-color" content="#222">
@@ -158,7 +158,7 @@
       .logo-line-after i { right: initial; }
     }
   </style>
-</noscript>
+</noscript><!-- hexo-inject:begin --><!-- hexo-inject:end -->
 
 </head>
 
@@ -169,7 +169,7 @@
     
   
 
-  <div class="container sidebar-position-left 
+  <!-- hexo-inject:begin --><!-- hexo-inject:end --><div class="container sidebar-position-left 
   page-home">
     <div class="headband"></div>
 
@@ -305,6 +305,189 @@
           <div id="content" class="content">
             
   <section id="posts" class="posts-expand">
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://odie2630463.github.io/2019/12/03/vi-3/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="odie">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="odie's whisper">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2019/12/03/vi-3/" itemprop="url">漫談 Variational Inference (三)</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">發表於</span>
+              
+              <time title="創建於" itemprop="dateCreated datePublished" datetime="2019-12-03T17:24:52+08:00">2019-12-03</time>
+            
+
+            
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分類於</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/variational-inference/" itemprop="url" rel="index"><span itemprop="name">variational inference</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>沒想到一晃眼就是一年了，但自己挖的坑還是要填完，希望又能開始恢復寫部落格的習慣，也把自己關注的研究陸續整理上來，期待能獲得一些新想法，要訓練<strong>自己能用多個角度去看同一個問題，能把多個問題歸納成同一個框架</strong></p>
+<p>本篇是漫談 Variational Inference 系列第三篇，<a href="https://odie2630463.github.io/2018/09/20/vi-2/">第二篇</a>介紹了VAE，把深度學習與VI做個結合，也引領出了很多後續的研究；而本篇來談談VI方法跟一些其他生成模型的關係，用一致的框架來討論VAE與GAN</p>
+<h2 id="New-formulation-of-VAE"><a href="#New-formulation-of-VAE" class="headerlink" title="New formulation of VAE"></a>New formulation of VAE</h2><p>首先我們有 $q_{\phi}(x,z)=q_{\phi}(z|x)p(x)$ 與 $p_{\theta}(x,z)=p_{\theta}(x|z)p(z)$，那來對上一篇VAE的ELBO計算期望值</p>
+<p>$<br>\begin{split}<br>E_x \left[<br>    E_{q_{\phi}(z|x)}<br>        \left[ \log \frac{p_{\theta}(x,z)}          {q_{\phi}(z|x)}\right]<br>        \right] &amp;= E_{q_{\phi}(x,z)}<br>        \left[ \log \frac{p_{\theta}(x,z)}          {q_{\phi}(z|x)}\right]  \\<br>          &amp;= E_{q_{\phi}(x,z)}<br>        \left[ \log \frac{p_{\theta}(x,z)}          {q_{\phi}(z|x)} + \log p(x) - \log p(x) \right] \\<br>        &amp;= E_{q_{\phi}(x,z)}<br>        \left[ \log \frac{p_{\theta}(x,z)}          {q_{\phi}(x,z)} + \log p(x) \right]  \\<br>        &amp;= KL(q_{\phi}(x,z) || p_{\theta}(x,z)) + C<br>\end{split}<br>$</p>
+<p>做了一些變換後，可以把ELBO表示成兩個聯合機率分布的KL距離，我們關注的是 $p_{\theta}(x,z)$，希望可以生成很真實的樣本，KL是個非對稱的divergence，交換位置是完全不同的效果，生成器$p_{\theta}(x,z)$於計算KL的位置會影響優化的目標，這也導致了VAE生成樣本比較模糊，但不容易<strong>Mode collapse</strong>的原因，我們接著來看GAN的形式如何，再來一起討論其異同</p>
+<h2 id="New-formulation-of-GAN"><a href="#New-formulation-of-GAN" class="headerlink" title="New formulation of GAN"></a>New formulation of GAN</h2><p>接著我們也是看看把GAN整理成類似的形式，方便後續的分析比較，$y$代表真實資料(y=1)或是生成樣本(y=0)，現在我們換個角度來看，<strong>把$x$當作隱變量而$y$視為可觀測的輸入</strong>，我們想用一個候選分佈$p_{\theta}(x|y)$，希望去優化$q_{\phi}(y|x)$這個條件機率(判別器)，GAN訓練過程我們會輸入真實資料與生成樣本給判別器去，我們現在的候選分佈應該是由$g_{\theta}(x)$生成與$p_{\text data}(x)$混合而成，所以把$p_{\theta}(x|y)$寫成：</p>
+<!--
+![](/media/15753671192197.jpg)
+-->
+
+<p>$$<br>p_{\theta}(x | y)=\left \{<br>\begin{array}{ll}<br>{p_{g_{\theta}}(x)} &amp; {y=0} \\<br>{p_{\text {data}}(x)} &amp; {y=1}<br>\end{array}\right.<br>$$</p>
+<p>優化的目標也會依訓練過程不同，兩個階段是相反的，候選分佈會隨機給真實資料或是生成樣本，訓練$q_{\phi}(y|x)$判別器分類正確</p>
+<p>$$<br>\max_{\boldsymbol{\phi}} L_{\phi} = \mathbb{E}_{p_{\theta}(\boldsymbol{x} | y)p(y)}\left[\log q_{\phi}(y | \boldsymbol{x})\right]<br>$$</p>
+<p>於訓練$g_{\theta}(x)$生成器階段，我們希望$q_{\phi}(y|x)$分類錯誤，$q_{\phi}^r(y|x)$表示相反的$y$，優化目標變成</p>
+<p>$$<br>\max_{\boldsymbol{\theta}} \mathcal{L}_{\theta}=\mathbb{E}_{p_{\theta}(\boldsymbol{x} | y) p(y)}\left[\log q_{\phi}^r(y | \boldsymbol{x})\right]<br>$$</p>
+<p>跟VAE不同，兩個階段優化的目標並不一樣，這也導致訓練更為困難，我們對訓練生成器階段做個推導整理，並且加上負號來改成最小化</p>
+<p>$<br>\begin{split}<br>E_{p(y)}\left[<br>    E_{p_{\theta}(x|y)}<br>        \left[ - \log q_{\phi}^r(y | x)\right]<br>        \right] &amp;= E_{p(y)p_{\theta}(x|y)}\left[ \log \frac{q_{\phi}^r(y | x)p_{\theta^\prime}(x)}{p_{\theta}(x|y)p(y)} - \log \frac{p_{\theta}(x|y)p(y)}{p_{\theta^\prime}(x)} \right] \\<br>        &amp;= KL(p_{\theta}(x,y) || q_{\phi}^r(x,y)) - KL(p_{\theta}(x,y) || p_{\theta^\prime}(x))<br>\end{split}<br>$</p>
+<p>推導過程中我們加入$x$的先驗分佈$p_{\theta^\prime}(x)= \sum_y p_{\theta^\prime}(y|x)p(y)$，訓練生成器時候，我們會由上一輪訓練出來的$g_{\theta^\prime}$生成樣本與真實資料去訓練新的$g_{\theta}$，所以每次先驗分佈都在改變，最後我們得到一個跟VAE類似的結果，但是$p_{\theta}(x,y)$在KL中的位置是相反的</p>
+<h2 id="Compare-VAE-and-GAN"><a href="#Compare-VAE-and-GAN" class="headerlink" title="Compare VAE and GAN"></a>Compare VAE and GAN</h2><h3 id="Mode-covering-and-collapse"><a href="#Mode-covering-and-collapse" class="headerlink" title="Mode covering and collapse"></a>Mode covering and collapse</h3><p>我們看到兩種模型的優化目標是相反的KL divergence，VAE傾向去<strong>覆蓋</strong>整個分佈，但也可能會覆蓋到一些機率密度低的位置，而使得有時候抽樣出來的影像不夠真實，所以VAE除了使用L2 loss去計算影像還原損失，本身就會導致模糊外，更深一層本質上是KL的特性所導致</p>
+<p>GAN則為相反，傾向去學好一個Mode，認真顧好一個部分就好，所以能產生非常真實的資料，但會有Mode collapse</p>
+<p><img src="/media/15753578381818.jpg" alt="-w824"></p>
+<h3 id="Different-prior"><a href="#Different-prior" class="headerlink" title="Different prior"></a>Different prior</h3><p>推導過程中我們都有引入$x$的先驗分佈，</p>
+<ul>
+<li>VAE：$p(x)$代表的是真實資料分布</li>
+<li>GAN：$p_{\theta^\prime}(x)$代表的是混和分佈</li>
+</ul>
+<h4 id="Mixed-prior"><a href="#Mixed-prior" class="headerlink" title="Mixed prior"></a>Mixed prior</h4><p>我們換從訓練判別器階段來分析，我們嘗試把$p_{\theta^\prime}(x)$當作先驗分佈引入在拆解$q_{\phi}(x,y)$時</p>
+<p>$<br>\begin{split}<br>KL(p_{\theta}(x,y) || q_{\phi}(x,y))<br>&amp;= \int p_{data}(x) \log \frac{p_{data}(x)}{q_{\phi}(x,y=1)} + \int p_{g_{\theta}}(x) \log \frac{p_{g_{\theta}}(x)}{q_{\phi}(x,y=0)} \\<br>&amp;= \int p_{data}(x) \log \frac{p_{data}(x)}{q_{\phi}(y=1|x)p_{data}(x)} + \int p_{g_{\theta}}(x) \log \frac{p_{g_{\theta}}(x)}{q_{\phi}(y=0|x)p_{g_{\theta}}(x)} \\<br>&amp;= \int p_{data}(x) \log \frac{1}{q_{\phi}(y=1|x)} + \int p_{g_{\theta}}(x) \log \frac{1}{q_{\phi}(y=0|x)} \\<br>&amp;= E_{p_{data}(x)}\left[ \log D(x) \right] + E_{p_{g_{\theta}}(x)}\left[ \log (1-D(x)) \right]<br>\end{split}<br>$</p>
+<p>我們得到跟原始GAN paper上熟悉的式子！</p>
+<h4 id="Data-prior"><a href="#Data-prior" class="headerlink" title="Data prior"></a>Data prior</h4><p><a href="https://kexue.fm/archives/5716#一般框架" target="_blank" rel="noopener">用变分推断统一理解生成模型（VAE、GAN、AAE、ALI）By 苏剑林</a>文章中引入了$p(x)$當作先驗分佈，一開始不太理解文章與原始GAN的關係，後來經過一番梳理，發現原來只是先驗分佈的不同</p>
+<p>$<br>\begin{split}<br>KL(p_{\theta}(x,y) || q_{\phi}(x,y))<br>&amp;= \int p_{data}(x) \log \frac{p_{data}(x)}{q_{\phi}(x,y=1)} + \int p_{g_{\theta}}(x) \log \frac{p_{g_{\theta}}(x)}{q_{\phi}(x,y=0)} \\<br>&amp;= \int p_{data}(x) \log \frac{p_{data}(x)}{q_{\phi}(y=1|x)p_{data}(x)} + \int p_{g_{\theta}}(x) \log \frac{p_{g_{\theta}}(x)}{q_{\phi}(y=0|x)p_{data}(x)} \\<br>&amp;= \int p_{data}(x) \log \frac{1}{q_{\phi}(y=1|x)} + \int p_{g_{\theta}}(x) \log \frac{1}{q_{\phi}(y=0|x)} + \int  p_{g_{\theta}}(x) \log \frac{p_{g_{\theta}}(x)}{p_{data}(x)} \\<br>&amp;= E_{p_{data}(x)}\left[ \log D(x) \right] +  E_{p_{g_{\theta}}(x)}\left[ \log (1-D(x)) \right] + KL(p_{g_{\theta}}(x) || p_{data}(x))<br>\end{split}<br>$</p>
+<p>實務上，我們訓練生成器都只去優化第二項，引入Data prior後，整個優化項變成</p>
+<p>$$<br>\mathbb{E}_{p_{g_{\theta}}(x)}\left[ \log (D(x)) \right] + KL(p_{g_{\theta}}(x) || p_{data}(x))<br>$$</p>
+<p>我們假設$p_{data}(x)$可以由上一輪的$p_{g_{\theta^\prime}}(x)$近似，故帶入式子</p>
+<p>$$<br>\mathbb{E}_{p_{g_{\theta}}(x)}\left[ \log (D(x)) \right] + KL(p_{g_{\theta}}(x) || p_{g_{\theta^\prime}}(x))<br>$$</p>
+<p>生成器除了要去騙過判別器外，我們還要求生成器要跟過去的自己接近，意思就是不要更新太快，這個跟一些訓練GAN常用的技巧是相同的，例如gradient penalty，在<a href="https://kexue.fm/archives/5716#正则项" target="_blank" rel="noopener">蘇大神的文章中有做實驗</a>，真的會幫助GAN的訓練與結果</p>
+<h2 id="結語"><a href="#結語" class="headerlink" title="結語"></a>結語</h2><p>這篇花了不少時間讀懂參考資料，用自己的理解再重新詮釋過，能用一致的角度來看這兩個模型，還是很有收穫的，也更能看清楚模型根本優劣，下一篇還沒想到要寫什麼，敬請期待！</p>
+<h2 id="Refernece"><a href="#Refernece" class="headerlink" title="Refernece"></a>Refernece</h2><ul>
+<li><a href="https://kexue.fm/archives/5716/" target="_blank" rel="noopener">用变分推断统一理解生成模型（VAE、GAN、AAE、ALI）By 苏剑林</a></li>
+<li><a href="https://sailinglab.github.io/pgm-spring-2019/lectures/" target="_blank" rel="noopener">Lecture #17 (Eric): Deep generative models (part 1): Overview of the theoretical basis and connections of deep generative models</a></li>
+<li><a href="https://arxiv.org/pdf/1706.00550.pdf" target="_blank" rel="noopener">On Unifying Deep Generative Models</a></li>
+</ul>
+
+          
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
     
       
 
@@ -591,7 +774,7 @@
 <li><a href="https://www.researchgate.net/publication/41001209_Friston_KJ_The_free-energy_principle_a_unified_brain_theory_Nat_Rev_Neurosci_11_127-138" target="_blank" rel="noopener">The free-energy principle: a unified brain theory?</a></li>
 <li><a href="https://www.sciencedirect.com/science/article/pii/S0022249615000759" target="_blank" rel="noopener">A tutorial on the free-energy framework for modelling perception and learning</a></li>
 <li><a href="">Karl Friston 15分鐘訪談 - Free Energy Principle</a></li>
-<li><a href="https://www.youtube.com/watch?v=dLXKFA33SSM&amp;t=2642s" target="_blank" rel="noopener">Karl Friston 演講影片 - Free energy and active inference</a></li>
+<li><a href="https://www.youtube.com/watch?v=dLXKFA33SSM&t=2642s" target="_blank" rel="noopener">Karl Friston 演講影片 - Free energy and active inference</a></li>
 </ul>
 
           
@@ -758,7 +941,7 @@
 <p><img src="/media/7A9ABDDC-52AA-4946-961C-F2CE320DAA8F.png" alt="7A9ABDDC-52AA-4946-961C-F2CE320DAA8F"><br>圖片來源：<a href="https://www.dropbox.com/s/dl/v6ua3d9yt44vgb3/cover_and_thesis.pdf" target="_blank" rel="noopener">VARIATIONAL INFERENCE &amp; DEEP LEARNING: A NEW SYNTHESIS
 </a></p>
 <p>抽樣會使得梯度無法傳遞，就像左邊那張圖一樣，Z是一個隨機計算節點，經過Z後我們無法對之前的計算有任何資訊，自然也無法計算梯度，但改成Reparameterized form後，梯度就能順利回傳至參數上；另一點是有效減少梯度變異，原本梯度計算過程受$n \log p_{\theta}(x|z)$影響而造成變異過大，而現在我們只需要計算$\nabla_\phi f$的期望值，兩者數值大小差異很大，因此減少梯度變異使訓練過程穩定，才能用在複雜的資料集上</p>
-<p>$$<br>\nabla_\phi \mathbb{E}<em>{z \sim q(z\mid x)}\left[ f(x,z) \right] = \mathbb{E}</em>{\epsilon \sim p(\epsilon)} \left[ \nabla _{\phi} f(x,g(\epsilon, x))\right]<br>$$</p>
+<p>$$<br>\nabla_\phi \mathbb{E}_{z \sim q(z\mid x)}\left[ f(x,z) \right] = \mathbb{E}_{\epsilon \sim p(\epsilon)} \left[ \nabla _{\phi} f(x,g(\epsilon, x))\right]<br>$$</p>
 <h2 id="結語"><a href="#結語" class="headerlink" title="結語"></a>結語</h2><p>本篇是漫談VI方法的第二篇，細談了VAE模型基礎，如何從ELBO對應到自編碼器架構，且$KL(q_{\phi}(z|x)||p(z))$也可以看成是一種正規化項，並提出改進的梯度估計方法，才能使得訓練模型成為可能，VAE是非常好的表徵學習方法，訓練穩定並能結合<a href="https://arxiv.org/abs/1406.5298" target="_blank" rel="noopener">半監督式學習</a>、<a href="https://arxiv.org/pdf/1803.10122.pdf" target="_blank" rel="noopener">增強學習</a>等技術，後續很多的理論改進應用延伸，值得關注與學習</p>
 <p>下一篇會討論VAE與其他生成模型的關係，最近有一些工作討論將各種生成模型放入同一個框架內討論，敬請期待</p>
 <h2 id="Refernece"><a href="#Refernece" class="headerlink" title="Refernece"></a>Refernece</h2><ul>
@@ -921,20 +1104,33 @@
 <h2 id="Implement-and-Tricks"><a href="#Implement-and-Tricks" class="headerlink" title="Implement and Tricks"></a>Implement and Tricks</h2><p>我的<a href="https://github.com/odie2630463/transformer" target="_blank" rel="noopener">實作版本</a>，以pytorch實作並於IWSLT16英文-德語翻譯語料進行訓練與測試</p>
 <h3 id="Data-preprocessing"><a href="#Data-preprocessing" class="headerlink" title="Data preprocessing"></a>Data preprocessing</h3><p>把原始資料變成可以訓練的Dataloader常常要花一番苦工，Pytorch提供一系列不同的工具，像是<a href="https://github.com/pytorch/vision" target="_blank" rel="noopener">torchvision</a>、<a href="http://pytorch.org/audio/#torchaudio" target="_blank" rel="noopener">torchaudio</a>、<a href="https://github.com/pytorch/text" target="_blank" rel="noopener">torchtext</a>，裡面有一些整理好的資料集或是常用函數，不論是要自己重新做一個新資料集或是直接使用都非常方便，而且減少錯誤機會，所以基本上我不太喜歡自己去重寫資料整理的部分，而是去學習使用已有且穩定的套件</p>
 <p>torchtext其實是有直接提供IWSLT16 dataloader使用，但是有些錯誤，所以沒辦法順利直接利用，那只好利用所提供的函數自己來做一個囉</p>
-<p>要做一個翻譯的資料集相當簡單，只需要把語料資料整理成兩個文件(也可以是多個，用檔名區分即可)分別對應，像是這樣：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">#train.de.txt</span><br><span class="line"></span><br><span class="line">David Gallo: Das ist Bill Lange. Ich bin Dave Gallo.</span><br><span class="line">Wir werden Ihnen einige Geschichten über das Meer in Videoform erzählen.</span><br><span class="line">Wir haben ein paar der unglaublichsten Aufnahmen der Titanic, die man je gesehen hat,, und wir werden Ihnen nichts davon zeigen.</span><br><span class="line">...</span><br></pre></td></tr></table></figure></p>
+<p>要做一個翻譯的資料集相當簡單，只需要把語料資料整理成兩個文件(也可以是多個，用檔名區分即可)分別對應，像是這樣：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">#train.de.txt</span><br><span class="line"></span><br><span class="line">David Gallo: Das ist Bill Lange. Ich bin Dave Gallo.</span><br><span class="line">Wir werden Ihnen einige Geschichten über das Meer in Videoform erzählen.</span><br><span class="line">Wir haben ein paar der unglaublichsten Aufnahmen der Titanic, die man je gesehen hat,, und wir werden Ihnen nichts davon zeigen.</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">#train.en.txt</span><br><span class="line"></span><br><span class="line">David Gallo: This is Bill Lange. I&apos;m Dave Gallo.</span><br><span class="line">And we&apos;re going to tell you some stories from the sea here in video.</span><br><span class="line">We&apos;ve got some of the most incredible video of Titanic that&apos;s ever been seen, and we&apos;re not going to show you any of it.</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
-<p>用spacy來做斷詞，並告訴torchtext.data.Field所使用的斷詞器、與相關參數設定<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">spacy_de = spacy.load(<span class="string">'de'</span>)</span><br><span class="line">spacy_en = spacy.load(<span class="string">'en'</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">tokenize_en</span><span class="params">(text)</span>:</span></span><br><span class="line">    <span class="keyword">return</span> [tok.text <span class="keyword">for</span> tok <span class="keyword">in</span> spacy_en.tokenizer(text)]</span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">tokenize_de</span><span class="params">(text)</span>:</span></span><br><span class="line">    <span class="keyword">return</span> [tok.text <span class="keyword">for</span> tok <span class="keyword">in</span> spacy_de.tokenizer(text)]</span><br><span class="line"></span><br><span class="line">DE = data.Field(tokenize=tokenize_de,</span><br><span class="line">                init_token=<span class="string">'&lt;SOS&gt;'</span>,</span><br><span class="line">                eos_token=<span class="string">'&lt;EOS&gt;'</span>,</span><br><span class="line">                fix_length=<span class="number">20</span>,</span><br><span class="line">                lower=<span class="keyword">True</span>,</span><br><span class="line">                batch_first=<span class="keyword">True</span>)</span><br><span class="line">EN = data.Field(tokenize=tokenize_en,</span><br><span class="line">                init_token=<span class="string">'&lt;SOS&gt;'</span>,</span><br><span class="line">                eos_token=<span class="string">'&lt;EOS&gt;'</span>,</span><br><span class="line">                lower=<span class="keyword">True</span>,</span><br><span class="line">                fix_length=<span class="number">20</span>,</span><br><span class="line">                batch_first=<span class="keyword">True</span>)</span><br></pre></td></tr></table></figure></p>
-<p>用torchtext.datasets.TranslationDataset把語料包裝成datasets<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">train = datasets.TranslationDataset(path=<span class="string">'./data/train'</span>, </span><br><span class="line">                                    exts=(<span class="string">'.de.txt'</span>, <span class="string">'.en.txt'</span>),</span><br><span class="line">                                    fields=(DE, EN))</span><br></pre></td></tr></table></figure></p>
-<p>還有製作字典<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">DE.build_vocab(train.src, min_freq=<span class="number">3</span>)</span><br><span class="line">EN.build_vocab(train, max_size=<span class="number">50000</span>)</span><br></pre></td></tr></table></figure></p>
-<p>最後就可以包裝成Dataloader了<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">train_iter = data.BucketIterator(dataset=train, </span><br><span class="line">                                 batch_size=<span class="number">32</span>,</span><br><span class="line">                                 sort_key=<span class="keyword">lambda</span> x: data.interleave_keys(len(x.src), len(x.trg)))</span><br><span class="line">                                 </span><br><span class="line">train_batch = next(iter(train_iter))</span><br><span class="line">train_batch[<span class="number">0</span>].src</span><br><span class="line">&gt; tensor([[   <span class="number">2</span>,    <span class="number">6</span>,  <span class="number">195</span>,  <span class="number">437</span>,   <span class="number">13</span>,   <span class="number">82</span>, <span class="number">2076</span>,    <span class="number">0</span>,    <span class="number">5</span>,    <span class="number">3</span>,    <span class="number">1</span>,    <span class="number">1</span>,</span><br><span class="line">            <span class="number">1</span>,    <span class="number">1</span>,    <span class="number">1</span>,    <span class="number">1</span>,    <span class="number">1</span>,    <span class="number">1</span>,    <span class="number">1</span>,    <span class="number">1</span>]], device=<span class="string">'cuda:0'</span>)</span><br></pre></td></tr></table></figure></p>
+
+<p>用spacy來做斷詞，並告訴torchtext.data.Field所使用的斷詞器、與相關參數設定</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">spacy_de = spacy.load(<span class="string">'de'</span>)</span><br><span class="line">spacy_en = spacy.load(<span class="string">'en'</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">tokenize_en</span><span class="params">(text)</span>:</span></span><br><span class="line">    <span class="keyword">return</span> [tok.text <span class="keyword">for</span> tok <span class="keyword">in</span> spacy_en.tokenizer(text)]</span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">tokenize_de</span><span class="params">(text)</span>:</span></span><br><span class="line">    <span class="keyword">return</span> [tok.text <span class="keyword">for</span> tok <span class="keyword">in</span> spacy_de.tokenizer(text)]</span><br><span class="line"></span><br><span class="line">DE = data.Field(tokenize=tokenize_de,</span><br><span class="line">                init_token=<span class="string">'&lt;SOS&gt;'</span>,</span><br><span class="line">                eos_token=<span class="string">'&lt;EOS&gt;'</span>,</span><br><span class="line">                fix_length=<span class="number">20</span>,</span><br><span class="line">                lower=<span class="keyword">True</span>,</span><br><span class="line">                batch_first=<span class="keyword">True</span>)</span><br><span class="line">EN = data.Field(tokenize=tokenize_en,</span><br><span class="line">                init_token=<span class="string">'&lt;SOS&gt;'</span>,</span><br><span class="line">                eos_token=<span class="string">'&lt;EOS&gt;'</span>,</span><br><span class="line">                lower=<span class="keyword">True</span>,</span><br><span class="line">                fix_length=<span class="number">20</span>,</span><br><span class="line">                batch_first=<span class="keyword">True</span>)</span><br></pre></td></tr></table></figure>
+
+<p>用torchtext.datasets.TranslationDataset把語料包裝成datasets</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">train = datasets.TranslationDataset(path=<span class="string">'./data/train'</span>, </span><br><span class="line">                                    exts=(<span class="string">'.de.txt'</span>, <span class="string">'.en.txt'</span>),</span><br><span class="line">                                    fields=(DE, EN))</span><br></pre></td></tr></table></figure>
+
+<p>還有製作字典</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">DE.build_vocab(train.src, min_freq=<span class="number">3</span>)</span><br><span class="line">EN.build_vocab(train, max_size=<span class="number">50000</span>)</span><br></pre></td></tr></table></figure>
+
+<p>最後就可以包裝成Dataloader了</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">train_iter = data.BucketIterator(dataset=train, </span><br><span class="line">                                 batch_size=<span class="number">32</span>,</span><br><span class="line">                                 sort_key=<span class="keyword">lambda</span> x: data.interleave_keys(len(x.src), len(x.trg)))</span><br><span class="line">                                 </span><br><span class="line">train_batch = next(iter(train_iter))</span><br><span class="line">train_batch[<span class="number">0</span>].src</span><br><span class="line">&gt; tensor([[   <span class="number">2</span>,    <span class="number">6</span>,  <span class="number">195</span>,  <span class="number">437</span>,   <span class="number">13</span>,   <span class="number">82</span>, <span class="number">2076</span>,    <span class="number">0</span>,    <span class="number">5</span>,    <span class="number">3</span>,    <span class="number">1</span>,    <span class="number">1</span>,</span><br><span class="line">            <span class="number">1</span>,    <span class="number">1</span>,    <span class="number">1</span>,    <span class="number">1</span>,    <span class="number">1</span>,    <span class="number">1</span>,    <span class="number">1</span>,    <span class="number">1</span>]], device=<span class="string">'cuda:0'</span>)</span><br></pre></td></tr></table></figure>
+
 <p>以上很簡單介紹用法，這裡還有兩篇(<a href="https://zhuanlan.zhihu.com/p/37223078" target="_blank" rel="noopener">1</a>,<a href="https://zhuanlan.zhihu.com/p/31139113" target="_blank" rel="noopener">2</a>)不錯的教學，大家可以參考</p>
 <h3 id="Mask-is-important"><a href="#Mask-is-important" class="headerlink" title="Mask is important"></a>Mask is important</h3><p>Transformer模型不難理解與實作，但是有個小地方尤其重要，就是<strong>輸入需要很仔細地做Mask</strong>，非Recurrent模型有個問題，就是輸入長度、大小都必須要是固定的，不管句子長短，要輸入至模型都需要截長補短至固定長度，所以當句子短時候，後面會補上PAD來填滿長度，但是些部分是不能參與至注意力過程的，所以我們每次去做矩陣相成後，需要把某些部分遮起來</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">output = torch.bmm(Q,K.transpose(<span class="number">1</span>,<span class="number">2</span>))</span><br><span class="line">output = output / ( self.hidden_size**<span class="number">0.5</span>)</span><br><span class="line"></span><br><span class="line">queries_mask_ = torch.cat([queries_mask]*self.num_head,<span class="number">0</span>).float()</span><br><span class="line">keys_mask_ = torch.cat([keys_mask]*self.num_head,<span class="number">0</span>).float()</span><br><span class="line">output_mask = <span class="number">1</span> - queries_mask_.bmm(keys_mask_.transpose(<span class="number">1</span>,<span class="number">2</span>)).float()</span><br><span class="line">output_ = output.masked_fill(output_mask.byte() , <span class="number">-2</span>**<span class="number">32</span>)</span><br></pre></td></tr></table></figure>
+
 <p>這部分可以配合實作一起看會比較清楚，queries_mask_與keys_mask_是輸入時候給的，告訴模型這個序列的長度資訊，是PAD地方為0其餘為1</p>
 <p>既然output是Q,K相乘，我們如果把他們的mask也相乘，就可以得到正確的mask，mask為0的地方代表是PAD去做注意力過程，應該要被忽略</p>
 <p>最後用masked_fill來把要忽略的位置填上一個很小的數值，因為masked_fill是把為1的地方填上，所以之前算出來的mask要做反轉，至於為何要填上很小的負數值是因為等一下要做softmax，如果單純填上0，經過softmax可能不為0</p>
 <h3 id="Causality-is-important"><a href="#Causality-is-important" class="headerlink" title="Causality is important"></a>Causality is important</h3><p>Decoder在解碼的時候是基於過去的序列來預測下一個位置，當然不能看到未來的訊息，所以Decoder裡做Self attention要把未來資訊遮蔽，實作上很簡單就是做一個上三角矩陣，但是要保留對角線部分</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">if self.causality:</span><br><span class="line">    bs,s1,s2 = output_mask.size()</span><br><span class="line">    tri = np.triu(np.ones((s1,s2))) - np.eye(s1,s2)</span><br><span class="line">    tri = torch.from_numpy(tri).to(output_mask.device)</span><br><span class="line">    tri = torch.stack([tri]*bs,0).byte()</span><br><span class="line">    output_ = output_.masked_fill(tri , -2**32)</span><br></pre></td></tr></table></figure>
+
 <p>這樣就能保證Decoder訓練過程不會去偷看到下一個位置，只能用自己現在與過去的位置資訊來預測</p>
 <h2 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h2><ul>
 <li><a href="https://arxiv.org/abs/1706.03762" target="_blank" rel="noopener">Attention Is All You Need</a></li>
@@ -1125,7 +1321,7 @@
 <p>$<br>\begin{split}<br>ELBO(q, \theta) &amp; = \int \prod_i q_i(z_i) \Big[ \log p_{\theta}(x,z) - \sum_i \log q_i(z_i) \Big ]dz \\<br>&amp; = \int q_j(z_j) \Big [ \int \log p_{\theta}(x,z) \prod_{i \neq j} q_i(z_i)dz_i \Big ] dz_j - \int \sum_{i \neq j} \log q_i(z_i) \prod_{i \neq j} q_i(z_i)dz_i - \int q_i(z_i) \log q_i(z_i)dz_i \\<br>&amp; = \int q_j(z_j) \log \tilde p(x,z_j)dz_j - \int q_j(z_j) \log q_j(z_j) dz_j + const \\<br>&amp; = -KL(q_j(z_j) || \tilde p(x,z_j))<br>\end{split}<br>$</p>
 <p>最後 Variational EM 我們可以寫成</p>
 <ul>
-<li>E-step：$q_j(z_j) = \tilde p(x,z_j)$</li>
+<li>E-step：$q_j(z_j) \propto \tilde p(x,z_j)$</li>
 <li>Ｍ-step：$\max\limits_{\theta} \mathbb{E}\left[ \log p_{\theta}(x,z) - \log q(z) \right]$</li>
 </ul>
 <p>計算$q_j(z_j) = \mathbb{E}_{i \neq j}\left[ \log p(x,z) \right]$，固定$z_j$然後將j以外的維度進行積分，白話一點就是固定一個維度，把其他維度的所有組合都試過一次來計算這個維度的機率分佈，涉及非常大量的計算，雖然Mean-Field Approximation一定能寫成這樣的解，但是很多時候依然無法計算</p>
@@ -1294,17 +1490,22 @@
 <p>$$<br>p(\phi,\theta,z,w) = p(\phi) \prod_{d=1}^D \prod_{n=1}^{N_d} p(z_{dn}|\theta_d)p(w_{dn}|z_{dn},\phi)<br>$$</p>
 <p>式子對應Pyro程式碼如下：</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@pyro.poutine.broadcast</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">model</span><span class="params">(data)</span>:</span></span><br><span class="line">  phi = pyro.sample(<span class="string">"phi"</span>,dist.Dirichlet(torch.ones([K, V])).independent(<span class="number">1</span>))</span><br><span class="line">  </span><br><span class="line">  <span class="keyword">for</span> d <span class="keyword">in</span> pyro.irange(<span class="string">"documents"</span>, D):</span><br><span class="line">    theta_d = pyro.sample(<span class="string">"theta_%d"</span>%d, dist.Dirichlet(torch.ones([K])))</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">with</span> pyro.iarange(<span class="string">"words_%d"</span>%d, N[d]):</span><br><span class="line">      z = pyro.sample(<span class="string">"z_%d"</span>%d, dist.Categorical(theta_d))</span><br><span class="line">      pyro.sample(<span class="string">"w_%d"</span>%d, dist.Categorical(phi[z]), obs=data[d])</span><br></pre></td></tr></table></figure>
+
 <h4 id="Guide"><a href="#Guide" class="headerlink" title="Guide"></a>Guide</h4><p>$w$是已知觀測變量，想要估計的隱變量有$\phi,\theta,z$，我們可以用上Variational inference方法來最大化資料似然$\log p(w)$，並用另一個<strong>guide</strong>來近似$p(\phi,\theta,z|w)$，有關於VI相關會在後續寫個幾篇好好來講講</p>
 <p>$$<br>q(\phi,\theta,z) = q(\phi) \prod_{d=1}^D q(\theta_d)\prod_{n=1}^{N_d} q(z_{dn})<br>$$</p>
 <p>式子對應Pyro程式碼如下：</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@pyro.poutine.broadcast</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">guide</span><span class="params">(data)</span>:</span></span><br><span class="line">  beta_q = pyro.param(<span class="string">"beta_q"</span>, torch.ones([K, V]),constraint=constraints.positive)</span><br><span class="line">  phi_q = pyro.sample(<span class="string">"phi"</span>,dist.Dirichlet(beta_q).independent(<span class="number">1</span>))</span><br><span class="line">  </span><br><span class="line">  <span class="keyword">for</span> d <span class="keyword">in</span> pyro.irange(<span class="string">"documents"</span>, D):</span><br><span class="line">    alpha_q = pyro.param(<span class="string">"alpha_q_%d"</span>%d, torch.ones([K]),constraint=constraints.positive)</span><br><span class="line">    q_theta_d = pyro.sample(<span class="string">"theta_%d"</span>%d, dist.Dirichlet(alpha_q))</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">with</span> pyro.iarange(<span class="string">"words_%d"</span>%d, N[d]):</span><br><span class="line">      q_i = pyro.param(<span class="string">"q_%d"</span>%d, torch.randn([N[d], K]).exp(),</span><br><span class="line">                       constraint=constraints.simplex)</span><br><span class="line">      pyro.sample(<span class="string">"z_%d"</span>%d, dist.Categorical(q_i))</span><br></pre></td></tr></table></figure>
+
 <p>注意<strong>guide</strong>裡面有參數是需要訓練的，比如每一個字所對應的$z_dn$，我們都用一個Categorical分佈來代表主題，都有參數需要訓練，很直接去估文件裡的每個字代表什麼主題</p>
 <h4 id="Training"><a href="#Training" class="headerlink" title="Training"></a>Training</h4><p>最後用SVI去最大化ELBO</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">adam_params = &#123;<span class="string">"lr"</span>: <span class="number">0.01</span>, <span class="string">"betas"</span>: (<span class="number">0.90</span>, <span class="number">0.999</span>)&#125;</span><br><span class="line">optimizer = Adam(adam_params)</span><br><span class="line"></span><br><span class="line">svi = SVI(model, config_enumerate(guide, <span class="string">'parallel'</span>), optimizer, loss=TraceEnum_ELBO(max_iarange_nesting=<span class="number">1</span>))</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> _ <span class="keyword">in</span> range(<span class="number">3000</span>):</span><br><span class="line">  loss = svi.step(data)</span><br></pre></td></tr></table></figure>
+
 <p>TraceEnum_ELBO適用於有離散變量需要估計的時候，會直接去做enumerate，不然單用Trace_ELBO遇到離散變量效果都很差</p>
 <h4 id="Result"><a href="#Result" class="headerlink" title="Result"></a>Result</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">pyro.param(<span class="string">'q_2'</span>)</span><br><span class="line">&gt;&gt;&gt;</span><br><span class="line">tensor([[<span class="number">0.8072</span>, <span class="number">0.0559</span>, <span class="number">0.0606</span>, <span class="number">0.0543</span>, <span class="number">0.0220</span>],</span><br><span class="line">        [<span class="number">0.9249</span>, <span class="number">0.0258</span>, <span class="number">0.0146</span>, <span class="number">0.0242</span>, <span class="number">0.0104</span>],</span><br><span class="line">        [<span class="number">0.9250</span>, <span class="number">0.0258</span>, <span class="number">0.0145</span>, <span class="number">0.0243</span>, <span class="number">0.0105</span>],</span><br><span class="line">        [<span class="number">0.3842</span>, <span class="number">0.0408</span>, <span class="number">0.5215</span>, <span class="number">0.0381</span>, <span class="number">0.0153</span>],</span><br><span class="line">        [<span class="number">0.9406</span>, <span class="number">0.0206</span>, <span class="number">0.0110</span>, <span class="number">0.0193</span>, <span class="number">0.0085</span>],</span><br><span class="line">        [<span class="number">0.9406</span>, <span class="number">0.0206</span>, <span class="number">0.0111</span>, <span class="number">0.0193</span>, <span class="number">0.0084</span>],</span><br><span class="line">        [<span class="number">0.9406</span>, <span class="number">0.0204</span>, <span class="number">0.0110</span>, <span class="number">0.0192</span>, <span class="number">0.0088</span>],</span><br><span class="line">        [<span class="number">0.9406</span>, <span class="number">0.0205</span>, <span class="number">0.0111</span>, <span class="number">0.0193</span>, <span class="number">0.0085</span>],</span><br><span class="line">        [<span class="number">0.9250</span>, <span class="number">0.0258</span>, <span class="number">0.0145</span>, <span class="number">0.0242</span>, <span class="number">0.0105</span>]], grad_fn=&lt;DivBackward1&gt;)</span><br><span class="line">        </span><br><span class="line">z[<span class="number">2</span>]</span><br><span class="line">&gt;&gt;&gt;</span><br><span class="line">tensor([<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>])</span><br></pre></td></tr></table></figure>
+
 <p>看一下第二筆文件裡的字，估計主題效果還不錯</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">phi[<span class="number">0</span>]</span><br><span class="line">&gt;&gt;&gt;</span><br><span class="line">tensor([<span class="number">1.1714e-03</span>, <span class="number">7.1110e-01</span>, <span class="number">1.4448e-03</span>, <span class="number">1.8015e-03</span>, <span class="number">1.0734e-01</span>, <span class="number">2.6613e-06</span>,</span><br><span class="line">        <span class="number">1.1921e-07</span>, <span class="number">3.6218e-03</span>, <span class="number">9.7121e-02</span>, <span class="number">1.1921e-07</span>, <span class="number">8.0717e-03</span>, <span class="number">7.9834e-07</span>,</span><br><span class="line">        <span class="number">6.8322e-02</span>, <span class="number">1.1921e-07</span>, <span class="number">1.1921e-07</span>])</span><br><span class="line"></span><br><span class="line">dist.Dirichlet(pyro.param(<span class="string">'beta_q'</span>)).sample()[<span class="number">0</span>]</span><br><span class="line">&gt;&gt;&gt;</span><br><span class="line">tensor([<span class="number">0.0089</span>, <span class="number">0.4932</span>, <span class="number">0.0083</span>, <span class="number">0.0549</span>, <span class="number">0.1486</span>, <span class="number">0.0355</span>, <span class="number">0.0272</span>, <span class="number">0.0291</span>, <span class="number">0.0509</span>,</span><br><span class="line">        <span class="number">0.0098</span>, <span class="number">0.0045</span>, <span class="number">0.0631</span>, <span class="number">0.0331</span>, <span class="number">0.0021</span>, <span class="number">0.0308</span>])</span><br></pre></td></tr></table></figure>
+
 <p>來看第1個主題對應字的機率，都是第2個字的機率最高，代表主題1最相關的字為第2個，雖然分佈可能還有點差異，但效果也還不差</p>
 <h2 id="結語"><a href="#結語" class="headerlink" title="結語"></a>結語</h2><p>深度學習結合機率方法是趨勢，這些PPL框架能更快投入研究與產品，後續會再分享一些Pyro應用與心得</p>
 
@@ -1462,10 +1663,10 @@
 </ul>
 <p>還有最近由OpenAI剛發佈的<a href="https://arxiv.org/abs/1807.03039" target="_blank" rel="noopener">Glow: Generative Flow with Invertible 1x1 Convolutions</a>，基於Normalizing Flows的一種生成模型，也能生成高品質影像與表徵解構</p>
 <h2 id="Normalizing-Flows"><a href="#Normalizing-Flows" class="headerlink" title="Normalizing Flows"></a>Normalizing Flows</h2><p>假設隨機變量$x \in \mathbb{R}^d$且$x \sim p(x)$，與一個可逆函數$f:\mathbb{R}^d \mapsto \mathbb{R}^d$，我們用$f$來轉換$p(x)$，可以得到另一個經過轉換的隨機變量$y=f(x)$與其機率分佈：</p>
-<p>$<br>p(y) = p(x) \left|<br>    \mathrm{det} \frac{<br>      \partial f^{-1}<br>    }{<br>      \partial x\<br>    }<br>  \right|<br>  = p(x) \left|<br>    \mathrm{det} \frac{<br>      \partial f<br>    }{<br>      \partial x\<br>    }<br>  \right| ^{-1} \tag{1}<br>$</p>
+<p>$<br>p(y) = p(x) \left|<br>    \mathrm{det} \frac{<br>      \partial f^{-1}<br>    }{<br>      \partial x<br>    }<br>  \right|<br>  = p(x) \left|<br>    \mathrm{det} \frac{<br>      \partial f<br>    }{<br>      \partial x<br>    }<br>  \right| ^{-1} \tag{1}<br>$</p>
 <p>行列式直觀上是面積或是體積的<strong>縮放比例</strong>，機率為機率密度函數底下的面積，轉換函數$f$可是視為一種面積的縮放變形，所以$p(y)$由轉換前$p(x)$底下的面積，乘上行列式表示的面積縮放比例，因為是計算$f^{-1}$，這個面積縮放的比例係指$y$對於$x$影響，意思是說，給$y$來反推回去$x$，並調整$p(x)$底下的面積大小，但也可以計算向前過程的行列式來取倒數。</p>
 <p>假設轉換由多個轉換函數$f_1 \dots f_K$組成，$z_k$為轉換過程的中間變量，最後得到的隨機變量$y = f_K \circ \dots\circ f_1(x)$，計算$\log p(y)$為：</p>
-<p>$<br>\log p(y) = \log p(x) - \sum_{k=1}^K<br>  \log<br>    \left|<br>    \mathrm{det} \frac{<br>      \partial f_k<br>    }{<br>      \partial \mathbf{x}_{k-1}\<br>    }<br>  \right| \tag{2}<br>$</p>
+<p>$<br>\log p(y) = \log p(x) - \sum_{k=1}^K<br>  \log<br>    \left|<br>    \mathrm{det} \frac{<br>      \partial f_k<br>    }{<br>      \partial \mathbf{x}_{k-1}<br>    }<br>  \right| \tag{2}<br>$</p>
 <p>綜上所述，NF有兩種計算，<strong>第一是向前抽樣計算</strong>，從$x$計算$y = f(x)$，<strong>第二是向後機率機算</strong>，給一個$y$要一步步往後做逆運算，計算轉換的行列式總和，最後求出$x$。</p>
 <p>計算行列式最差時候需要<a href="https://en.wikipedia.org/wiki/Computational_complexity_of_mathematical_operations" target="_blank" rel="noopener">$O(n^3)$</a>，所以就需要設計比較容易計算行列式的轉換，例如 Masked Autoregressive Flow、Inversed Autoregressive Flow、RealNVP等等模型，有用到Autoregressive的特性，所以行列式會很容易計算，這些方法會在後續的文章中介紹。</p>
 <h2 id="Training-and-sampling"><a href="#Training-and-sampling" class="headerlink" title="Training and sampling"></a>Training and sampling</h2><p><strong>向後機率計算</strong>，我們可以直接對$\log p(y)$最大化機率似然，給$y$透過一系列反函數得到$x$與行列式總和</p>
@@ -1907,7 +2108,7 @@
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">9</span>
+                    <span class="site-state-item-count">10</span>
                     <span class="site-state-item-name">文章</span>
                   </a>
                 </div>
@@ -2183,6 +2384,8 @@
     
       
     
+      
+    
   
 
   
@@ -2205,7 +2408,7 @@
         }
     });
 </script>
-<script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/npm/mathjax@2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><!-- hexo-inject:begin --><!-- hexo-inject:end -->
 
     
   
