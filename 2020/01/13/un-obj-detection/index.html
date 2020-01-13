@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-TW">
+<head>
+  <!-- hexo-inject:begin --><!-- hexo-inject:end --><meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.0.6" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.0.6">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.0.6">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.0.6">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.0.6" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '6.0.6',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="我們是如何理解由視覺接受到的場景與畫面呢？因為雙眼立體視覺的關係，我們能輕易透過深度感知，來區分遠近背景與物件，個別物件再去理解其位置、描述，甚至是物件之間的關係，我們對於場景的理解是「物件導向」的，我們先有了各種物件的概念，再去感知它們出現在哪？它們有怎樣的描述？它們有什麼關係？腦袋如何生成一幅「心智圖畫」來反應世界？ 我們觀測到現實，並且對於其中一些隱藏變量進行估計，例如物件數量、位置、描述等">
+<meta name="keywords" content="generative model,variational inference">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Unsupervised object detection with pyro">
+<meta property="og:url" content="https://odie2630463.github.io/2020/01/13/un-obj-detection/index.html">
+<meta property="og:site_name" content="odie&#39;s whisper">
+<meta property="og:description" content="我們是如何理解由視覺接受到的場景與畫面呢？因為雙眼立體視覺的關係，我們能輕易透過深度感知，來區分遠近背景與物件，個別物件再去理解其位置、描述，甚至是物件之間的關係，我們對於場景的理解是「物件導向」的，我們先有了各種物件的概念，再去感知它們出現在哪？它們有怎樣的描述？它們有什麼關係？腦袋如何生成一幅「心智圖畫」來反應世界？ 我們觀測到現實，並且對於其中一些隱藏變量進行估計，例如物件數量、位置、描述等">
+<meta property="og:locale" content="zh-TW">
+<meta property="og:image" content="https://odie2630463.github.io/media/grid.png">
+<meta property="og:image" content="https://odie2630463.github.io/media/sample1.png">
+<meta property="og:image" content="https://odie2630463.github.io/media/sample2.png">
+<meta property="og:image" content="https://odie2630463.github.io/media/sample3.png">
+<meta property="og:image" content="https://odie2630463.github.io/media/train2.png">
+<meta property="og:image" content="https://odie2630463.github.io/media/train2-2.png">
+<meta property="og:image" content="https://odie2630463.github.io/media/test2-1.png">
+<meta property="og:image" content="https://odie2630463.github.io/media/test2-2.png">
+<meta property="og:updated_time" content="2020-01-13T09:04:26.551Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Unsupervised object detection with pyro">
+<meta name="twitter:description" content="我們是如何理解由視覺接受到的場景與畫面呢？因為雙眼立體視覺的關係，我們能輕易透過深度感知，來區分遠近背景與物件，個別物件再去理解其位置、描述，甚至是物件之間的關係，我們對於場景的理解是「物件導向」的，我們先有了各種物件的概念，再去感知它們出現在哪？它們有怎樣的描述？它們有什麼關係？腦袋如何生成一幅「心智圖畫」來反應世界？ 我們觀測到現實，並且對於其中一些隱藏變量進行估計，例如物件數量、位置、描述等">
+<meta name="twitter:image" content="https://odie2630463.github.io/media/grid.png">
+
+
+
+
+
+
+  <link rel="canonical" href="https://odie2630463.github.io/2020/01/13/un-obj-detection/"/>
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>Unsupervised object detection with pyro | odie's whisper</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-TW">
+
+  
+  
+    
+  
+
+  <!-- hexo-inject:begin --><!-- hexo-inject:end --><div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> 
+
+<div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">odie's whisper</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切換導航欄">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+          
+  <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首頁</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-about">
+    <a href="/about/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-user"></i> <br />關於</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />標籤</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分類</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />歸檔</a>
+</li>
+
+      
+
+      
+    </ul>
+  
+
+  
+    
+
+    
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+    
+
+  
+
+
+  
+
+  
+</nav>
+
+
+  
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://odie2630463.github.io/2020/01/13/un-obj-detection/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="odie">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="odie's whisper">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Unsupervised object detection with pyro</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">發表於</span>
+              
+              <time title="創建於" itemprop="dateCreated datePublished" datetime="2020-01-13T17:04:26+08:00">2020-01-13</time>
+            
+
+            
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分類於</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/probabilistic-programming/" itemprop="url" rel="index"><span itemprop="name">probabilistic programming</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>我們是如何理解由視覺接受到的場景與畫面呢？因為雙眼立體視覺的關係，我們能輕易透過深度感知，來區分遠近背景與物件，個別物件再去理解其位置、描述，甚至是物件之間的關係，我們對於場景的理解是「物件導向」的，我們先有了各種物件的概念，再去感知它們出現在哪？它們有怎樣的描述？它們有什麼關係？腦袋如何生成一幅「心智圖畫」來反應世界？</p>
+<p>我們觀測到現實，並且對於其中一些隱藏變量進行估計，例如物件數量、位置、描述等等，然後在腦海中重新生成一幅「心智圖畫」來代表所看到的現實，如果所估計的變量正確，我們期待所生成的心智圖畫會跟現實很像；本篇我們使用 Pyro 來實作一個生成模型，模型生成個別物件的資訊與位置，然後透過可微分渲染器來產生影像，最後使用VI老方法來訓練生成模型與估計模型。</p>
+<h2 id="可微分渲染器"><a href="#可微分渲染器" class="headerlink" title="可微分渲染器"></a>可微分渲染器</h2><p>假設我們有個物件要擺到畫布上，我們可以透過 Indexing，例如<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">我們希望擺的位置是可以**微分**的，該怎麼做呢？我們可以用 Spatial transformer networks (STN) 來將物件放到畫布上，並且整個過程是可以微分的，但這裡不詳述STN的原理</span><br><span class="line"></span><br><span class="line">```python</span><br><span class="line">def render(obj_param,logit):</span><br><span class="line">  img_param = obj_to_image_param(obj_param)</span><br><span class="line">  img_param = img_param.view(-1,2)</span><br><span class="line">  bs = img_param.size(0)</span><br><span class="line">  </span><br><span class="line">  logit = (logit_scale*logit.view(-1,1,1,1)).sigmoid()</span><br><span class="line">  obj = torch.ones((bs,1,obj_size,obj_size))*logit</span><br><span class="line">  </span><br><span class="line">  theta = torch.zeros(bs,2,3)</span><br><span class="line">  theta[:,0,0] = ratio</span><br><span class="line">  theta[:,1,1] = ratio</span><br><span class="line">  theta[:,:,-1] = img_param</span><br><span class="line">  </span><br><span class="line">  grid = affine_grid(theta, torch.Size((bs,1,img_size,img_size)))</span><br><span class="line">  out = grid_sample(obj, grid)</span><br><span class="line">  out = out.view(batch_size,-1,1,img_size,img_size)</span><br><span class="line">  return out , out.sum(1)</span><br></pre></td></tr></table></figure></p>
+<p>obj_param 代表物件的座標參數，logit 代表物件出現的機率，透過 obj_to_image_param 做參數的轉換，把物件參數轉換到畫布參數，並放到 theta 中用 affine_grid 與 grid_sample 函數來把物件放到畫布上</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">out , img_ = render(torch.zeros(<span class="number">2</span>,<span class="number">4</span>,<span class="number">4</span>,<span class="number">2</span>,<span class="number">2</span>),torch.ones(<span class="number">2</span>,<span class="number">4</span>,<span class="number">4</span>,<span class="number">2</span>,<span class="number">1</span>))</span><br></pre></td></tr></table></figure>
+
+<p>借鏡 Yolo 模型，把影像分成4*4的方格，每個方格內可以有2個物件，每個物件有x,y偏移座標與出現機率，測試一下渲染器，每個方格內有2個白色物件，且偏移座標為0（所以在正中間重疊），出現機率都是1</p>
+<p><img src="/media/grid.png" alt="grid"></p>
+<h2 id="Yolo-like-generative-model"><a href="#Yolo-like-generative-model" class="headerlink" title="Yolo-like generative model"></a>Yolo-like generative model</h2><p>模型根據定義的維度，每個物件可能出現的方格內抽樣物件的座標與機率，用Pyro來表示相當簡潔，plate代表每個維度間互相獨立，抽樣出來的參數在送給宣染器來產生抽樣出影像</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">model</span><span class="params">(obs)</span>:</span></span><br><span class="line">  B = pyro.plate(<span class="string">'B'</span>,size=<span class="number">2</span>,dim=<span class="number">-5</span>)</span><br><span class="line">  H = pyro.plate(<span class="string">'H'</span>,size=<span class="number">4</span>,dim=<span class="number">-4</span>)</span><br><span class="line">  W = pyro.plate(<span class="string">'W'</span>,size=<span class="number">4</span>,dim=<span class="number">-3</span>)</span><br><span class="line">  N = pyro.plate(<span class="string">'N'</span>,size=<span class="number">2</span>,dim=<span class="number">-2</span>)</span><br><span class="line"></span><br><span class="line">  <span class="keyword">with</span> B,H,W,N:</span><br><span class="line">    pos = pyro.sample(<span class="string">'obj_param'</span>,dist.Normal(torch.zeros(<span class="number">2</span>),torch.ones(<span class="number">2</span>)))</span><br><span class="line">    logit = pyro.sample(<span class="string">'obj_logit'</span>,dist.Normal(torch.tensor(<span class="number">-1.</span>),torch.ones(<span class="number">1</span>)))</span><br><span class="line">    </span><br><span class="line">  out , imgs_ = render(pos,logit)</span><br><span class="line">  imgs = pyro.sample(<span class="string">'images'</span>,</span><br><span class="line">                     dist.Normal(imgs_ , <span class="number">0.01</span>*torch.ones_like(imgs_)).to_event(<span class="number">2</span>) , obs=obs)</span><br><span class="line">  <span class="keyword">return</span> out , imgs</span><br></pre></td></tr></table></figure>
+
+<p>從模型直接做抽樣，物件的深淺反映可能出現的機率</p>
+<p><img src="/media/sample1.png" alt="sample1"><br><img src="/media/sample2.png" alt="sample2"></p>
+<h2 id="Guide"><a href="#Guide" class="headerlink" title="Guide"></a>Guide</h2><p>接著來做估計，可以先嘗試看看點估計，看看VI方法能不能估計出想要的隱藏變量</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">guide = AutoDelta(pyro.poutine.block(model, expose=[<span class="string">"obj_param"</span>,<span class="string">"obj_logit"</span>]))</span><br></pre></td></tr></table></figure>
+
+<p>或是用Amortized inference，引入一個估計模型訓練神經網路直接去預測隱藏變量</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">encoder = nn.Sequential(nn.Conv2d(<span class="number">1</span>,<span class="number">16</span>,<span class="number">3</span>,<span class="number">2</span>,<span class="number">1</span>),</span><br><span class="line">                        nn.ReLU(),</span><br><span class="line">                        nn.Conv2d(<span class="number">16</span>,<span class="number">32</span>,<span class="number">3</span>,<span class="number">2</span>,<span class="number">1</span>),</span><br><span class="line">                        nn.ReLU(),</span><br><span class="line">                        nn.Conv2d(<span class="number">32</span>,<span class="number">32</span>,<span class="number">3</span>,<span class="number">2</span>,<span class="number">1</span>),</span><br><span class="line">                        nn.ReLU(),</span><br><span class="line">                        nn.Conv2d(<span class="number">32</span>,<span class="number">16</span>,<span class="number">3</span>,<span class="number">2</span>,<span class="number">1</span>),</span><br><span class="line">                        nn.ReLU(),</span><br><span class="line">                        nn.Conv2d(<span class="number">16</span>,<span class="number">6</span>,<span class="number">1</span>,<span class="number">1</span>))</span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">guide</span><span class="params">(imgs)</span>:</span></span><br><span class="line">  pyro.module(<span class="string">"encoder"</span>, encoder)</span><br><span class="line">  feats = encoder(imgs).permute(<span class="number">0</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">1</span>).view(batch_size,H,W,C,<span class="number">3</span>).contiguous()</span><br><span class="line">  s1 = pyro.sample(<span class="string">'obj_logit'</span>,dist.Delta(feats[:,:,:,:,:<span class="number">1</span>]))</span><br><span class="line">  s2 = pyro.sample(<span class="string">'obj_param'</span>,dist.Delta(feats[:,:,:,:,<span class="number">1</span>:]))</span><br></pre></td></tr></table></figure>
+
+<h2 id="Inference"><a href="#Inference" class="headerlink" title="Inference"></a>Inference</h2><p>當 Model 與 Guide 都定義好後，就用VI方法來訓練囉！（比自己從頭寫，方便多了呀！）</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">pyro.clear_param_store()</span><br><span class="line">elbo = Trace_ELBO()</span><br><span class="line">optim = pyro.optim.Adam(&#123;<span class="string">'lr'</span>: <span class="number">1e-3</span>&#125;)</span><br><span class="line">svi = SVI(model, guide, optim, loss=elbo)</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> _ <span class="keyword">in</span> range(<span class="number">1000</span>):</span><br><span class="line">  loss = svi.step(imgs)</span><br><span class="line">print(loss)</span><br></pre></td></tr></table></figure>
+
+<h2 id="Result"><a href="#Result" class="headerlink" title="Result"></a>Result</h2><p>把訓練過後的 guide 所估計的物件框畫在訓練資料上來看看，可以看到還蠻不錯的</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">idx = <span class="number">0</span></span><br><span class="line">filter_img_param_ = get_bbox(obj_param_[idx],obj_logit_[idx],t=<span class="number">0.5</span>)</span><br><span class="line"></span><br><span class="line">plt.figure(figsize=(<span class="number">5</span>, <span class="number">5</span>))</span><br><span class="line">plt.imshow(imgs[idx].view(img_size,img_size).detach().numpy(),cmap=<span class="string">'gray'</span>)</span><br><span class="line">currentAxis=plt.gca()</span><br><span class="line"><span class="keyword">for</span> p <span class="keyword">in</span> filter_img_param_:</span><br><span class="line">  x,y = param_to_px(p)</span><br><span class="line">  rect=patches.Rectangle((x<span class="number">-5</span>, y<span class="number">-5</span>),obj_size,obj_size,linewidth=<span class="number">1</span>,edgecolor=<span class="string">'r'</span>,facecolor=<span class="string">'none'</span>)</span><br><span class="line">  currentAxis.add_patch(rect)</span><br></pre></td></tr></table></figure>
+
+<p><img src="/media/sample3.png" alt="sample3"></p>
+<p>目前我們是直接用模型來生成訓練資料，生成的資料完全符合模型假設，當然比較容易訓練，我們來換個生成訓練資料的方式，用均勻分布的方式抽樣物件數量與位置，還有把物件換成圓形</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">draw_sprites</span><span class="params">()</span>:</span></span><br><span class="line">  img = Image.new(<span class="string">'L'</span>, (<span class="number">64</span>, <span class="number">64</span>))</span><br><span class="line">  drawer = ImageDraw.Draw(img)</span><br><span class="line">  num_sprite = randint(<span class="number">1</span>,<span class="number">5</span>)</span><br><span class="line"></span><br><span class="line">  <span class="keyword">for</span> i <span class="keyword">in</span> range(num_sprite):</span><br><span class="line">    x = randint(<span class="number">0</span>,img_size - obj_size)</span><br><span class="line">    y = randint(<span class="number">0</span>,img_size - obj_size)</span><br><span class="line">    drawer.ellipse((x,y,x+obj_size,y+obj_size),fill=(<span class="number">255</span>))</span><br><span class="line">  <span class="keyword">return</span> img</span><br></pre></td></tr></table></figure>
+
+<p><img src="/media/train2.png" alt="train2"><br><img src="/media/train2-2.png" alt="train2-2"></p>
+<p>經過訓練後結果<br><img src="/media/test2-1.png" alt="test2-1"><br><img src="/media/test2-2.png" alt="test2-2"></p>
+<h2 id="結語"><a href="#結語" class="headerlink" title="結語"></a>結語</h2><p>本篇介紹了一個 Unsupervised object detection 的方法，我們定義了一個影像生成的過程與模型，我們假設所看到的影像背後都有一些隱藏的<strong>生成參數</strong>，我們如果能很好的估計出來，就能也生成出接近一樣的影像（影像還原誤差），所以我們可以透過著個方式，來評斷估計的隱變量好壞，進而去訓練估計模型預測隱變量，物件座標也只是其中的一種隱變量，還有物件大小、類別、甚至光影都可以是，都可以套用這個框架去延伸，當然本篇只是淺嚐而止，只是一個概念驗證，離能真的用在真實影像上的物件偵測還非常的遠，但多少能換個思路去理解<strong>生成模型</strong>或是<strong>非監督式學習</strong>能怎樣扮演其他學習任務的基石。</p>
+<p>下篇已經大概知道要寫什麼，但還沒寫之前都不敢說，敬請期待！</p>
+<h2 id="Refernece"><a href="#Refernece" class="headerlink" title="Refernece"></a>Refernece</h2><ul>
+<li><a href="http://e2crawfo.github.io/pdfs/spair_aaai_2019.pdf" target="_blank" rel="noopener">Spatially Invariant Unsupervised Object Detection with Convolutional Neural<br>Networks
+</a></li>
+<li><a href="https://arxiv.org/abs/1603.08575" target="_blank" rel="noopener">Attend, Infer, Repeat: Fast Scene Understanding with Generative Models</a></li>
+<li><a href="https://pyro.ai/examples/air.html" target="_blank" rel="noopener">Attend Infer Repeat - Pyro</a></li>
+</ul>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/generative-model/" rel="tag"># generative model</a>
+          
+            <a href="/tags/variational-inference/" rel="tag"># variational inference</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/12/03/vi-3/" rel="next" title="漫談 Variational Inference (三)">
+                <i class="fa fa-chevron-left"></i> 漫談 Variational Inference (三)
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目錄
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            本站概要
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">odie</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">11</span>
+                    <span class="site-state-item-name">文章</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">5</span>
+                    <span class="site-state-item-name">分類</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">4</span>
+                    <span class="site-state-item-name">標籤</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#可微分渲染器"><span class="nav-number">1.</span> <span class="nav-text">可微分渲染器</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Yolo-like-generative-model"><span class="nav-number">2.</span> <span class="nav-text">Yolo-like generative model</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Guide"><span class="nav-number">3.</span> <span class="nav-text">Guide</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Inference"><span class="nav-number">4.</span> <span class="nav-text">Inference</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Result"><span class="nav-number">5.</span> <span class="nav-text">Result</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#結語"><span class="nav-number">6.</span> <span class="nav-text">結語</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Refernece"><span class="nav-number">7.</span> <span class="nav-text">Refernece</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love" id="animate"> 
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">odie</span>
+
+  
+
+  
+</div>
+
+
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 強力驅動</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主題 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Muse</a> v6.0.6</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.0.6"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.0.6"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.0.6"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.0.6"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.0.6"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+
+  
+    
+      <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/npm/mathjax@2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+
+    
+  
+
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
