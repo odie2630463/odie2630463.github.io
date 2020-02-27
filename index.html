@@ -321,6 +321,190 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://odie2630463.github.io/2020/02/27/stacked-capsule-net/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="odie">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="odie's whisper">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2020/02/27/stacked-capsule-net/" itemprop="url">Stacked Capsule Autoencoders</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">發表於</span>
+              
+              <time title="創建於" itemprop="dateCreated datePublished" datetime="2020-02-27T11:16:04+08:00">2020-02-27</time>
+            
+
+            
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分類於</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/paper/" itemprop="url" rel="index"><span itemprop="name">paper</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>Hinton 大神於2017年提出 <a href="http://papers.nips.cc/paper/6975-dynamic-routing-between-capsules" target="_blank" rel="noopener"><em>Dynamic Routing Between Capsules</em></a>，探討了CNN的缺陷並提出Capsules概念，2018的 <a href="https://openreview.net/forum?id=HJWLfGWRb" target="_blank" rel="noopener"><em>Matrix capsules with EM routing</em></a> 改進了其中 routing 機制，到2019年這篇 <a href="https://arxiv.org/abs/1906.06818" target="_blank" rel="noopener"><em>Stacked Capsule Autoencoders</em></a> 算是這個系列的集大成，概念脈絡更為清楚，大神也在 AAAI 2020 給了一個關於本篇論文的<a href="https://youtu.be/UX8OubxsY8w" target="_blank" rel="noopener">演講</a>，他還特別提到說請大家忘記前兩篇論文，這篇才是對的！足見這一篇論文的重要性</p>
+<p>本篇文章不是詳細解讀 <em>Stacked Capsule Autoencoders (SCAE)</em>的文章，如果想要深入了解這篇論文，推薦看第一作者寫的<a href="http://akosiorek.github.io/ml/2019/06/23/stacked_capsule_autoencoders.html" target="_blank" rel="noopener">部落格文章</a>與搭配論文服用，本篇文章是想從生成模型的角度去重新理解與實作 capsule 這個概念，建議先閱讀過<a href="https://odie2630463.github.io/2020/01/13/un-obj-detection/">之前的文章</a>，用生成模型概念來解決物件偵測問題跟本論文也有很相似的概念，另外很有趣的是，上述提到第一作者的部落格文章中，有提到<strong>為何不用生成模型的方式來實現 SCAE</strong>，這也啟發我一些思考與後續探討，故寫成文章與大家討論</p>
+<h2 id="Stacked-Capsule-Autoencoders"><a href="#Stacked-Capsule-Autoencoders" class="headerlink" title="Stacked Capsule Autoencoders"></a>Stacked Capsule Autoencoders</h2><p><img src="/media/15826453668789.jpg" alt="-w628"></p>
+<h3 id="Capsules"><a href="#Capsules" class="headerlink" title="Capsules"></a>Capsules</h3><p>在進入模型架構前，想先來談談 capsule 這個概念，上述提到的作者部落格文章中有定義什麼是 capsule</p>
+<blockquote>
+<p>We define a capsule as a specialized part of a model that describes an abstract entity, e.g. a part or an object.</p>
+</blockquote>
+<p>形象上的描述就是<strong>積木與組合</strong>，一個高階概念是由多個低階概念所組成，低階的概念就像是積木一樣，我們可以組合出更複雜的物件，也就是高階概念，組合的過程中，我們要去選取適當的積木，還要去旋轉積木的姿態來組合；從視覺辨識物件的過程來看，我們看到一個影像並想要知道那是什麼，先去辨識影像用了哪些積木，那些積木分別姿態是什麼，這比起直接去辨識整個物件，積木多半更為簡單，更容易辨識出來，然後我們將有用到的積木搜集起來，看看用這些積木能組合出什麼，透過訓練我們希望特定積木的集合，會對應到特定的物件類別，看到收集到的積木就知道這大概只能組合出哪些東西，我們就能知道這個影像是什麼，這樣組合過程可以一直下去，從只有幾個積木，但到最後可以組合出非常複雜的影像或概念</p>
+<p><img src="/media/15827059978437.jpg" alt="-w723"></p>
+<p>概覽一下整個模型，輸入影像後找出使用的積木與姿態，再來根據收集到的積木來看能組合出哪些物件</p>
+<h3 id="Part-Capsule-Autoencoder"><a href="#Part-Capsule-Autoencoder" class="headerlink" title="Part Capsule Autoencoder"></a>Part Capsule Autoencoder</h3><p><img src="/media/15827065660727.jpg" alt="-w823"></p>
+<p>第一部分訓練模型去學習積木與估計姿態，姿態包含位置、大小、旋轉，積木是指有多個小張影像，例如輸入影像是28x28，積木影像為11x11，輸入影像後模型會輸出每個積木影像的使用機率與姿態，然後還原輸入影像來訓練模型與積木影像</p>
+<h3 id="Object-Capsule-Autoencoder"><a href="#Object-Capsule-Autoencoder" class="headerlink" title="Object Capsule Autoencoder"></a>Object Capsule Autoencoder</h3><p><img src="/media/15827065812926.jpg" alt="-w628"></p>
+<p>第二部分為把積木聚合成物件，使用 EM 的迭代估計的方式(類似 Kmean)，來找出中心點，且加入 sparsity regularization 讓積木只集中在某幾個物件上</p>
+<h2 id="Implementation"><a href="#Implementation" class="headerlink" title="Implementation"></a>Implementation</h2><p>接著我們來嘗試實作 Part Capsule Autoencoder，這個部分與之前實作<a href="https://odie2630463.github.io/2020/01/13/un-obj-detection/">非監督的物件偵測</a>概念非常類似，也同樣使用 Pyro 來實作，生成模型必須使用積木去組合出影像，積木的使用機率與姿態就是隱藏變量，我們訓練另一個模型去估計這些變量</p>
+<p><a href="https://colab.research.google.com/drive/1KS0HdxNWj0RplDimwqHfYx7M3qgSScw3" target="_blank" rel="noopener">我的實作於Colab</a></p>
+<h3 id="Model"><a href="#Model" class="headerlink" title="Model"></a>Model</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">model</span><span class="params">(self,obs)</span>:</span></span><br><span class="line">        templates = pyro.param(<span class="string">'templates'</span>,self.templates)</span><br><span class="line">    </span><br><span class="line">        B = pyro.plate(<span class="string">'B'</span>,size=self.batch_size,dim=<span class="number">-3</span>)</span><br><span class="line">        N = pyro.plate(<span class="string">'N'</span>,size=self.n_templates,dim=<span class="number">-2</span>)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">with</span> B,N:</span><br><span class="line">            part_view = pyro.sample(<span class="string">'part_view'</span>,dist.Normal(self.part_view_prior_mu,</span><br><span class="line">                                                            self.part_view_prior_scale))</span><br><span class="line">            part_logit = pyro.sample(<span class="string">'part_logit'</span>,dist.Normal(self.part_logit_prior_mu,</span><br><span class="line">                                                            self.part_logit_prior_scale))</span><br><span class="line">  </span><br><span class="line">        layers , imgs_ = self.render(part_view , part_logit)</span><br><span class="line">        imgs = pyro.sample(<span class="string">'images'</span>,dist.Normal(imgs_ , <span class="number">0.01</span>*torch.ones_like(imgs_)).to_event(<span class="number">2</span>) , obs=obs)</span><br><span class="line">        <span class="keyword">return</span> layers , imgs</span><br></pre></td></tr></table></figure>
+
+<p>大致看一下生成模型定義，詳細的函數可以參考我的實作，templates 就是積木，這裡用了16個11x11的影像，並且也是可以學習的，接著每個 templates 都去抽樣出姿態與使用機率，最後用可微分渲染器去生成影像，我們直接生成影像來看看</p>
+<p><img src="/media/init_sample.png" alt="init_sample"></p>
+<h3 id="Result"><a href="#Result" class="headerlink" title="Result"></a>Result</h3><p>模型在 MNIST 訓練資料集上訓練，得到一些不錯的結果，下圖左邊是訓練資料，右邊是還原影像</p>
+<p><img src="/media/15827324081106.jpg" alt=""></p>
+<p>我們來看看模型學到的積木長怎樣，左邊是論文給出的模型訓練在 MNIST 學到的結果，右邊則是實作得到的，雖然與論文設定不完全相同，但顯示模型有學到一些有用的積木</p>
+<p><img src="/media/15827326690735.jpg" alt=""></p>
+<p>右邊是依照使用機率排序的 templates，左邊是將使用機率高於0.5的積木來組合成影像，顯示模型是會去選擇重要的積木來組成，不是全部都用上</p>
+<p><img src="/media/15827329342409.jpg" alt=""></p>
+<p>在測試資料集上，也有不錯的效果，右邊是測試資料，左邊是還原影像</p>
+<p><img src="/media/15827334224668.jpg" alt=""></p>
+<p>選取機率高的積木來組成</p>
+<p><img src="/media/15827335436074.jpg" alt=""></p>
+<h2 id="結語"><a href="#結語" class="headerlink" title="結語"></a>結語</h2><p>我的實作版本與<a href="https://github.com/google-research/google-research/tree/master/stacked_capsule_autoencoders" target="_blank" rel="noopener">官方實作</a>是不同的，雖然 capsules 概念上是相同的，不同點在於 SCAE 官方實作把 capsules 概念放到估計模型上，而我的版本則放到生成模型裡</p>
+<ul>
+<li>官方實作：capsules encoder + decoder</li>
+<li>我的實作：encoder + capsules generator</li>
+</ul>
+<p>作者認為 SCAE 當然可以用生成模型來實作，像是我們很熟悉的VI框架一樣，定義一個生成模型與估計模型，用估計模型去近似隱藏變量，但我們往往都是把一些結構先驗知識放到生成模型去，我們會去假設變量之間關係與結構等等，再用任意的模型去當估計模型，但這樣的缺點就是隱變量後驗分佈往往很複雜，估計模型不容易很好近似，估計模型應該需要更多的額外知識來輔助，如果估計模型裡沒有 capsules 架構是無法學到 capsule-like representations 的</p>
+<p>我的版本則是照生成模型的概念去實現，如果解碼器太過強大，它是可以忽略編碼器給的訊息，依然可以把資料還原得很好，所以就算編碼器是含有有先驗結構的，也可能無法學到有用資訊，所以我將先驗結構放在生成模型，用估計模型來近似，希望可以得到近似 capsule-like representations 的結果</p>
+<p>另外提一個不太嚴謹的想法，我認為人在辨識物件大部分時間都是依賴快速、自動化，接近反射的過程，這是後你用上的是估計模型，是一種快速近似；當你便是不出是什麼物體時候，你會停下來思考，甚至轉動你的視角，嘗試去精確估計，這時候你不會使用估計模型，而是專為你眼前的物體重新去估計變量，經過一些思考計算，你可以精確估計出來積木與姿態等等，並也可以在腦海中還原出這個物體，再把估計到的這些變量丟給估計模型去重新訓練，這裡用的就是監督式學習，估計模型看到這樣的物體就應該要估計出怎樣的變量數值，所以兩種快慢的認知模式，是同時存在與交互訓練的</p>
+<p>敬啟期待！</p>
+<h2 id="Refernece"><a href="#Refernece" class="headerlink" title="Refernece"></a>Refernece</h2><ul>
+<li><a href="http://akosiorek.github.io/ml/2019/06/23/stacked_capsule_autoencoders.html" target="_blank" rel="noopener">第一作者的部落格文章</a></li>
+<li><a href="https://arxiv.org/pdf/1906.06818.pdf" target="_blank" rel="noopener">Stacked Capsule Autoencoders</a></li>
+</ul>
+
+          
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://odie2630463.github.io/2020/01/13/un-obj-detection/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -413,7 +597,10 @@
 <p>我們觀測到現實，並且對於其中一些隱藏變量進行估計，例如物件數量、位置、描述等等，然後在腦海中重新生成一幅「心智圖畫」來代表所看到的現實，如果所估計的變量正確，我們期待所生成的心智圖畫會跟現實很像；本篇我們使用 Pyro 來實作一個生成模型，模型生成個別物件的資訊與位置，然後透過可微分渲染器來產生影像，最後使用VI老方法來訓練生成模型與估計模型。</p>
 <p>本篇主要參考了 Refernece 中的第一篇，為 AAAI 2019 的論文，簡化了模型與實驗的設定，並且用 Pyro 機率語言更簡明的實作出來（原始論文的code是tf 1.x寫的，很難讀呀…）</p>
 <p><a href="https://colab.research.google.com/drive/1UVX-RNf_FyZF0kwueQmCrCVCKX9WUemP" target="_blank" rel="noopener">我的實作於Colab</a></p>
-<h2 id="可微分渲染器"><a href="#可微分渲染器" class="headerlink" title="可微分渲染器"></a>可微分渲染器</h2><p>假設我們有個物件要擺到畫布上，我們可以透過 Indexing，例如<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">我們希望擺的位置是可以**微分**的，該怎麼做呢？我們可以用 Spatial transformer networks (STN) 來將物件放到畫布上，並且整個過程是可以微分的，但這裡不詳述STN的原理</span><br><span class="line"></span><br><span class="line">```python</span><br><span class="line">def render(obj_param,logit):</span><br><span class="line">  img_param = obj_to_image_param(obj_param)</span><br><span class="line">  img_param = img_param.view(-1,2)</span><br><span class="line">  bs = img_param.size(0)</span><br><span class="line">  </span><br><span class="line">  logit = (logit_scale*logit.view(-1,1,1,1)).sigmoid()</span><br><span class="line">  obj = torch.ones((bs,1,obj_size,obj_size))*logit</span><br><span class="line">  </span><br><span class="line">  theta = torch.zeros(bs,2,3)</span><br><span class="line">  theta[:,0,0] = ratio</span><br><span class="line">  theta[:,1,1] = ratio</span><br><span class="line">  theta[:,:,-1] = img_param</span><br><span class="line">  </span><br><span class="line">  grid = affine_grid(theta, torch.Size((bs,1,img_size,img_size)))</span><br><span class="line">  out = grid_sample(obj, grid)</span><br><span class="line">  out = out.view(batch_size,-1,1,img_size,img_size)</span><br><span class="line">  return out , out.sum(1)</span><br></pre></td></tr></table></figure></p>
+<h2 id="可微分渲染器"><a href="#可微分渲染器" class="headerlink" title="可微分渲染器"></a>可微分渲染器</h2><p>假設我們有個物件要擺到畫布上，我們可以透過 Indexing，例如array[i,j] = obj，但 Pytorch indexing 是無法傳遞梯度的，例子中的 i,j 是無法微分的，所以我們沒辦法去有梯度改變i,j，把物件移動到我們想要的地方，這可是大問題呀！沒有可微分的渲染器，就沒辦法生成影像，所以可微分程式是很重要的呀！（關於可微分程式之後再跟大家分享討論）</p>
+<p>我們希望擺的位置是可以<strong>微分</strong>的，該怎麼做呢？我們可以用 Spatial transformer networks (STN) 來將物件放到畫布上，並且整個過程是可以微分的，但這裡不詳述STN的原理</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">render</span><span class="params">(obj_param,logit)</span>:</span></span><br><span class="line">  img_param = obj_to_image_param(obj_param)</span><br><span class="line">  img_param = img_param.view(<span class="number">-1</span>,<span class="number">2</span>)</span><br><span class="line">  bs = img_param.size(<span class="number">0</span>)</span><br><span class="line">  </span><br><span class="line">  logit = (logit_scale*logit.view(<span class="number">-1</span>,<span class="number">1</span>,<span class="number">1</span>,<span class="number">1</span>)).sigmoid()</span><br><span class="line">  obj = torch.ones((bs,<span class="number">1</span>,obj_size,obj_size))*logit</span><br><span class="line">  </span><br><span class="line">  theta = torch.zeros(bs,<span class="number">2</span>,<span class="number">3</span>)</span><br><span class="line">  theta[:,<span class="number">0</span>,<span class="number">0</span>] = ratio</span><br><span class="line">  theta[:,<span class="number">1</span>,<span class="number">1</span>] = ratio</span><br><span class="line">  theta[:,:,<span class="number">-1</span>] = img_param</span><br><span class="line">  </span><br><span class="line">  grid = affine_grid(theta, torch.Size((bs,<span class="number">1</span>,img_size,img_size)))</span><br><span class="line">  out = grid_sample(obj, grid)</span><br><span class="line">  out = out.view(batch_size,<span class="number">-1</span>,<span class="number">1</span>,img_size,img_size)</span><br><span class="line">  <span class="keyword">return</span> out , out.sum(<span class="number">1</span>)</span><br></pre></td></tr></table></figure>
+
 <p>obj_param 代表物件的座標參數，logit 代表物件出現的機率，透過 obj_to_image_param 做參數的轉換，把物件參數轉換到畫布參數，並放到 theta 中用 affine_grid 與 grid_sample 函數來把物件放到畫布上</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">out , img_ = render(torch.zeros(<span class="number">2</span>,<span class="number">4</span>,<span class="number">4</span>,<span class="number">2</span>,<span class="number">2</span>),torch.ones(<span class="number">2</span>,<span class="number">4</span>,<span class="number">4</span>,<span class="number">2</span>,<span class="number">1</span>))</span><br></pre></td></tr></table></figure>
 
@@ -1903,180 +2090,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://odie2630463.github.io/2018/04/15/sketchrnn/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="odie">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="odie's whisper">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/04/15/sketchrnn/" itemprop="url">SketchRNN</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">發表於</span>
-              
-              <time title="創建於" itemprop="dateCreated datePublished" datetime="2018-04-15T23:19:54+08:00">2018-04-15</time>
-            
-
-            
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分類於</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/paper/" itemprop="url" rel="index"><span itemprop="name">paper</span></a></span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>之前Google有一個有趣的小遊戲<a href="https://quickdraw.withgoogle.com" target="_blank" rel="noopener">Quickdraw</a>，給你一個題目要你20秒內畫出來，當然除了讓你打發時間外，大家手繪大作也變成機器的精神糧食，拿來學習了XD</p>
-<p><img src="/media/7FB391C9-1C05-4051-88FE-80FF2961ED8F.png" alt="7FB391C9-1C05-4051-88FE-80FF2961ED8F"></p>
-<p>SketchRNN是一個向量軌跡的生成模型，這篇<a href="https://research.googleblog.com/2017/04/teaching-machines-to-draw.html" target="_blank" rel="noopener">部落格文章</a>可以看到很多有趣的結果，詳細的模型架構與訓練過程可以看這一篇<a href="https://arxiv.org/abs/1704.03477" target="_blank" rel="noopener">論文</a></p>
-<p><img src="/media/15231614597425.png" alt=""></p>
-<p>整個模型可分為3個部分：</p>
-<ul>
-<li>Seq2seq autoencoder + Gaussian mixture model</li>
-<li>Variational inference</li>
-</ul>
-<h2 id="Seq2seq-autoencoder-Gaussian-mixture-model"><a href="#Seq2seq-autoencoder-Gaussian-mixture-model" class="headerlink" title="Seq2seq autoencoder + Gaussian mixture model"></a>Seq2seq autoencoder + Gaussian mixture model</h2><p>Seq2seq+GMM這是很經典的序列至序列架構，最早是出現在這一篇<a href="https://arxiv.org/pdf/1308.0850.pdf" target="_blank" rel="noopener">Generating Sequences With Recurrent Neural Networks</a>，並且有一個<a href="https://www.cs.toronto.edu/~graves/handwriting.html" target="_blank" rel="noopener">手寫筆跡產生</a>的應用，也算是這個塗鴉的前身之作，作者是Alex Graves，他可是Hinton的博士生喔！</p>
-<p>架構上是一個序列至序列模型，$encoder$是雙向的LSTM，每個時間點吃入筆跡$x,y$實數座標值與下筆狀態類別，而$decoder$是單向的LSTM，每個時間點輸出下一個時間點的筆跡座標與下筆狀態</p>
-<p>下筆狀態是離散的類別，這個很容易處理，只是簡單的分類問題，用個$softmax$就搞定了，輸出就是離散類別的機率分佈，但是連續資料我們要怎麼處理呢？怎麼建立連續的機率分佈呢？</p>
-<p>我們常用高斯分佈是來作為連續變量的機率分佈，每個時間點可以輸出$\mu,\sigma$來建立高斯分佈，但對於複雜的資料，只用一個高斯分佈可能太過簡單，無法很好的捕捉資料的分佈，例如：筆跡座標可能有蠻大的變異性，很難說每個時間點就只用一個高斯就能代表，畢盡畫圖很隨性的呀～</p>
-<p>所以用上GMM來增加輸出的機率分佈複雜度，由多個高斯分佈組合起來，形成一個複雜的機率分佈，如圖，用上3個不同參數的高斯分佈，就能組合出紅色的這個複雜分佈</p>
-<p><img src="/media/15231633369052.jpg" alt=""></p>
-<p>每個時間點模型給出的預測$\hat{y}$為公式17，分別為是否停止、GMM的參數等，就可以直接做MLE訓練</p>
-<p><img src="/media/BD8784F1-5355-4BE2-A726-BBB86271B739.png" alt="BD8784F1-5355-4BE2-A726-BBB86271B739"></p>
-<h2 id="Variational-inference"><a href="#Variational-inference" class="headerlink" title="Variational inference"></a>Variational inference</h2><p>VAE這個東西是一個非常熱門的生成模型，下次有機會再開一篇來講講，如果想簡單了解，可以直接看<a href="https://jaan.io/what-is-variational-autoencoder-vae-tutorial/" target="_blank" rel="noopener">這裡</a>，直觀上SketchRNN透過$encoder$把序列壓縮到一個連續空間中，這個連續空間為高斯分佈$N(0,1)$，而$decoder$要能還原回原本的軌跡，但我們能從連續空間中抽樣出新的點，由$decoder$產生軌跡，就是產生新的塗鴉囉！</p>
-<h2 id="Implement-and-Tricks"><a href="#Implement-and-Tricks" class="headerlink" title="Implement and Tricks"></a>Implement and Tricks</h2><p>我的<a href="https://github.com/odie2630463/sketch_rnn" target="_blank" rel="noopener">實作版本</a>，以Pytorch實作</p>
-<h3 id="Data-processing-amp-Training"><a href="#Data-processing-amp-Training" class="headerlink" title="Data processing &amp; Training"></a>Data processing &amp; Training</h3><ul>
-<li><a href="https://github.com/googlecreativelab/quickdraw-dataset" target="_blank" rel="noopener">quickdraw-dataset</a>有約300多種類別的塗鴉資料可以下載</li>
-<li>軌跡都是正整數，要先剔除一些異常資料，再做縮放正規化，這部分可以參考實作</li>
-<li>Google實作還有做一些data augmentation，有些類別資料很少，但我實作裡沒有</li>
-<li>訓練就跟一般seq2seq差不多，而且蠻快的</li>
-<li>產生新樣本時，不論是直接從高斯抽樣，或是從給定的序列去還原，有一個部分要特別注意，就是tempture，調整tempture會改變輸出的機率分佈，低的溫度會使分佈更為集中，高的反之亦然，溫度低筆觸就不會到處亂飄，因為機率分佈集中了，比較容易畫出像樣的圖，而溫度高，分佈就比較均勻，筆觸就容易到處飄，就不容易畫出好的圖 </li>
-</ul>
-<p><img src="/media/15233779330198.jpg" alt=""></p>
-<h2 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h2><ol>
-<li><a href="https://research.googleblog.com/2017/04/teaching-machines-to-draw.html" target="_blank" rel="noopener">Teaching Machines to Draw</a></li>
-<li><a href="https://arxiv.org/abs/1704.03477" target="_blank" rel="noopener">A Neural Representation of Sketch Drawings</a></li>
-<li><a href="https://github.com/tensorflow/magenta/tree/master/magenta/models/sketch_rnn" target="_blank" rel="noopener">magenta/models/sketch_rnn</a></li>
-<li><a href="https://github.com/alexis-jacq/Pytorch-Sketch-RNN" target="_blank" rel="noopener">alexis-jacq/Pytorch-Sketch-RNN</a></li>
-</ol>
-
-          
-        
-      
-    </div>
-
-    
-
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -2124,7 +2137,7 @@
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">11</span>
+                    <span class="site-state-item-count">12</span>
                     <span class="site-state-item-name">文章</span>
                   </a>
                 </div>
@@ -2170,7 +2183,9 @@
                     
                       
                     
-                    <span class="site-state-item-count">4</span>
+                      
+                    
+                    <span class="site-state-item-count">5</span>
                     <span class="site-state-item-name">標籤</span>
                   </a>
                 </div>

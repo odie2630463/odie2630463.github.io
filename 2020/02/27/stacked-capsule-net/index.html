@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-TW">
+<head>
+  <!-- hexo-inject:begin --><!-- hexo-inject:end --><meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.0.6" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.0.6">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.0.6">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.0.6">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.0.6" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '6.0.6',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="Hinton 大神於2017年提出 Dynamic Routing Between Capsules，探討了CNN的缺陷並提出Capsules概念，2018的 Matrix capsules with EM routing 改進了其中 routing 機制，到2019年這篇 Stacked Capsule Autoencoders 算是這個系列的集大成，概念脈絡更為清楚，大神也在 AAAI 202">
+<meta name="keywords" content="generative model,probabilistic programming">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Stacked Capsule Autoencoders">
+<meta property="og:url" content="https://odie2630463.github.io/2020/02/27/stacked-capsule-net/index.html">
+<meta property="og:site_name" content="odie&#39;s whisper">
+<meta property="og:description" content="Hinton 大神於2017年提出 Dynamic Routing Between Capsules，探討了CNN的缺陷並提出Capsules概念，2018的 Matrix capsules with EM routing 改進了其中 routing 機制，到2019年這篇 Stacked Capsule Autoencoders 算是這個系列的集大成，概念脈絡更為清楚，大神也在 AAAI 202">
+<meta property="og:locale" content="zh-TW">
+<meta property="og:image" content="https://odie2630463.github.io/media/15826453668789.jpg">
+<meta property="og:image" content="https://odie2630463.github.io/media/15827059978437.jpg">
+<meta property="og:image" content="https://odie2630463.github.io/media/15827065660727.jpg">
+<meta property="og:image" content="https://odie2630463.github.io/media/15827065812926.jpg">
+<meta property="og:image" content="https://odie2630463.github.io/media/init_sample.png">
+<meta property="og:image" content="https://odie2630463.github.io/media/15827324081106.jpg">
+<meta property="og:image" content="https://odie2630463.github.io/media/15827326690735.jpg">
+<meta property="og:image" content="https://odie2630463.github.io/media/15827329342409.jpg">
+<meta property="og:image" content="https://odie2630463.github.io/media/15827334224668.jpg">
+<meta property="og:image" content="https://odie2630463.github.io/media/15827335436074.jpg">
+<meta property="og:updated_time" content="2020-02-27T03:16:49.696Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Stacked Capsule Autoencoders">
+<meta name="twitter:description" content="Hinton 大神於2017年提出 Dynamic Routing Between Capsules，探討了CNN的缺陷並提出Capsules概念，2018的 Matrix capsules with EM routing 改進了其中 routing 機制，到2019年這篇 Stacked Capsule Autoencoders 算是這個系列的集大成，概念脈絡更為清楚，大神也在 AAAI 202">
+<meta name="twitter:image" content="https://odie2630463.github.io/media/15826453668789.jpg">
+
+
+
+
+
+
+  <link rel="canonical" href="https://odie2630463.github.io/2020/02/27/stacked-capsule-net/"/>
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>Stacked Capsule Autoencoders | odie's whisper</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-TW">
+
+  
+  
+    
+  
+
+  <!-- hexo-inject:begin --><!-- hexo-inject:end --><div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> 
+
+<div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">odie's whisper</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切換導航欄">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+          
+  <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首頁</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-about">
+    <a href="/about/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-user"></i> <br />關於</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />標籤</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分類</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />歸檔</a>
+</li>
+
+      
+
+      
+    </ul>
+  
+
+  
+    
+
+    
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+    
+
+  
+
+
+  
+
+  
+</nav>
+
+
+  
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://odie2630463.github.io/2020/02/27/stacked-capsule-net/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="odie">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="odie's whisper">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Stacked Capsule Autoencoders</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">發表於</span>
+              
+              <time title="創建於" itemprop="dateCreated datePublished" datetime="2020-02-27T11:16:04+08:00">2020-02-27</time>
+            
+
+            
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分類於</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/paper/" itemprop="url" rel="index"><span itemprop="name">paper</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>Hinton 大神於2017年提出 <a href="http://papers.nips.cc/paper/6975-dynamic-routing-between-capsules" target="_blank" rel="noopener"><em>Dynamic Routing Between Capsules</em></a>，探討了CNN的缺陷並提出Capsules概念，2018的 <a href="https://openreview.net/forum?id=HJWLfGWRb" target="_blank" rel="noopener"><em>Matrix capsules with EM routing</em></a> 改進了其中 routing 機制，到2019年這篇 <a href="https://arxiv.org/abs/1906.06818" target="_blank" rel="noopener"><em>Stacked Capsule Autoencoders</em></a> 算是這個系列的集大成，概念脈絡更為清楚，大神也在 AAAI 2020 給了一個關於本篇論文的<a href="https://youtu.be/UX8OubxsY8w" target="_blank" rel="noopener">演講</a>，他還特別提到說請大家忘記前兩篇論文，這篇才是對的！足見這一篇論文的重要性</p>
+<p>本篇文章不是詳細解讀 <em>Stacked Capsule Autoencoders (SCAE)</em>的文章，如果想要深入了解這篇論文，推薦看第一作者寫的<a href="http://akosiorek.github.io/ml/2019/06/23/stacked_capsule_autoencoders.html" target="_blank" rel="noopener">部落格文章</a>與搭配論文服用，本篇文章是想從生成模型的角度去重新理解與實作 capsule 這個概念，建議先閱讀過<a href="https://odie2630463.github.io/2020/01/13/un-obj-detection/">之前的文章</a>，用生成模型概念來解決物件偵測問題跟本論文也有很相似的概念，另外很有趣的是，上述提到第一作者的部落格文章中，有提到<strong>為何不用生成模型的方式來實現 SCAE</strong>，這也啟發我一些思考與後續探討，故寫成文章與大家討論</p>
+<h2 id="Stacked-Capsule-Autoencoders"><a href="#Stacked-Capsule-Autoencoders" class="headerlink" title="Stacked Capsule Autoencoders"></a>Stacked Capsule Autoencoders</h2><p><img src="/media/15826453668789.jpg" alt="-w628"></p>
+<h3 id="Capsules"><a href="#Capsules" class="headerlink" title="Capsules"></a>Capsules</h3><p>在進入模型架構前，想先來談談 capsule 這個概念，上述提到的作者部落格文章中有定義什麼是 capsule</p>
+<blockquote>
+<p>We define a capsule as a specialized part of a model that describes an abstract entity, e.g. a part or an object.</p>
+</blockquote>
+<p>形象上的描述就是<strong>積木與組合</strong>，一個高階概念是由多個低階概念所組成，低階的概念就像是積木一樣，我們可以組合出更複雜的物件，也就是高階概念，組合的過程中，我們要去選取適當的積木，還要去旋轉積木的姿態來組合；從視覺辨識物件的過程來看，我們看到一個影像並想要知道那是什麼，先去辨識影像用了哪些積木，那些積木分別姿態是什麼，這比起直接去辨識整個物件，積木多半更為簡單，更容易辨識出來，然後我們將有用到的積木搜集起來，看看用這些積木能組合出什麼，透過訓練我們希望特定積木的集合，會對應到特定的物件類別，看到收集到的積木就知道這大概只能組合出哪些東西，我們就能知道這個影像是什麼，這樣組合過程可以一直下去，從只有幾個積木，但到最後可以組合出非常複雜的影像或概念</p>
+<p><img src="/media/15827059978437.jpg" alt="-w723"></p>
+<p>概覽一下整個模型，輸入影像後找出使用的積木與姿態，再來根據收集到的積木來看能組合出哪些物件</p>
+<h3 id="Part-Capsule-Autoencoder"><a href="#Part-Capsule-Autoencoder" class="headerlink" title="Part Capsule Autoencoder"></a>Part Capsule Autoencoder</h3><p><img src="/media/15827065660727.jpg" alt="-w823"></p>
+<p>第一部分訓練模型去學習積木與估計姿態，姿態包含位置、大小、旋轉，積木是指有多個小張影像，例如輸入影像是28x28，積木影像為11x11，輸入影像後模型會輸出每個積木影像的使用機率與姿態，然後還原輸入影像來訓練模型與積木影像</p>
+<h3 id="Object-Capsule-Autoencoder"><a href="#Object-Capsule-Autoencoder" class="headerlink" title="Object Capsule Autoencoder"></a>Object Capsule Autoencoder</h3><p><img src="/media/15827065812926.jpg" alt="-w628"></p>
+<p>第二部分為把積木聚合成物件，使用 EM 的迭代估計的方式(類似 Kmean)，來找出中心點，且加入 sparsity regularization 讓積木只集中在某幾個物件上</p>
+<h2 id="Implementation"><a href="#Implementation" class="headerlink" title="Implementation"></a>Implementation</h2><p>接著我們來嘗試實作 Part Capsule Autoencoder，這個部分與之前實作<a href="https://odie2630463.github.io/2020/01/13/un-obj-detection/">非監督的物件偵測</a>概念非常類似，也同樣使用 Pyro 來實作，生成模型必須使用積木去組合出影像，積木的使用機率與姿態就是隱藏變量，我們訓練另一個模型去估計這些變量</p>
+<p><a href="https://colab.research.google.com/drive/1KS0HdxNWj0RplDimwqHfYx7M3qgSScw3" target="_blank" rel="noopener">我的實作於Colab</a></p>
+<h3 id="Model"><a href="#Model" class="headerlink" title="Model"></a>Model</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">model</span><span class="params">(self,obs)</span>:</span></span><br><span class="line">        templates = pyro.param(<span class="string">'templates'</span>,self.templates)</span><br><span class="line">    </span><br><span class="line">        B = pyro.plate(<span class="string">'B'</span>,size=self.batch_size,dim=<span class="number">-3</span>)</span><br><span class="line">        N = pyro.plate(<span class="string">'N'</span>,size=self.n_templates,dim=<span class="number">-2</span>)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">with</span> B,N:</span><br><span class="line">            part_view = pyro.sample(<span class="string">'part_view'</span>,dist.Normal(self.part_view_prior_mu,</span><br><span class="line">                                                            self.part_view_prior_scale))</span><br><span class="line">            part_logit = pyro.sample(<span class="string">'part_logit'</span>,dist.Normal(self.part_logit_prior_mu,</span><br><span class="line">                                                            self.part_logit_prior_scale))</span><br><span class="line">  </span><br><span class="line">        layers , imgs_ = self.render(part_view , part_logit)</span><br><span class="line">        imgs = pyro.sample(<span class="string">'images'</span>,dist.Normal(imgs_ , <span class="number">0.01</span>*torch.ones_like(imgs_)).to_event(<span class="number">2</span>) , obs=obs)</span><br><span class="line">        <span class="keyword">return</span> layers , imgs</span><br></pre></td></tr></table></figure>
+
+<p>大致看一下生成模型定義，詳細的函數可以參考我的實作，templates 就是積木，這裡用了16個11x11的影像，並且也是可以學習的，接著每個 templates 都去抽樣出姿態與使用機率，最後用可微分渲染器去生成影像，我們直接生成影像來看看</p>
+<p><img src="/media/init_sample.png" alt="init_sample"></p>
+<h3 id="Result"><a href="#Result" class="headerlink" title="Result"></a>Result</h3><p>模型在 MNIST 訓練資料集上訓練，得到一些不錯的結果，下圖左邊是訓練資料，右邊是還原影像</p>
+<p><img src="/media/15827324081106.jpg" alt=""></p>
+<p>我們來看看模型學到的積木長怎樣，左邊是論文給出的模型訓練在 MNIST 學到的結果，右邊則是實作得到的，雖然與論文設定不完全相同，但顯示模型有學到一些有用的積木</p>
+<p><img src="/media/15827326690735.jpg" alt=""></p>
+<p>右邊是依照使用機率排序的 templates，左邊是將使用機率高於0.5的積木來組合成影像，顯示模型是會去選擇重要的積木來組成，不是全部都用上</p>
+<p><img src="/media/15827329342409.jpg" alt=""></p>
+<p>在測試資料集上，也有不錯的效果，右邊是測試資料，左邊是還原影像</p>
+<p><img src="/media/15827334224668.jpg" alt=""></p>
+<p>選取機率高的積木來組成</p>
+<p><img src="/media/15827335436074.jpg" alt=""></p>
+<h2 id="結語"><a href="#結語" class="headerlink" title="結語"></a>結語</h2><p>我的實作版本與<a href="https://github.com/google-research/google-research/tree/master/stacked_capsule_autoencoders" target="_blank" rel="noopener">官方實作</a>是不同的，雖然 capsules 概念上是相同的，不同點在於 SCAE 官方實作把 capsules 概念放到估計模型上，而我的版本則放到生成模型裡</p>
+<ul>
+<li>官方實作：capsules encoder + decoder</li>
+<li>我的實作：encoder + capsules generator</li>
+</ul>
+<p>作者認為 SCAE 當然可以用生成模型來實作，像是我們很熟悉的VI框架一樣，定義一個生成模型與估計模型，用估計模型去近似隱藏變量，但我們往往都是把一些結構先驗知識放到生成模型去，我們會去假設變量之間關係與結構等等，再用任意的模型去當估計模型，但這樣的缺點就是隱變量後驗分佈往往很複雜，估計模型不容易很好近似，估計模型應該需要更多的額外知識來輔助，如果估計模型裡沒有 capsules 架構是無法學到 capsule-like representations 的</p>
+<p>我的版本則是照生成模型的概念去實現，如果解碼器太過強大，它是可以忽略編碼器給的訊息，依然可以把資料還原得很好，所以就算編碼器是含有有先驗結構的，也可能無法學到有用資訊，所以我將先驗結構放在生成模型，用估計模型來近似，希望可以得到近似 capsule-like representations 的結果</p>
+<p>另外提一個不太嚴謹的想法，我認為人在辨識物件大部分時間都是依賴快速、自動化，接近反射的過程，這是後你用上的是估計模型，是一種快速近似；當你便是不出是什麼物體時候，你會停下來思考，甚至轉動你的視角，嘗試去精確估計，這時候你不會使用估計模型，而是專為你眼前的物體重新去估計變量，經過一些思考計算，你可以精確估計出來積木與姿態等等，並也可以在腦海中還原出這個物體，再把估計到的這些變量丟給估計模型去重新訓練，這裡用的就是監督式學習，估計模型看到這樣的物體就應該要估計出怎樣的變量數值，所以兩種快慢的認知模式，是同時存在與交互訓練的</p>
+<p>敬啟期待！</p>
+<h2 id="Refernece"><a href="#Refernece" class="headerlink" title="Refernece"></a>Refernece</h2><ul>
+<li><a href="http://akosiorek.github.io/ml/2019/06/23/stacked_capsule_autoencoders.html" target="_blank" rel="noopener">第一作者的部落格文章</a></li>
+<li><a href="https://arxiv.org/pdf/1906.06818.pdf" target="_blank" rel="noopener">Stacked Capsule Autoencoders</a></li>
+</ul>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/generative-model/" rel="tag"># generative model</a>
+          
+            <a href="/tags/probabilistic-programming/" rel="tag"># probabilistic programming</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/01/13/un-obj-detection/" rel="next" title="Unsupervised object detection with pyro">
+                <i class="fa fa-chevron-left"></i> Unsupervised object detection with pyro
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目錄
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            本站概要
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">odie</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">12</span>
+                    <span class="site-state-item-name">文章</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">5</span>
+                    <span class="site-state-item-name">分類</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">5</span>
+                    <span class="site-state-item-name">標籤</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Stacked-Capsule-Autoencoders"><span class="nav-number">1.</span> <span class="nav-text">Stacked Capsule Autoencoders</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Capsules"><span class="nav-number">1.1.</span> <span class="nav-text">Capsules</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Part-Capsule-Autoencoder"><span class="nav-number">1.2.</span> <span class="nav-text">Part Capsule Autoencoder</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Object-Capsule-Autoencoder"><span class="nav-number">1.3.</span> <span class="nav-text">Object Capsule Autoencoder</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Implementation"><span class="nav-number">2.</span> <span class="nav-text">Implementation</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Model"><span class="nav-number">2.1.</span> <span class="nav-text">Model</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Result"><span class="nav-number">2.2.</span> <span class="nav-text">Result</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#結語"><span class="nav-number">3.</span> <span class="nav-text">結語</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Refernece"><span class="nav-number">4.</span> <span class="nav-text">Refernece</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love" id="animate"> 
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">odie</span>
+
+  
+
+  
+</div>
+
+
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 強力驅動</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主題 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Muse</a> v6.0.6</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.0.6"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.0.6"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.0.6"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.0.6"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.0.6"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+
+  
+    
+      <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/npm/mathjax@2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+
+    
+  
+
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

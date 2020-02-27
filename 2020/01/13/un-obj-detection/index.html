@@ -115,7 +115,7 @@
 <meta property="og:image" content="https://odie2630463.github.io/media/train2-2.png">
 <meta property="og:image" content="https://odie2630463.github.io/media/test2-1.png">
 <meta property="og:image" content="https://odie2630463.github.io/media/test2-2.png">
-<meta property="og:updated_time" content="2020-01-13T09:17:48.379Z">
+<meta property="og:updated_time" content="2020-02-25T14:13:49.238Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Unsupervised object detection with pyro">
 <meta name="twitter:description" content="我們是如何理解由視覺接受到的場景與畫面呢？因為雙眼立體視覺的關係，我們能輕易透過深度感知，來區分遠近背景與物件，個別物件再去理解其位置、描述，甚至是物件之間的關係，我們對於場景的理解是「物件導向」的，我們先有了各種物件的概念，再去感知它們出現在哪？它們有怎樣的描述？它們有什麼關係？腦袋如何生成一幅「心智圖畫」來反應世界？ 我們觀測到現實，並且對於其中一些隱藏變量進行估計，例如物件數量、位置、描述等">
@@ -422,7 +422,10 @@
 <p>我們觀測到現實，並且對於其中一些隱藏變量進行估計，例如物件數量、位置、描述等等，然後在腦海中重新生成一幅「心智圖畫」來代表所看到的現實，如果所估計的變量正確，我們期待所生成的心智圖畫會跟現實很像；本篇我們使用 Pyro 來實作一個生成模型，模型生成個別物件的資訊與位置，然後透過可微分渲染器來產生影像，最後使用VI老方法來訓練生成模型與估計模型。</p>
 <p>本篇主要參考了 Refernece 中的第一篇，為 AAAI 2019 的論文，簡化了模型與實驗的設定，並且用 Pyro 機率語言更簡明的實作出來（原始論文的code是tf 1.x寫的，很難讀呀…）</p>
 <p><a href="https://colab.research.google.com/drive/1UVX-RNf_FyZF0kwueQmCrCVCKX9WUemP" target="_blank" rel="noopener">我的實作於Colab</a></p>
-<h2 id="可微分渲染器"><a href="#可微分渲染器" class="headerlink" title="可微分渲染器"></a>可微分渲染器</h2><p>假設我們有個物件要擺到畫布上，我們可以透過 Indexing，例如<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">我們希望擺的位置是可以**微分**的，該怎麼做呢？我們可以用 Spatial transformer networks (STN) 來將物件放到畫布上，並且整個過程是可以微分的，但這裡不詳述STN的原理</span><br><span class="line"></span><br><span class="line">```python</span><br><span class="line">def render(obj_param,logit):</span><br><span class="line">  img_param = obj_to_image_param(obj_param)</span><br><span class="line">  img_param = img_param.view(-1,2)</span><br><span class="line">  bs = img_param.size(0)</span><br><span class="line">  </span><br><span class="line">  logit = (logit_scale*logit.view(-1,1,1,1)).sigmoid()</span><br><span class="line">  obj = torch.ones((bs,1,obj_size,obj_size))*logit</span><br><span class="line">  </span><br><span class="line">  theta = torch.zeros(bs,2,3)</span><br><span class="line">  theta[:,0,0] = ratio</span><br><span class="line">  theta[:,1,1] = ratio</span><br><span class="line">  theta[:,:,-1] = img_param</span><br><span class="line">  </span><br><span class="line">  grid = affine_grid(theta, torch.Size((bs,1,img_size,img_size)))</span><br><span class="line">  out = grid_sample(obj, grid)</span><br><span class="line">  out = out.view(batch_size,-1,1,img_size,img_size)</span><br><span class="line">  return out , out.sum(1)</span><br></pre></td></tr></table></figure></p>
+<h2 id="可微分渲染器"><a href="#可微分渲染器" class="headerlink" title="可微分渲染器"></a>可微分渲染器</h2><p>假設我們有個物件要擺到畫布上，我們可以透過 Indexing，例如array[i,j] = obj，但 Pytorch indexing 是無法傳遞梯度的，例子中的 i,j 是無法微分的，所以我們沒辦法去有梯度改變i,j，把物件移動到我們想要的地方，這可是大問題呀！沒有可微分的渲染器，就沒辦法生成影像，所以可微分程式是很重要的呀！（關於可微分程式之後再跟大家分享討論）</p>
+<p>我們希望擺的位置是可以<strong>微分</strong>的，該怎麼做呢？我們可以用 Spatial transformer networks (STN) 來將物件放到畫布上，並且整個過程是可以微分的，但這裡不詳述STN的原理</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">render</span><span class="params">(obj_param,logit)</span>:</span></span><br><span class="line">  img_param = obj_to_image_param(obj_param)</span><br><span class="line">  img_param = img_param.view(<span class="number">-1</span>,<span class="number">2</span>)</span><br><span class="line">  bs = img_param.size(<span class="number">0</span>)</span><br><span class="line">  </span><br><span class="line">  logit = (logit_scale*logit.view(<span class="number">-1</span>,<span class="number">1</span>,<span class="number">1</span>,<span class="number">1</span>)).sigmoid()</span><br><span class="line">  obj = torch.ones((bs,<span class="number">1</span>,obj_size,obj_size))*logit</span><br><span class="line">  </span><br><span class="line">  theta = torch.zeros(bs,<span class="number">2</span>,<span class="number">3</span>)</span><br><span class="line">  theta[:,<span class="number">0</span>,<span class="number">0</span>] = ratio</span><br><span class="line">  theta[:,<span class="number">1</span>,<span class="number">1</span>] = ratio</span><br><span class="line">  theta[:,:,<span class="number">-1</span>] = img_param</span><br><span class="line">  </span><br><span class="line">  grid = affine_grid(theta, torch.Size((bs,<span class="number">1</span>,img_size,img_size)))</span><br><span class="line">  out = grid_sample(obj, grid)</span><br><span class="line">  out = out.view(batch_size,<span class="number">-1</span>,<span class="number">1</span>,img_size,img_size)</span><br><span class="line">  <span class="keyword">return</span> out , out.sum(<span class="number">1</span>)</span><br></pre></td></tr></table></figure>
+
 <p>obj_param 代表物件的座標參數，logit 代表物件出現的機率，透過 obj_to_image_param 做參數的轉換，把物件參數轉換到畫布參數，並放到 theta 中用 affine_grid 與 grid_sample 函數來把物件放到畫布上</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">out , img_ = render(torch.zeros(<span class="number">2</span>,<span class="number">4</span>,<span class="number">4</span>,<span class="number">2</span>,<span class="number">2</span>),torch.ones(<span class="number">2</span>,<span class="number">4</span>,<span class="number">4</span>,<span class="number">2</span>,<span class="number">1</span>))</span><br></pre></td></tr></table></figure>
 
@@ -504,6 +507,10 @@
 
           <div class="post-nav-prev post-nav-item">
             
+              <a href="/2020/02/27/stacked-capsule-net/" rel="prev" title="Stacked Capsule Autoencoders">
+                Stacked Capsule Autoencoders <i class="fa fa-chevron-right"></i>
+              </a>
+            
           </div>
         </div>
       
@@ -576,7 +583,7 @@
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">11</span>
+                    <span class="site-state-item-count">12</span>
                     <span class="site-state-item-name">文章</span>
                   </a>
                 </div>
@@ -622,7 +629,9 @@
                     
                       
                     
-                    <span class="site-state-item-count">4</span>
+                      
+                    
+                    <span class="site-state-item-count">5</span>
                     <span class="site-state-item-name">標籤</span>
                   </a>
                 </div>
