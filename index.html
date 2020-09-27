@@ -321,6 +321,170 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://odie2630463.github.io/2020/09/28/langevin/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="odie">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="odie's whisper">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2020/09/28/langevin/" itemprop="url">Langevin Dynamics 抽樣方法</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">發表於</span>
+              
+              <time title="創建於" itemprop="dateCreated datePublished" datetime="2020-09-28T01:15:38+08:00">2020-09-28</time>
+            
+
+            
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分類於</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/mcmc/" itemprop="url" rel="index"><span itemprop="name">mcmc</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>最近在研究基於<a href="https://yilundu.github.io/ebm.pdf" target="_blank" rel="noopener">能量</a>或是<a href="https://arxiv.org/pdf/1907.05600.pdf" target="_blank" rel="noopener">梯度</a>的生成模型，在生成的過程都會需要用到抽樣方法，來從模型學習到的分佈中抽樣出樣本，如何於高維度的空間中抽樣是一個重要問題，例如 Markov chain Monte Carlo 這類演算法，是基於建構一個狀態轉移矩陣來得到一個平穩分佈，最後可以從平穩分佈中來抽樣出樣本，網路上有很多<a href="https://zhuanlan.zhihu.com/p/37121528" target="_blank" rel="noopener">好文章講解 MCMC</a>，雖然在一般常見的深度學習任務中，並不常用 MCMC 來求解積分或是抽樣，但是依然是一個很重要且值得學習的方法</p>
+<p>Langevin Dynamics 抽樣方法是另一類抽樣方法，不是基於建構狀態轉移矩陣，而是基於粒子運動假設來產生穩定分佈，MCMC 中的狀態轉移矩陣常常都是隨機跳到下一個點，所以過程會產生很多被拒絕的樣本，我們希望一直往能量低或是機率高的區域前進，但在高維度空間中單憑隨機亂跳，很難抽樣出高機率的樣本，所以如果我們能引入梯度或是一些粒子運動假設，能幫助我們知道高機率的區域應該往哪裡，這樣便可以大幅加速我們抽樣的效率與品質；之前在很多論文中就常看到這個抽樣方法被使用，單看公式非常像梯度下降演算法，只是更新梯度前乘上一個係數並且多加上了一個隨機項，這樣竟然就可以變成一個抽樣方法，優化跟抽樣能一起做，覺得非常神奇，本篇文章是 <a href="https://youtu.be/3-KzIjoFJy4" target="_blank" rel="noopener">Langevin Dynamics for sampling and global optimization</a> 的學習心得，底下的圖也都是來自於<a href="https://docs.google.com/presentation/d/1_yekoTv_CHRgz6vsT57RMDESHjlnbGQvq8tYCxKLyW0/edit?usp=sharing" target="_blank" rel="noopener">投影片</a>，但因為內容涉及隨機微分方程，我沒有系統性的學習過，所以僅是整理一下整個 Langevin Dynamics 抽樣方法的概念，數學推導可能不夠嚴謹，如果觀念上有錯誤也請大家不吝指教囉！</p>
+<h2 id="Langevin-Dynamics"><a href="#Langevin-Dynamics" class="headerlink" title="Langevin Dynamics"></a>Langevin Dynamics</h2><p><img src="/media/16012220921569.jpg" alt=""></p>
+<p>Langevin Dynamics 用隨機微分方程描述了粒子移動，粒子的移動隨著所在位置對能量函數的梯度與隨機項來決定，粒子當下位置$x$可由上一個位置$x’$來形成一個常態分佈所抽樣出來，像是下圖動畫顯示了粒子的運動過程 </p>
+<p><img src="/media/single_particles.gif" alt="single_particles-w551"></p>
+<h3 id="Fokker-Planck-equation"><a href="#Fokker-Planck-equation" class="headerlink" title="Fokker-Planck equation"></a>Fokker-Planck equation</h3><p>基於上節的運動假設，在某個時間點粒子出現在空間中的的機率，我們可以用 Fokker-Planck equation 來描述，由上一個微小時間點$x’$的位置分佈來計算出特定時間點$x$的位置分佈</p>
+<p>$$p(x, t)=\int d x^{\prime} p\left(x, t \mid x^{\prime}, t-d t\right) p\left(x^{\prime}, t-d t\right)$$</p>
+<p>粒子的位置分佈會隨時間演化，最終形成一個穩定分佈 (紅色的線)，而這個穩定分佈的樣子跟能量函數有關係</p>
+<p><img src="/media/FP_simulation_stat.gif" alt="FP_simulation_stat"></p>
+<h3 id="Stationary-distribution"><a href="#Stationary-distribution" class="headerlink" title="Stationary distribution"></a>Stationary distribution</h3><p>我們可以對 Fokker-Planck equation 微分，代表這個機率函數變化的梯度，如果當機率函數不在變化時，也就意指為穩定分佈，求解微分的過程蠻複雜的，用到很多數學技巧，我這邊就不細講，有興趣的人可以自行參考錄影與投影片</p>
+<p><img src="/media/16012223963491.jpg" alt=""></p>
+<p>第一行就是最後得到的微分公式，我們假設穩定分佈可以寫成 $P_G(x)$，帶入得到的微分公式且當微分為0時，我們就解出 $P_G(x)$裡的 $T$，故之後我們只要知道能量函數 $U(x)$，就可以馬上知道穩定分佈的樣子</p>
+<h2 id="Sampling-via-the-Langevin-dynamics"><a href="#Sampling-via-the-Langevin-dynamics" class="headerlink" title="Sampling via the Langevin dynamics"></a>Sampling via the Langevin dynamics</h2><p>我們知道依照 Langevin Dynamics 最終粒子出現的機率會是一個穩定分佈，如果這個穩定分佈恰好是我們設定或是想要的，那穩定後粒子的運動過程就等於抽樣</p>
+<p><img src="/media/16012226874494.jpg" alt=""></p>
+<p>我們希望從 $p(x)$ 來抽樣出樣本，就是希望穩定分佈最後演化成這樣，我們要讓 $p_G(x) = p(x)$，故得到 $U(x) = - \log p(x)$ 與 $ \sigma=\sqrt{2} $ ，所以帶回去我們的運動假設中</p>
+<p><img src="/media/16012251092195.jpg" alt=""></p>
+<p>我們終於得到了使用 Langevin dynamics 進行抽樣的方法</p>
+<h2 id="結語"><a href="#結語" class="headerlink" title="結語"></a>結語</h2><p>本文章我們稍微了解了使用 Langevin dynamics 來進行抽樣背後的原理，雖然抽樣方法可以直接當作工具去使用它，而不用管背後的原理，但是深入理解背後的原理也是相當有趣，很佩服這些受物理啟發的工作，後續我會分享一些生成模型的實作，並使用 Langevin dynamics 抽樣方法，敬請期待！</p>
+<h2 id="Refernece"><a href="#Refernece" class="headerlink" title="Refernece"></a>Refernece</h2><ul>
+<li><a href="https://youtu.be/3-KzIjoFJy4" target="_blank" rel="noopener">Langevin Dynamics for sampling and global optimization</a> </li>
+<li><a href="https://zhuanlan.zhihu.com/p/37121528" target="_blank" rel="noopener">马尔可夫链蒙特卡罗算法（MCMC）</a></li>
+<li><a href="https://www.zhihu.com/question/24334476" target="_blank" rel="noopener">Metropolis 蒙特卡罗方法、动力学蒙特卡罗方法、分子动力学方法这三种模拟方法有何特点与差异？</a></li>
+</ul>
+
+          
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://odie2630463.github.io/2020/02/27/stacked-capsule-net/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1915,181 +2079,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://odie2630463.github.io/2018/07/11/flow/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="odie">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="odie's whisper">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/07/11/flow/" itemprop="url">Normalizing Flows</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">發表於</span>
-              
-              <time title="創建於" itemprop="dateCreated datePublished" datetime="2018-07-11T15:13:46+08:00">2018-07-11</time>
-            
-
-            
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分類於</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/flow/" itemprop="url" rel="index"><span itemprop="name">flow</span></a></span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>機率分佈估計一直是機器學習中的核心問題，不論是分類問題估計條件機率分佈$p(y|x)$，或是建立生成模型$p(x,z)$，我們都在從資料中建立與學習出一個機率分佈</p>
-<p>基本上機率分佈能做到兩件事：</p>
-<ul>
-<li>評估機率值，計算$p(x)$，給樣本空間的點都要能得出機率值</li>
-<li>抽樣，計算$x \sim p(x)$，要能依機率密度來抽樣出樣本</li>
-</ul>
-<p>近年來，深度學習能有效率的近似高維度的複雜函數，而且還有完整的訓練框架，再加上機率圖模型概念，能表示很多複雜的機率分佈，但雖然能訓練模型來估計複雜分佈，也不一定能做到上面說的兩件事，比如：GAN很容易生成新影像，但卻無法給一張影像估計其機率值</p>
-<p>Normalizing Flows是一種能將機率分佈轉換到另一個分佈的數學工具，例如把簡單的高斯分佈轉換至另一個複雜的機率分佈上，且依然能有效率評估機率值與抽樣，最近很多論文也開始結合這類的方法，例如：</p>
-<ul>
-<li><a href="https://arxiv.org/abs/1606.04934" target="_blank" rel="noopener">Improving Variational Inference with Inverse Autoregressive Flow</a></li>
-<li><a href="https://arxiv.org/abs/1705.07057" target="_blank" rel="noopener">Masked Autoregressive Flow for Density Estimation</a></li>
-</ul>
-<p>還有最近由OpenAI剛發佈的<a href="https://arxiv.org/abs/1807.03039" target="_blank" rel="noopener">Glow: Generative Flow with Invertible 1x1 Convolutions</a>，基於Normalizing Flows的一種生成模型，也能生成高品質影像與表徵解構</p>
-<h2 id="Normalizing-Flows"><a href="#Normalizing-Flows" class="headerlink" title="Normalizing Flows"></a>Normalizing Flows</h2><p>假設隨機變量$x \in \mathbb{R}^d$且$x \sim p(x)$，與一個可逆函數$f:\mathbb{R}^d \mapsto \mathbb{R}^d$，我們用$f$來轉換$p(x)$，可以得到另一個經過轉換的隨機變量$y=f(x)$與其機率分佈：</p>
-<p>$<br>p(y) = p(x) \left|<br>    \mathrm{det} \frac{<br>      \partial f^{-1}<br>    }{<br>      \partial x<br>    }<br>  \right|<br>  = p(x) \left|<br>    \mathrm{det} \frac{<br>      \partial f<br>    }{<br>      \partial x<br>    }<br>  \right| ^{-1} \tag{1}<br>$</p>
-<p>行列式直觀上是面積或是體積的<strong>縮放比例</strong>，機率為機率密度函數底下的面積，轉換函數$f$可是視為一種面積的縮放變形，所以$p(y)$由轉換前$p(x)$底下的面積，乘上行列式表示的面積縮放比例，因為是計算$f^{-1}$，這個面積縮放的比例係指$y$對於$x$影響，意思是說，給$y$來反推回去$x$，並調整$p(x)$底下的面積大小，但也可以計算向前過程的行列式來取倒數。</p>
-<p>假設轉換由多個轉換函數$f_1 \dots f_K$組成，$z_k$為轉換過程的中間變量，最後得到的隨機變量$y = f_K \circ \dots\circ f_1(x)$，計算$\log p(y)$為：</p>
-<p>$<br>\log p(y) = \log p(x) - \sum_{k=1}^K<br>  \log<br>    \left|<br>    \mathrm{det} \frac{<br>      \partial f_k<br>    }{<br>      \partial \mathbf{x}_{k-1}<br>    }<br>  \right| \tag{2}<br>$</p>
-<p>綜上所述，NF有兩種計算，<strong>第一是向前抽樣計算</strong>，從$x$計算$y = f(x)$，<strong>第二是向後機率機算</strong>，給一個$y$要一步步往後做逆運算，計算轉換的行列式總和，最後求出$x$。</p>
-<p>計算行列式最差時候需要<a href="https://en.wikipedia.org/wiki/Computational_complexity_of_mathematical_operations" target="_blank" rel="noopener">$O(n^3)$</a>，所以就需要設計比較容易計算行列式的轉換，例如 Masked Autoregressive Flow、Inversed Autoregressive Flow、RealNVP等等模型，有用到Autoregressive的特性，所以行列式會很容易計算，這些方法會在後續的文章中介紹。</p>
-<h2 id="Training-and-sampling"><a href="#Training-and-sampling" class="headerlink" title="Training and sampling"></a>Training and sampling</h2><p><strong>向後機率計算</strong>，我們可以直接對$\log p(y)$最大化機率似然，給$y$透過一系列反函數得到$x$與行列式總和</p>
-<p>$$x = f_1^{-1}  \circ \dots \circ f_K^{-1}(y)$$</p>
-<p>最後計算$\log p(x)$減去轉換過程行列式總和(如式子2)，就可以算出$\log p(y)$，當然也就能用上SGD等優化方法，一系列轉換函數就當成一層層神經網路來訓練，只是這裡要求要能計算反函數</p>
-<p><strong>向前抽樣計算</strong>，出新樣本很直觀，就從$p(x)$抽樣出$x$，經過轉換即可得到$y$，而且還能順便得到$p(y)$</p>
-<p>$$y = f_K  \circ \dots \circ f_1(x)$$</p>
-<hr>
-<p>如果對NF有興趣，參考資料都很值得一看！</p>
-<p>之後會放上一個實作例子，把簡單機率分佈轉換至一個複雜分佈，還有關於最近NF發展的論文的閱讀心得</p>
-<h2 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h2><ol>
-<li><a href="https://blog.evjang.com/2018/01/nf1.html" target="_blank" rel="noopener">Normalizing Flows Tutorial by Eric Jang</a></li>
-<li><a href="http://akosiorek.github.io/ml/2018/04/03/norm_flows.html" target="_blank" rel="noopener">Normalizing Flows by Adam Kosiorek</a></li>
-<li><a href="https://www.slideshare.net/daynap1204/improving-variational-inference-with-inverse-autoregressive-flow-71213560" target="_blank" rel="noopener">Improving Variational Inference with Inverse Autoregressive Flow</a></li>
-<li><a href="http://bjlkeng.github.io/posts/variational-autoencoders-with-inverse-autoregressive-flows/" target="_blank" rel="noopener">Variational Autoencoders with Inverse Autoregressive Flows</a></li>
-</ol>
-
-          
-        
-      
-    </div>
-
-    
-
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -2137,7 +2126,7 @@
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">12</span>
+                    <span class="site-state-item-count">13</span>
                     <span class="site-state-item-name">文章</span>
                   </a>
                 </div>
@@ -2160,7 +2149,9 @@
                     
                       
                     
-                    <span class="site-state-item-count">5</span>
+                      
+                    
+                    <span class="site-state-item-count">6</span>
                     <span class="site-state-item-name">分類</span>
                   </a>
                 </div>

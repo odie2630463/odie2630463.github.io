@@ -321,6 +321,181 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://odie2630463.github.io/2018/07/11/flow/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="odie">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="odie's whisper">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/07/11/flow/" itemprop="url">Normalizing Flows</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">發表於</span>
+              
+              <time title="創建於" itemprop="dateCreated datePublished" datetime="2018-07-11T15:13:46+08:00">2018-07-11</time>
+            
+
+            
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分類於</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/flow/" itemprop="url" rel="index"><span itemprop="name">flow</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>機率分佈估計一直是機器學習中的核心問題，不論是分類問題估計條件機率分佈$p(y|x)$，或是建立生成模型$p(x,z)$，我們都在從資料中建立與學習出一個機率分佈</p>
+<p>基本上機率分佈能做到兩件事：</p>
+<ul>
+<li>評估機率值，計算$p(x)$，給樣本空間的點都要能得出機率值</li>
+<li>抽樣，計算$x \sim p(x)$，要能依機率密度來抽樣出樣本</li>
+</ul>
+<p>近年來，深度學習能有效率的近似高維度的複雜函數，而且還有完整的訓練框架，再加上機率圖模型概念，能表示很多複雜的機率分佈，但雖然能訓練模型來估計複雜分佈，也不一定能做到上面說的兩件事，比如：GAN很容易生成新影像，但卻無法給一張影像估計其機率值</p>
+<p>Normalizing Flows是一種能將機率分佈轉換到另一個分佈的數學工具，例如把簡單的高斯分佈轉換至另一個複雜的機率分佈上，且依然能有效率評估機率值與抽樣，最近很多論文也開始結合這類的方法，例如：</p>
+<ul>
+<li><a href="https://arxiv.org/abs/1606.04934" target="_blank" rel="noopener">Improving Variational Inference with Inverse Autoregressive Flow</a></li>
+<li><a href="https://arxiv.org/abs/1705.07057" target="_blank" rel="noopener">Masked Autoregressive Flow for Density Estimation</a></li>
+</ul>
+<p>還有最近由OpenAI剛發佈的<a href="https://arxiv.org/abs/1807.03039" target="_blank" rel="noopener">Glow: Generative Flow with Invertible 1x1 Convolutions</a>，基於Normalizing Flows的一種生成模型，也能生成高品質影像與表徵解構</p>
+<h2 id="Normalizing-Flows"><a href="#Normalizing-Flows" class="headerlink" title="Normalizing Flows"></a>Normalizing Flows</h2><p>假設隨機變量$x \in \mathbb{R}^d$且$x \sim p(x)$，與一個可逆函數$f:\mathbb{R}^d \mapsto \mathbb{R}^d$，我們用$f$來轉換$p(x)$，可以得到另一個經過轉換的隨機變量$y=f(x)$與其機率分佈：</p>
+<p>$<br>p(y) = p(x) \left|<br>    \mathrm{det} \frac{<br>      \partial f^{-1}<br>    }{<br>      \partial x<br>    }<br>  \right|<br>  = p(x) \left|<br>    \mathrm{det} \frac{<br>      \partial f<br>    }{<br>      \partial x<br>    }<br>  \right| ^{-1} \tag{1}<br>$</p>
+<p>行列式直觀上是面積或是體積的<strong>縮放比例</strong>，機率為機率密度函數底下的面積，轉換函數$f$可是視為一種面積的縮放變形，所以$p(y)$由轉換前$p(x)$底下的面積，乘上行列式表示的面積縮放比例，因為是計算$f^{-1}$，這個面積縮放的比例係指$y$對於$x$影響，意思是說，給$y$來反推回去$x$，並調整$p(x)$底下的面積大小，但也可以計算向前過程的行列式來取倒數。</p>
+<p>假設轉換由多個轉換函數$f_1 \dots f_K$組成，$z_k$為轉換過程的中間變量，最後得到的隨機變量$y = f_K \circ \dots\circ f_1(x)$，計算$\log p(y)$為：</p>
+<p>$<br>\log p(y) = \log p(x) - \sum_{k=1}^K<br>  \log<br>    \left|<br>    \mathrm{det} \frac{<br>      \partial f_k<br>    }{<br>      \partial \mathbf{x}_{k-1}<br>    }<br>  \right| \tag{2}<br>$</p>
+<p>綜上所述，NF有兩種計算，<strong>第一是向前抽樣計算</strong>，從$x$計算$y = f(x)$，<strong>第二是向後機率機算</strong>，給一個$y$要一步步往後做逆運算，計算轉換的行列式總和，最後求出$x$。</p>
+<p>計算行列式最差時候需要<a href="https://en.wikipedia.org/wiki/Computational_complexity_of_mathematical_operations" target="_blank" rel="noopener">$O(n^3)$</a>，所以就需要設計比較容易計算行列式的轉換，例如 Masked Autoregressive Flow、Inversed Autoregressive Flow、RealNVP等等模型，有用到Autoregressive的特性，所以行列式會很容易計算，這些方法會在後續的文章中介紹。</p>
+<h2 id="Training-and-sampling"><a href="#Training-and-sampling" class="headerlink" title="Training and sampling"></a>Training and sampling</h2><p><strong>向後機率計算</strong>，我們可以直接對$\log p(y)$最大化機率似然，給$y$透過一系列反函數得到$x$與行列式總和</p>
+<p>$$x = f_1^{-1}  \circ \dots \circ f_K^{-1}(y)$$</p>
+<p>最後計算$\log p(x)$減去轉換過程行列式總和(如式子2)，就可以算出$\log p(y)$，當然也就能用上SGD等優化方法，一系列轉換函數就當成一層層神經網路來訓練，只是這裡要求要能計算反函數</p>
+<p><strong>向前抽樣計算</strong>，出新樣本很直觀，就從$p(x)$抽樣出$x$，經過轉換即可得到$y$，而且還能順便得到$p(y)$</p>
+<p>$$y = f_K  \circ \dots \circ f_1(x)$$</p>
+<hr>
+<p>如果對NF有興趣，參考資料都很值得一看！</p>
+<p>之後會放上一個實作例子，把簡單機率分佈轉換至一個複雜分佈，還有關於最近NF發展的論文的閱讀心得</p>
+<h2 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h2><ol>
+<li><a href="https://blog.evjang.com/2018/01/nf1.html" target="_blank" rel="noopener">Normalizing Flows Tutorial by Eric Jang</a></li>
+<li><a href="http://akosiorek.github.io/ml/2018/04/03/norm_flows.html" target="_blank" rel="noopener">Normalizing Flows by Adam Kosiorek</a></li>
+<li><a href="https://www.slideshare.net/daynap1204/improving-variational-inference-with-inverse-autoregressive-flow-71213560" target="_blank" rel="noopener">Improving Variational Inference with Inverse Autoregressive Flow</a></li>
+<li><a href="http://bjlkeng.github.io/posts/variational-autoencoders-with-inverse-autoregressive-flows/" target="_blank" rel="noopener">Variational Autoencoders with Inverse Autoregressive Flows</a></li>
+</ol>
+
+          
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://odie2630463.github.io/2018/04/15/sketchrnn/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -697,7 +872,7 @@
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">12</span>
+                    <span class="site-state-item-count">13</span>
                     <span class="site-state-item-name">文章</span>
                   </a>
                 </div>
@@ -720,7 +895,9 @@
                     
                       
                     
-                    <span class="site-state-item-count">5</span>
+                      
+                    
+                    <span class="site-state-item-count">6</span>
                     <span class="site-state-item-name">分類</span>
                   </a>
                 </div>
@@ -950,6 +1127,8 @@
 
   
   
+    
+      
     
       
     
