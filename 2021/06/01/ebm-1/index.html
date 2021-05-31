@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-TW">
+<head>
+  <!-- hexo-inject:begin --><!-- hexo-inject:end --><meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.0.6" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.0.6">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.0.6">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.0.6">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.0.6" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '6.0.6',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="基於能量模型（Energy-based model）是一種基於能量函數來定義機率模型的方式，能量函數是用來衡量變數的可能性，為什麼這裡不是說是給出機率呢？因為能量函數的輸出是個實數，能量越小也代表可能性越高，如果要換算成機率就必須要考慮所有的可能性，除上正規化項才能讓這個值符合機率的要求，但求解這個正規化項往往是相當困難的 很多問題其實我們也不用真的去求出正規化項，能量函數已經足夠了，例如分類問題">
+<meta name="keywords" content="generative model,energy-based model">
+<meta property="og:type" content="article">
+<meta property="og:title" content="漫談 Energy-based model">
+<meta property="og:url" content="https://odie2630463.github.io/2021/06/01/ebm-1/index.html">
+<meta property="og:site_name" content="odie&#39;s whisper">
+<meta property="og:description" content="基於能量模型（Energy-based model）是一種基於能量函數來定義機率模型的方式，能量函數是用來衡量變數的可能性，為什麼這裡不是說是給出機率呢？因為能量函數的輸出是個實數，能量越小也代表可能性越高，如果要換算成機率就必須要考慮所有的可能性，除上正規化項才能讓這個值符合機率的要求，但求解這個正規化項往往是相當困難的 很多問題其實我們也不用真的去求出正規化項，能量函數已經足夠了，例如分類問題">
+<meta property="og:locale" content="zh-TW">
+<meta property="og:image" content="https://odie2630463.github.io/media/16224895114966.jpg">
+<meta property="og:updated_time" content="2021-05-31T19:52:28.292Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="漫談 Energy-based model">
+<meta name="twitter:description" content="基於能量模型（Energy-based model）是一種基於能量函數來定義機率模型的方式，能量函數是用來衡量變數的可能性，為什麼這裡不是說是給出機率呢？因為能量函數的輸出是個實數，能量越小也代表可能性越高，如果要換算成機率就必須要考慮所有的可能性，除上正規化項才能讓這個值符合機率的要求，但求解這個正規化項往往是相當困難的 很多問題其實我們也不用真的去求出正規化項，能量函數已經足夠了，例如分類問題">
+<meta name="twitter:image" content="https://odie2630463.github.io/media/16224895114966.jpg">
+
+
+
+
+
+
+  <link rel="canonical" href="https://odie2630463.github.io/2021/06/01/ebm-1/"/>
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>漫談 Energy-based model | odie's whisper</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-TW">
+
+  
+  
+    
+  
+
+  <!-- hexo-inject:begin --><!-- hexo-inject:end --><div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> 
+
+<div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">odie's whisper</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切換導航欄">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+          
+  <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首頁</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-about">
+    <a href="/about/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-user"></i> <br />關於</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />標籤</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分類</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />歸檔</a>
+</li>
+
+      
+
+      
+    </ul>
+  
+
+  
+    
+
+    
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+    
+
+  
+
+
+  
+
+  
+</nav>
+
+
+  
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://odie2630463.github.io/2021/06/01/ebm-1/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="odie">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="odie's whisper">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">漫談 Energy-based model</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">發表於</span>
+              
+              <time title="創建於" itemprop="dateCreated datePublished" datetime="2021-06-01T03:52:28+08:00">2021-06-01</time>
+            
+
+            
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分類於</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/energy-based-model/" itemprop="url" rel="index"><span itemprop="name">energy-based model</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>基於能量模型（Energy-based model）是一種基於<strong>能量函數</strong>來定義機率模型的方式，能量函數是用來衡量變數的<strong>可能性</strong>，為什麼這裡不是說是給出機率呢？因為能量函數的輸出是個實數，能量越小也代表可能性越高，如果要換算成機率就必須要考慮所有的可能性，除上<strong>正規化項</strong>才能讓這個值符合機率的要求，但求解這個正規化項往往是相當困難的</p>
+<p>很多問題其實我們也不用真的去求出正規化項，能量函數已經足夠了，例如分類問題，實際上只需要讓你的目標類別是能量最低的，其他的類別能量提高即可，能量函數的設計相當彈性，所以很多問題其實都可以放入到 EBM 框架裡來解釋，Yann LeCun 大神在最近於 ICLR 2020 也給了個 Keynote 關於 Self-supervised learning 與 EBM 的<a href="https://iclr.cc/virtual_2020/speaker_7.html" target="_blank" rel="noopener">演講</a>，與YT神人 Yannic Kilcher <a href="https://www.youtube.com/watch?v=piaPIKO1MFY" target="_blank" rel="noopener">線上討論 EBM</a>，還有最近有相當多的基於能量的生成模型，甚至都有<a href="https://arxiv.org/abs/2105.05233" target="_blank" rel="noopener">超越 GAN 的表現</a>，這經典有點老派的 EBM 最近又熱了起來，趕緊來看看！</p>
+<h2 id="Energy-based-model"><a href="#Energy-based-model" class="headerlink" title="Energy-based model"></a>Energy-based model</h2><p>假設我們有一個參數為 $\theta$ 的能量函數 $E_\theta(x)$，將輸入變數$x$輸出一個代表能量的實數，所以可以定義出機率函數為</p>
+<p>$$<br>p_{\boldsymbol{\theta}}(\mathbf{x})=\frac{\exp \left(-E_{\boldsymbol{\theta}}(\mathbf{x})\right)}{Z_{\theta}}<br>$$</p>
+<p>為了要滿足機率的要求，定義正規化項 $Z_\theta$ 為各種可能的 x 下能量的總和</p>
+<p>$$<br>Z_{\boldsymbol{\theta}}=\int \exp \left(-E_{\boldsymbol{\theta}}(\mathbf{x})\right) \mathrm{d} \mathbf{x}<br>$$</p>
+<p>我們可以看到 $Z_\theta$ 是個很難求出的項，因為要把所有 x 的能量都計算出來，在高維度的狀況下是無法被求解的，所以我們需要一些方式來近似或是避免直接去計算 $Z_\theta$</p>
+<h2 id="Maximum-likelihood-training-with-MCMC"><a href="#Maximum-likelihood-training-with-MCMC" class="headerlink" title="Maximum likelihood training with MCMC"></a>Maximum likelihood training with MCMC</h2><p>一般來說訓練機率模型的方式就是最大化機率似然值，那我們也來看看如何訓練能量函數的參數$\theta$，來最大化 $p_\theta(x)$，首先來看 $\theta$ 對 $\log p_\theta(x)$ 的梯度如何計算</p>
+<p>$$<br>\nabla_{\boldsymbol{\theta}} \log p_{\boldsymbol{\theta}}(\mathbf{x})=-\nabla_{\boldsymbol{\theta}} E_{\boldsymbol{\theta}}(\mathbf{x})-\nabla_{\boldsymbol{\theta}} \log Z_{\boldsymbol{\theta}}<br>$$</p>
+<p>第一個項就是 $\theta$ 對於能量函數於 x 的梯度，是很容易計算出來的，並沒什麼特別的問題，但第二項我們依然還是有 $Z_\theta$，我們要如何求解 $\nabla_{\boldsymbol{\theta}} \log Z_{\boldsymbol{\theta}}$ 呢？這裡會用上一個計算<a href="http://blog.shakirm.com/2015/11/machine-learning-trick-of-the-day-5-log-derivative-trick/" target="_blank" rel="noopener">技巧</a>，計算取 log 的函數 $f$ 的梯度時，可以得到</p>
+<p>$$<br>\nabla_{\theta} \log f(\mathbf{x} ; \theta)=\frac{\nabla_{\theta} f(\mathbf{x} ; \theta)}{f(\mathbf{x} ; \theta)}<br>$$</p>
+<p>應用於 $\nabla_{\boldsymbol{\theta}} \log Z_{\boldsymbol{\theta}}$ 得到</p>
+<p>$$<br>\begin{split}<br>\nabla_{\boldsymbol{\theta}} \log Z_{\boldsymbol{\theta}}<br>&amp;= \frac{\nabla_{\boldsymbol{\theta}} Z_{\boldsymbol{\theta}}}{Z_{\boldsymbol{\theta}}} \<br>&amp;= \frac{1}{Z_{\boldsymbol{\theta}}} \int \nabla_{\boldsymbol{\theta}} \exp \left(-E_{\boldsymbol{\theta}}(\mathbf{x})\right) d \mathbf{x} \<br>&amp;= \int \frac{1}{Z_{\boldsymbol{\theta}}} \exp \left(-E_{\boldsymbol{\theta}}(\mathbf{x})\right)\left(-\nabla_{\boldsymbol{\theta}} E_{\boldsymbol{\theta}}(\mathbf{x})\right) d \mathbf{x} \<br>&amp;= \int \frac{ \exp \left(-E_{\boldsymbol{\theta}}(\mathbf{x})\right) }{Z_{\boldsymbol{\theta}}}\left(-\nabla_{\boldsymbol{\theta}} E_{\boldsymbol{\theta}}(\mathbf{x})\right) d \mathbf{x} \<br>&amp;= \int p_{\boldsymbol{\theta}}(x) \left(-\nabla_{\boldsymbol{\theta}} E_{\boldsymbol{\theta}}(\mathbf{x})\right) d \mathbf{x} \<br>&amp;= \mathbb{E}<em>{\mathbf{x} \sim p</em>{\theta}(\mathbf{x})}\left[-\nabla_{\boldsymbol{\theta}} E_{\boldsymbol{\theta}}(\mathbf{x})\right]<br>\end{split}<br>$$</p>
+<p>第二項變成我們需要從 $p_\theta(x)$ 抽樣出 x 來計算能量函數的梯度，其實這裡跟 GAN 的訓練過程是有點相似的，如果把判別器看成一種能量函數，就是要對資料給低的能量，而對於抽樣的樣本要賦予高的能量，之後也有一些研究是結合 EBM 與 GAN 的模型，有機會後續會跟大家分享；另外值得思考的是很多基於 MLE 訓練的模型，都只有在資料上學習，但是資料並沒有辦法覆蓋整個空間，這裡除了對資料學習外，還需要去<strong>抽樣一些可能的樣本</strong>，來增強能量函數的估計能力，這個過程也相似於對比學習 Contrastive Learning，訓練過程中引入負樣本來幫助學習到好的表徵</p>
+<p>簡單梳理一下，我們最後得到的式子為</p>
+<p>$$<br>\nabla_{\boldsymbol{\theta}} \log p_{\boldsymbol{\theta}}(\mathbf{x})=-\nabla_{\boldsymbol{\theta}} E_{\boldsymbol{\theta}}(\mathbf{x})- \mathbb{E}<em>{\mathbf{x} \sim p</em>{\theta}(\mathbf{x})}\left[-\nabla_{\boldsymbol{\theta}} E_{\boldsymbol{\theta}}(\mathbf{x})\right]<br>$$</p>
+<h2 id="Implementation"><a href="#Implementation" class="headerlink" title="Implementation"></a>Implementation</h2><p><a href="https://colab.research.google.com/drive/1g0bWCn-EkEa_DWdnQkvkfWaNOe5nywq4?usp=sharing" target="_blank" rel="noopener">Colab網址</a></p>
+<p>接著我們來嘗試訓練一個 EBM，這次我使用了 <a href="https://jax.readthedocs.io/en/latest/" target="_blank" rel="noopener">Jax</a> 與 <a href="https://flax.readthedocs.io/en/latest/" target="_blank" rel="noopener">Flax</a> 來實作，最明顯的感受是非常快！可以比我用 Pytorch 的版本快50倍，至於其他的好處與心得，應該會另開一篇跟大家分享，基本上他的語法跟 Numpy 是幾乎相同的，應該是不會影響理解</p>
+<p>我們先看一些核心的部分，基本上對應著我們剛推導出來的式子，model 就是我們定義的能量函數，分別對資料與抽樣樣本去計算能量，並計算差異與額外的 regularization</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">loss</span><span class="params">(param,data,sample)</span>:</span></span><br><span class="line">    pos = model.apply(param,data)</span><br><span class="line">    neg = model.apply(param,sample)</span><br><span class="line">    loss = (neg.mean() - pos.mean()) + <span class="number">0.1</span>*(pos**<span class="number">2</span> + neg**<span class="number">2</span>).mean()</span><br><span class="line">    <span class="keyword">return</span> loss</span><br></pre></td></tr></table></figure>
+
+<p>至於如何抽樣出樣本呢？這裡就使用了上一篇介紹的 <a href="https://odie2630463.github.io/2020/09/28/langevin/">Langevin Dynamics 抽樣方法</a>，從能量函數中去抽樣出新樣本</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">langevin_sampling</span><span class="params">(key,</span></span></span><br><span class="line"><span class="function"><span class="params">                      init,</span></span></span><br><span class="line"><span class="function"><span class="params">                      energy_fn,</span></span></span><br><span class="line"><span class="function"><span class="params">                      n_step=<span class="number">20</span>,step_size=<span class="number">1e-2</span>)</span>:</span></span><br><span class="line">    grad_fn = grad(<span class="keyword">lambda</span> x: energy_fn(x).sum())</span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">kernel</span><span class="params">(carry, noise)</span>:</span></span><br><span class="line">        x, step_size = carry</span><br><span class="line">        grad_x = grad_fn(x)</span><br><span class="line">        x = x + <span class="number">0.5</span>*step_size*grad_x + jnp.sqrt(step_size)*noise</span><br><span class="line">        <span class="keyword">return</span> (x, step_size*<span class="number">0.9</span>), x</span><br><span class="line">    </span><br><span class="line">    (x,_),_ = jax.lax.scan(kernel,</span><br><span class="line">                           (init,step_size),</span><br><span class="line">                           random.normal(key,(n_step,) + init.shape))</span><br><span class="line">    <span class="keyword">return</span> x</span><br></pre></td></tr></table></figure>
+
+<p>可以看程式中的第9行，是對應 langevin sampling 的公式，這裡還有點小技巧就是有加上退火，所以 step_size 會用來越小，抽樣的效果會好很多</p>
+<p>經過訓練後，我們可以看到能量函數有學到資料的分佈（圖有點變形，Colab裡是正常的）</p>
+<p><img src="/media/16224895114966.jpg" alt=""></p>
+<h2 id="結語"><a href="#結語" class="headerlink" title="結語"></a>結語</h2><p>本文章我們了解了 EBM 與如何用 MCMC 方式來訓練，雖然 Langevin Dynamics 已經算是相當快速與好用的一種抽樣方式了，但於更複雜的真實資料可能需要更久的抽樣步數，造成訓練上的難點，而最近相當受到重視的訓練方法為 Score Matching，無需從模型去抽樣來計算梯度，且架構上更適合深度學習模型設計，在影像、三維點雲資料上都有非常驚艷的生成能力，後續我會分享相關的研究，敬請期待！</p>
+<h2 id="Refernece"><a href="#Refernece" class="headerlink" title="Refernece"></a>Refernece</h2><ul>
+<li><a href="http://yann.lecun.com/exdb/publis/pdf/lecun-06.pdf" target="_blank" rel="noopener">A Tutorial on Energy-Based Learning</a></li>
+<li><a href="https://arxiv.org/abs/2101.03288" target="_blank" rel="noopener">How to Train Your Energy-Based Models</a></li>
+</ul>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/generative-model/" rel="tag"># generative model</a>
+          
+            <a href="/tags/energy-based-model/" rel="tag"># energy-based model</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/09/28/langevin/" rel="next" title="Langevin Dynamics 抽樣方法">
+                <i class="fa fa-chevron-left"></i> Langevin Dynamics 抽樣方法
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目錄
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            本站概要
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">odie</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">14</span>
+                    <span class="site-state-item-name">文章</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">7</span>
+                    <span class="site-state-item-name">分類</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">6</span>
+                    <span class="site-state-item-name">標籤</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Energy-based-model"><span class="nav-number">1.</span> <span class="nav-text">Energy-based model</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Maximum-likelihood-training-with-MCMC"><span class="nav-number">2.</span> <span class="nav-text">Maximum likelihood training with MCMC</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Implementation"><span class="nav-number">3.</span> <span class="nav-text">Implementation</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#結語"><span class="nav-number">4.</span> <span class="nav-text">結語</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Refernece"><span class="nav-number">5.</span> <span class="nav-text">Refernece</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2021</span>
+  <span class="with-love" id="animate"> 
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">odie</span>
+
+  
+
+  
+</div>
+
+
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 強力驅動</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主題 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Muse</a> v6.0.6</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.0.6"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.0.6"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.0.6"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.0.6"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.0.6"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+
+  
+    
+      <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/npm/mathjax@2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+
+    
+  
+
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

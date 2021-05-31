@@ -321,6 +321,179 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://odie2630463.github.io/2021/06/01/ebm-1/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="odie">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="odie's whisper">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2021/06/01/ebm-1/" itemprop="url">漫談 Energy-based model</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">發表於</span>
+              
+              <time title="創建於" itemprop="dateCreated datePublished" datetime="2021-06-01T03:52:28+08:00">2021-06-01</time>
+            
+
+            
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分類於</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/energy-based-model/" itemprop="url" rel="index"><span itemprop="name">energy-based model</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>基於能量模型（Energy-based model）是一種基於<strong>能量函數</strong>來定義機率模型的方式，能量函數是用來衡量變數的<strong>可能性</strong>，為什麼這裡不是說是給出機率呢？因為能量函數的輸出是個實數，能量越小也代表可能性越高，如果要換算成機率就必須要考慮所有的可能性，除上<strong>正規化項</strong>才能讓這個值符合機率的要求，但求解這個正規化項往往是相當困難的</p>
+<p>很多問題其實我們也不用真的去求出正規化項，能量函數已經足夠了，例如分類問題，實際上只需要讓你的目標類別是能量最低的，其他的類別能量提高即可，能量函數的設計相當彈性，所以很多問題其實都可以放入到 EBM 框架裡來解釋，Yann LeCun 大神在最近於 ICLR 2020 也給了個 Keynote 關於 Self-supervised learning 與 EBM 的<a href="https://iclr.cc/virtual_2020/speaker_7.html" target="_blank" rel="noopener">演講</a>，與YT神人 Yannic Kilcher <a href="https://www.youtube.com/watch?v=piaPIKO1MFY" target="_blank" rel="noopener">線上討論 EBM</a>，還有最近有相當多的基於能量的生成模型，甚至都有<a href="https://arxiv.org/abs/2105.05233" target="_blank" rel="noopener">超越 GAN 的表現</a>，這經典有點老派的 EBM 最近又熱了起來，趕緊來看看！</p>
+<h2 id="Energy-based-model"><a href="#Energy-based-model" class="headerlink" title="Energy-based model"></a>Energy-based model</h2><p>假設我們有一個參數為 $\theta$ 的能量函數 $E_\theta(x)$，將輸入變數$x$輸出一個代表能量的實數，所以可以定義出機率函數為</p>
+<p>$$<br>p_{\boldsymbol{\theta}}(\mathbf{x})=\frac{\exp \left(-E_{\boldsymbol{\theta}}(\mathbf{x})\right)}{Z_{\theta}}<br>$$</p>
+<p>為了要滿足機率的要求，定義正規化項 $Z_\theta$ 為各種可能的 x 下能量的總和</p>
+<p>$$<br>Z_{\boldsymbol{\theta}}=\int \exp \left(-E_{\boldsymbol{\theta}}(\mathbf{x})\right) \mathrm{d} \mathbf{x}<br>$$</p>
+<p>我們可以看到 $Z_\theta$ 是個很難求出的項，因為要把所有 x 的能量都計算出來，在高維度的狀況下是無法被求解的，所以我們需要一些方式來近似或是避免直接去計算 $Z_\theta$</p>
+<h2 id="Maximum-likelihood-training-with-MCMC"><a href="#Maximum-likelihood-training-with-MCMC" class="headerlink" title="Maximum likelihood training with MCMC"></a>Maximum likelihood training with MCMC</h2><p>一般來說訓練機率模型的方式就是最大化機率似然值，那我們也來看看如何訓練能量函數的參數$\theta$，來最大化 $p_\theta(x)$，首先來看 $\theta$ 對 $\log p_\theta(x)$ 的梯度如何計算</p>
+<p>$$<br>\nabla_{\boldsymbol{\theta}} \log p_{\boldsymbol{\theta}}(\mathbf{x})=-\nabla_{\boldsymbol{\theta}} E_{\boldsymbol{\theta}}(\mathbf{x})-\nabla_{\boldsymbol{\theta}} \log Z_{\boldsymbol{\theta}}<br>$$</p>
+<p>第一個項就是 $\theta$ 對於能量函數於 x 的梯度，是很容易計算出來的，並沒什麼特別的問題，但第二項我們依然還是有 $Z_\theta$，我們要如何求解 $\nabla_{\boldsymbol{\theta}} \log Z_{\boldsymbol{\theta}}$ 呢？這裡會用上一個計算<a href="http://blog.shakirm.com/2015/11/machine-learning-trick-of-the-day-5-log-derivative-trick/" target="_blank" rel="noopener">技巧</a>，計算取 log 的函數 $f$ 的梯度時，可以得到</p>
+<p>$$<br>\nabla_{\theta} \log f(\mathbf{x} ; \theta)=\frac{\nabla_{\theta} f(\mathbf{x} ; \theta)}{f(\mathbf{x} ; \theta)}<br>$$</p>
+<p>應用於 $\nabla_{\boldsymbol{\theta}} \log Z_{\boldsymbol{\theta}}$ 得到</p>
+<p>$$<br>\begin{split}<br>\nabla_{\boldsymbol{\theta}} \log Z_{\boldsymbol{\theta}}<br>&amp;= \frac{\nabla_{\boldsymbol{\theta}} Z_{\boldsymbol{\theta}}}{Z_{\boldsymbol{\theta}}} \<br>&amp;= \frac{1}{Z_{\boldsymbol{\theta}}} \int \nabla_{\boldsymbol{\theta}} \exp \left(-E_{\boldsymbol{\theta}}(\mathbf{x})\right) d \mathbf{x} \<br>&amp;= \int \frac{1}{Z_{\boldsymbol{\theta}}} \exp \left(-E_{\boldsymbol{\theta}}(\mathbf{x})\right)\left(-\nabla_{\boldsymbol{\theta}} E_{\boldsymbol{\theta}}(\mathbf{x})\right) d \mathbf{x} \<br>&amp;= \int \frac{ \exp \left(-E_{\boldsymbol{\theta}}(\mathbf{x})\right) }{Z_{\boldsymbol{\theta}}}\left(-\nabla_{\boldsymbol{\theta}} E_{\boldsymbol{\theta}}(\mathbf{x})\right) d \mathbf{x} \<br>&amp;= \int p_{\boldsymbol{\theta}}(x) \left(-\nabla_{\boldsymbol{\theta}} E_{\boldsymbol{\theta}}(\mathbf{x})\right) d \mathbf{x} \<br>&amp;= \mathbb{E}<em>{\mathbf{x} \sim p</em>{\theta}(\mathbf{x})}\left[-\nabla_{\boldsymbol{\theta}} E_{\boldsymbol{\theta}}(\mathbf{x})\right]<br>\end{split}<br>$$</p>
+<p>第二項變成我們需要從 $p_\theta(x)$ 抽樣出 x 來計算能量函數的梯度，其實這裡跟 GAN 的訓練過程是有點相似的，如果把判別器看成一種能量函數，就是要對資料給低的能量，而對於抽樣的樣本要賦予高的能量，之後也有一些研究是結合 EBM 與 GAN 的模型，有機會後續會跟大家分享；另外值得思考的是很多基於 MLE 訓練的模型，都只有在資料上學習，但是資料並沒有辦法覆蓋整個空間，這裡除了對資料學習外，還需要去<strong>抽樣一些可能的樣本</strong>，來增強能量函數的估計能力，這個過程也相似於對比學習 Contrastive Learning，訓練過程中引入負樣本來幫助學習到好的表徵</p>
+<p>簡單梳理一下，我們最後得到的式子為</p>
+<p>$$<br>\nabla_{\boldsymbol{\theta}} \log p_{\boldsymbol{\theta}}(\mathbf{x})=-\nabla_{\boldsymbol{\theta}} E_{\boldsymbol{\theta}}(\mathbf{x})- \mathbb{E}<em>{\mathbf{x} \sim p</em>{\theta}(\mathbf{x})}\left[-\nabla_{\boldsymbol{\theta}} E_{\boldsymbol{\theta}}(\mathbf{x})\right]<br>$$</p>
+<h2 id="Implementation"><a href="#Implementation" class="headerlink" title="Implementation"></a>Implementation</h2><p><a href="https://colab.research.google.com/drive/1g0bWCn-EkEa_DWdnQkvkfWaNOe5nywq4?usp=sharing" target="_blank" rel="noopener">Colab網址</a></p>
+<p>接著我們來嘗試訓練一個 EBM，這次我使用了 <a href="https://jax.readthedocs.io/en/latest/" target="_blank" rel="noopener">Jax</a> 與 <a href="https://flax.readthedocs.io/en/latest/" target="_blank" rel="noopener">Flax</a> 來實作，最明顯的感受是非常快！可以比我用 Pytorch 的版本快50倍，至於其他的好處與心得，應該會另開一篇跟大家分享，基本上他的語法跟 Numpy 是幾乎相同的，應該是不會影響理解</p>
+<p>我們先看一些核心的部分，基本上對應著我們剛推導出來的式子，model 就是我們定義的能量函數，分別對資料與抽樣樣本去計算能量，並計算差異與額外的 regularization</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">loss</span><span class="params">(param,data,sample)</span>:</span></span><br><span class="line">    pos = model.apply(param,data)</span><br><span class="line">    neg = model.apply(param,sample)</span><br><span class="line">    loss = (neg.mean() - pos.mean()) + <span class="number">0.1</span>*(pos**<span class="number">2</span> + neg**<span class="number">2</span>).mean()</span><br><span class="line">    <span class="keyword">return</span> loss</span><br></pre></td></tr></table></figure>
+
+<p>至於如何抽樣出樣本呢？這裡就使用了上一篇介紹的 <a href="https://odie2630463.github.io/2020/09/28/langevin/">Langevin Dynamics 抽樣方法</a>，從能量函數中去抽樣出新樣本</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">langevin_sampling</span><span class="params">(key,</span></span></span><br><span class="line"><span class="function"><span class="params">                      init,</span></span></span><br><span class="line"><span class="function"><span class="params">                      energy_fn,</span></span></span><br><span class="line"><span class="function"><span class="params">                      n_step=<span class="number">20</span>,step_size=<span class="number">1e-2</span>)</span>:</span></span><br><span class="line">    grad_fn = grad(<span class="keyword">lambda</span> x: energy_fn(x).sum())</span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">kernel</span><span class="params">(carry, noise)</span>:</span></span><br><span class="line">        x, step_size = carry</span><br><span class="line">        grad_x = grad_fn(x)</span><br><span class="line">        x = x + <span class="number">0.5</span>*step_size*grad_x + jnp.sqrt(step_size)*noise</span><br><span class="line">        <span class="keyword">return</span> (x, step_size*<span class="number">0.9</span>), x</span><br><span class="line">    </span><br><span class="line">    (x,_),_ = jax.lax.scan(kernel,</span><br><span class="line">                           (init,step_size),</span><br><span class="line">                           random.normal(key,(n_step,) + init.shape))</span><br><span class="line">    <span class="keyword">return</span> x</span><br></pre></td></tr></table></figure>
+
+<p>可以看程式中的第9行，是對應 langevin sampling 的公式，這裡還有點小技巧就是有加上退火，所以 step_size 會用來越小，抽樣的效果會好很多</p>
+<p>經過訓練後，我們可以看到能量函數有學到資料的分佈（圖有點變形，Colab裡是正常的）</p>
+<p><img src="/media/16224895114966.jpg" alt=""></p>
+<h2 id="結語"><a href="#結語" class="headerlink" title="結語"></a>結語</h2><p>本文章我們了解了 EBM 與如何用 MCMC 方式來訓練，雖然 Langevin Dynamics 已經算是相當快速與好用的一種抽樣方式了，但於更複雜的真實資料可能需要更久的抽樣步數，造成訓練上的難點，而最近相當受到重視的訓練方法為 Score Matching，無需從模型去抽樣來計算梯度，且架構上更適合深度學習模型設計，在影像、三維點雲資料上都有非常驚艷的生成能力，後續我會分享相關的研究，敬請期待！</p>
+<h2 id="Refernece"><a href="#Refernece" class="headerlink" title="Refernece"></a>Refernece</h2><ul>
+<li><a href="http://yann.lecun.com/exdb/publis/pdf/lecun-06.pdf" target="_blank" rel="noopener">A Tutorial on Energy-Based Learning</a></li>
+<li><a href="https://arxiv.org/abs/2101.03288" target="_blank" rel="noopener">How to Train Your Energy-Based Models</a></li>
+</ul>
+
+          
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://odie2630463.github.io/2020/09/28/langevin/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1905,180 +2078,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://odie2630463.github.io/2018/07/28/pyro-lda/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="odie">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="odie's whisper">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/07/28/pyro-lda/" itemprop="url">LDA model use Pyro</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">發表於</span>
-              
-              <time title="創建於" itemprop="dateCreated datePublished" datetime="2018-07-28T21:21:44+08:00">2018-07-28</time>
-            
-
-            
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分類於</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/probabilistic-programming/" itemprop="url" rel="index"><span itemprop="name">probabilistic programming</span></a></span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p><a href="http://pyro.ai" target="_blank" rel="noopener">Pyro</a> 是一個由Uber AI Lab所開發的Probabilistic Programming Language(PPL)，用程式語言來描述具有隨機性的程序或是過程；從另一個角度來看，圖機率模型(PGM)是用圖的方式來描述一個機率過程，而PPL則是可以讓你用上程式語言來描述，條件、迴圈等等都可以用上，能描述更為複雜的機率過程</p>
-<p>PPL也存在好一陣子了，像是MIT基於LISP所開發的<a href="https://arxiv.org/abs/1206.3255" target="_blank" rel="noopener">Church</a>、<a href="http://webppl.org" target="_blank" rel="noopener">webppl</a>都是，但都偏向是學術性的語言；隨著深度學習也用上了一些機率推斷方法，像是MCMC、Variational inference等，也出現基於Tensorflow、Pytorch框架的PPL，能更好的與深度學習方法結合，並且引入很多有用的機率數學工具</p>
-<h2 id="Introduction-of-Pyro"><a href="#Introduction-of-Pyro" class="headerlink" title="Introduction of Pyro"></a>Introduction of Pyro</h2><p>根據官網描述，Pyro有幾個特點</p>
-<ul>
-<li>Universal: Pyro can represent any computable probability distribution.</li>
-<li>Scalable: Pyro scales to large data sets with little overhead.</li>
-<li>Minimal: Pyro is implemented with a small core of powerful, composable abstractions.</li>
-<li>Flexible: Pyro aims for automation when you want it, control when you need it. </li>
-</ul>
-<p>基於Pytorch開發，所以深度學習那些當然都可以整合一起用上，並且語法非常的Pythonic，也用上了很多高階特性，例如context manager，機率推斷演算法主要提供Stochastic Variational Inference(SVI)，可以用上SGD來訓練模型，整體上的確以最小需要、高彈性、透明為主要設計，相較於基於Tensorflow的<a href="http://edwardlib.org" target="_blank" rel="noopener">Edward</a>、<a href="https://github.com/tensorflow/probability" target="_blank" rel="noopener">Tensorflow_probability</a>，提供不只VI相關演算法，還有很多MCMC相關的，或是<a href="https://odie2630463.github.io/2018/07/11/flow/">前一篇提到的NF</a>，更多工具可以使用，但也相對不是那麼容易上手；不過結合更多機率特性是趨勢之一，這兩個主流的Deep PPL都很值得關注與學習。</p>
-<h2 id="Implement-LDA-model"><a href="#Implement-LDA-model" class="headerlink" title="Implement LDA model"></a>Implement LDA model</h2><p>以上介紹了Pyro，接著就來實作Latent Dirichlet allocation(LDA)模型，常用文本主題分析，且為圖機率模型的經典模型！接著用Pyro與SVI來實作並求解參數，本文並不會從頭介紹Pyro基礎，建議可以先看<a href="http://pyro.ai/examples/index.html" target="_blank" rel="noopener">官網教學</a>，程式碼我放在<a href="https://colab.research.google.com/drive/11NIOR7Ix2pxkQPw_m0zZaai9Fi935-l7" target="_blank" rel="noopener">Colab</a>，大家可以直接跑看看</p>
-<h4 id="Model"><a href="#Model" class="headerlink" title="Model"></a>Model</h4><p>我們就直接從模型看起，先來看一下LDA式子長怎樣，$\phi$指每個字對應個主題的機率分佈，$\theta_d$指每一文件對應主題的機率分佈，$z$指每個字被分配到的主題，式子可以寫成：</p>
-<p>$$<br>p(\phi,\theta,z,w) = p(\phi) \prod_{d=1}^D \prod_{n=1}^{N_d} p(z_{dn}|\theta_d)p(w_{dn}|z_{dn},\phi)<br>$$</p>
-<p>式子對應Pyro程式碼如下：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@pyro.poutine.broadcast</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">model</span><span class="params">(data)</span>:</span></span><br><span class="line">  phi = pyro.sample(<span class="string">"phi"</span>,dist.Dirichlet(torch.ones([K, V])).independent(<span class="number">1</span>))</span><br><span class="line">  </span><br><span class="line">  <span class="keyword">for</span> d <span class="keyword">in</span> pyro.irange(<span class="string">"documents"</span>, D):</span><br><span class="line">    theta_d = pyro.sample(<span class="string">"theta_%d"</span>%d, dist.Dirichlet(torch.ones([K])))</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">with</span> pyro.iarange(<span class="string">"words_%d"</span>%d, N[d]):</span><br><span class="line">      z = pyro.sample(<span class="string">"z_%d"</span>%d, dist.Categorical(theta_d))</span><br><span class="line">      pyro.sample(<span class="string">"w_%d"</span>%d, dist.Categorical(phi[z]), obs=data[d])</span><br></pre></td></tr></table></figure>
-
-<h4 id="Guide"><a href="#Guide" class="headerlink" title="Guide"></a>Guide</h4><p>$w$是已知觀測變量，想要估計的隱變量有$\phi,\theta,z$，我們可以用上Variational inference方法來最大化資料似然$\log p(w)$，並用另一個<strong>guide</strong>來近似$p(\phi,\theta,z|w)$，有關於VI相關會在後續寫個幾篇好好來講講</p>
-<p>$$<br>q(\phi,\theta,z) = q(\phi) \prod_{d=1}^D q(\theta_d)\prod_{n=1}^{N_d} q(z_{dn})<br>$$</p>
-<p>式子對應Pyro程式碼如下：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@pyro.poutine.broadcast</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">guide</span><span class="params">(data)</span>:</span></span><br><span class="line">  beta_q = pyro.param(<span class="string">"beta_q"</span>, torch.ones([K, V]),constraint=constraints.positive)</span><br><span class="line">  phi_q = pyro.sample(<span class="string">"phi"</span>,dist.Dirichlet(beta_q).independent(<span class="number">1</span>))</span><br><span class="line">  </span><br><span class="line">  <span class="keyword">for</span> d <span class="keyword">in</span> pyro.irange(<span class="string">"documents"</span>, D):</span><br><span class="line">    alpha_q = pyro.param(<span class="string">"alpha_q_%d"</span>%d, torch.ones([K]),constraint=constraints.positive)</span><br><span class="line">    q_theta_d = pyro.sample(<span class="string">"theta_%d"</span>%d, dist.Dirichlet(alpha_q))</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">with</span> pyro.iarange(<span class="string">"words_%d"</span>%d, N[d]):</span><br><span class="line">      q_i = pyro.param(<span class="string">"q_%d"</span>%d, torch.randn([N[d], K]).exp(),</span><br><span class="line">                       constraint=constraints.simplex)</span><br><span class="line">      pyro.sample(<span class="string">"z_%d"</span>%d, dist.Categorical(q_i))</span><br></pre></td></tr></table></figure>
-
-<p>注意<strong>guide</strong>裡面有參數是需要訓練的，比如每一個字所對應的$z_dn$，我們都用一個Categorical分佈來代表主題，都有參數需要訓練，很直接去估文件裡的每個字代表什麼主題</p>
-<h4 id="Training"><a href="#Training" class="headerlink" title="Training"></a>Training</h4><p>最後用SVI去最大化ELBO</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">adam_params = &#123;<span class="string">"lr"</span>: <span class="number">0.01</span>, <span class="string">"betas"</span>: (<span class="number">0.90</span>, <span class="number">0.999</span>)&#125;</span><br><span class="line">optimizer = Adam(adam_params)</span><br><span class="line"></span><br><span class="line">svi = SVI(model, config_enumerate(guide, <span class="string">'parallel'</span>), optimizer, loss=TraceEnum_ELBO(max_iarange_nesting=<span class="number">1</span>))</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> _ <span class="keyword">in</span> range(<span class="number">3000</span>):</span><br><span class="line">  loss = svi.step(data)</span><br></pre></td></tr></table></figure>
-
-<p>TraceEnum_ELBO適用於有離散變量需要估計的時候，會直接去做enumerate，不然單用Trace_ELBO遇到離散變量效果都很差</p>
-<h4 id="Result"><a href="#Result" class="headerlink" title="Result"></a>Result</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">pyro.param(<span class="string">'q_2'</span>)</span><br><span class="line">&gt;&gt;&gt;</span><br><span class="line">tensor([[<span class="number">0.8072</span>, <span class="number">0.0559</span>, <span class="number">0.0606</span>, <span class="number">0.0543</span>, <span class="number">0.0220</span>],</span><br><span class="line">        [<span class="number">0.9249</span>, <span class="number">0.0258</span>, <span class="number">0.0146</span>, <span class="number">0.0242</span>, <span class="number">0.0104</span>],</span><br><span class="line">        [<span class="number">0.9250</span>, <span class="number">0.0258</span>, <span class="number">0.0145</span>, <span class="number">0.0243</span>, <span class="number">0.0105</span>],</span><br><span class="line">        [<span class="number">0.3842</span>, <span class="number">0.0408</span>, <span class="number">0.5215</span>, <span class="number">0.0381</span>, <span class="number">0.0153</span>],</span><br><span class="line">        [<span class="number">0.9406</span>, <span class="number">0.0206</span>, <span class="number">0.0110</span>, <span class="number">0.0193</span>, <span class="number">0.0085</span>],</span><br><span class="line">        [<span class="number">0.9406</span>, <span class="number">0.0206</span>, <span class="number">0.0111</span>, <span class="number">0.0193</span>, <span class="number">0.0084</span>],</span><br><span class="line">        [<span class="number">0.9406</span>, <span class="number">0.0204</span>, <span class="number">0.0110</span>, <span class="number">0.0192</span>, <span class="number">0.0088</span>],</span><br><span class="line">        [<span class="number">0.9406</span>, <span class="number">0.0205</span>, <span class="number">0.0111</span>, <span class="number">0.0193</span>, <span class="number">0.0085</span>],</span><br><span class="line">        [<span class="number">0.9250</span>, <span class="number">0.0258</span>, <span class="number">0.0145</span>, <span class="number">0.0242</span>, <span class="number">0.0105</span>]], grad_fn=&lt;DivBackward1&gt;)</span><br><span class="line">        </span><br><span class="line">z[<span class="number">2</span>]</span><br><span class="line">&gt;&gt;&gt;</span><br><span class="line">tensor([<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>])</span><br></pre></td></tr></table></figure>
-
-<p>看一下第二筆文件裡的字，估計主題效果還不錯</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">phi[<span class="number">0</span>]</span><br><span class="line">&gt;&gt;&gt;</span><br><span class="line">tensor([<span class="number">1.1714e-03</span>, <span class="number">7.1110e-01</span>, <span class="number">1.4448e-03</span>, <span class="number">1.8015e-03</span>, <span class="number">1.0734e-01</span>, <span class="number">2.6613e-06</span>,</span><br><span class="line">        <span class="number">1.1921e-07</span>, <span class="number">3.6218e-03</span>, <span class="number">9.7121e-02</span>, <span class="number">1.1921e-07</span>, <span class="number">8.0717e-03</span>, <span class="number">7.9834e-07</span>,</span><br><span class="line">        <span class="number">6.8322e-02</span>, <span class="number">1.1921e-07</span>, <span class="number">1.1921e-07</span>])</span><br><span class="line"></span><br><span class="line">dist.Dirichlet(pyro.param(<span class="string">'beta_q'</span>)).sample()[<span class="number">0</span>]</span><br><span class="line">&gt;&gt;&gt;</span><br><span class="line">tensor([<span class="number">0.0089</span>, <span class="number">0.4932</span>, <span class="number">0.0083</span>, <span class="number">0.0549</span>, <span class="number">0.1486</span>, <span class="number">0.0355</span>, <span class="number">0.0272</span>, <span class="number">0.0291</span>, <span class="number">0.0509</span>,</span><br><span class="line">        <span class="number">0.0098</span>, <span class="number">0.0045</span>, <span class="number">0.0631</span>, <span class="number">0.0331</span>, <span class="number">0.0021</span>, <span class="number">0.0308</span>])</span><br></pre></td></tr></table></figure>
-
-<p>來看第1個主題對應字的機率，都是第2個字的機率最高，代表主題1最相關的字為第2個，雖然分佈可能還有點差異，但效果也還不差</p>
-<h2 id="結語"><a href="#結語" class="headerlink" title="結語"></a>結語</h2><p>深度學習結合機率方法是趨勢，這些PPL框架能更快投入研究與產品，後續會再分享一些Pyro應用與心得</p>
-
-          
-        
-      
-    </div>
-
-    
-
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -2126,7 +2125,7 @@
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">13</span>
+                    <span class="site-state-item-count">14</span>
                     <span class="site-state-item-name">文章</span>
                   </a>
                 </div>
@@ -2151,7 +2150,9 @@
                     
                       
                     
-                    <span class="site-state-item-count">6</span>
+                      
+                    
+                    <span class="site-state-item-count">7</span>
                     <span class="site-state-item-name">分類</span>
                   </a>
                 </div>
@@ -2176,7 +2177,9 @@
                     
                       
                     
-                    <span class="site-state-item-count">5</span>
+                      
+                    
+                    <span class="site-state-item-count">6</span>
                     <span class="site-state-item-name">標籤</span>
                   </a>
                 </div>
@@ -2216,7 +2219,7 @@
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2021</span>
   <span class="with-love" id="animate"> 
     <i class="fa fa-user"></i>
   </span>

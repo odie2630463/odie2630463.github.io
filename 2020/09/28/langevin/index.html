@@ -100,7 +100,7 @@
 
 
   <meta name="description" content="最近在研究基於能量或是梯度的生成模型，在生成的過程都會需要用到抽樣方法，來從模型學習到的分佈中抽樣出樣本，如何於高維度的空間中抽樣是一個重要問題，例如 Markov chain Monte Carlo 這類演算法，是基於建構一個狀態轉移矩陣來得到一個平穩分佈，最後可以從平穩分佈中來抽樣出樣本，網路上有很多好文章講解 MCMC，雖然在一般常見的深度學習任務中，並不常用 MCMC 來求解積分或是抽樣，">
-<meta name="keywords" content="generative model">
+<meta name="keywords" content="generative model,energy-based model">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Langevin Dynamics 抽樣方法">
 <meta property="og:url" content="https://odie2630463.github.io/2020/09/28/langevin/index.html">
@@ -113,7 +113,7 @@
 <meta property="og:image" content="https://odie2630463.github.io/media/16012223963491.jpg">
 <meta property="og:image" content="https://odie2630463.github.io/media/16012226874494.jpg">
 <meta property="og:image" content="https://odie2630463.github.io/media/16012251092195.jpg">
-<meta property="og:updated_time" content="2020-09-27T17:15:38.939Z">
+<meta property="og:updated_time" content="2021-05-31T16:16:40.902Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Langevin Dynamics 抽樣方法">
 <meta name="twitter:description" content="最近在研究基於能量或是梯度的生成模型，在生成的過程都會需要用到抽樣方法，來從模型學習到的分佈中抽樣出樣本，如何於高維度的空間中抽樣是一個重要問題，例如 Markov chain Monte Carlo 這類演算法，是基於建構一個狀態轉移矩陣來得到一個平穩分佈，最後可以從平穩分佈中來抽樣出樣本，網路上有很多好文章講解 MCMC，雖然在一般常見的深度學習任務中，並不常用 MCMC 來求解積分或是抽樣，">
@@ -461,6 +461,8 @@
           
             <a href="/tags/generative-model/" rel="tag"># generative model</a>
           
+            <a href="/tags/energy-based-model/" rel="tag"># energy-based model</a>
+          
         </div>
       
 
@@ -481,6 +483,10 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2021/06/01/ebm-1/" rel="prev" title="漫談 Energy-based model">
+                漫談 Energy-based model <i class="fa fa-chevron-right"></i>
+              </a>
             
           </div>
         </div>
@@ -554,7 +560,7 @@
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">13</span>
+                    <span class="site-state-item-count">14</span>
                     <span class="site-state-item-name">文章</span>
                   </a>
                 </div>
@@ -579,7 +585,9 @@
                     
                       
                     
-                    <span class="site-state-item-count">6</span>
+                      
+                    
+                    <span class="site-state-item-count">7</span>
                     <span class="site-state-item-name">分類</span>
                   </a>
                 </div>
@@ -604,7 +612,9 @@
                     
                       
                     
-                    <span class="site-state-item-count">5</span>
+                      
+                    
+                    <span class="site-state-item-count">6</span>
                     <span class="site-state-item-name">標籤</span>
                   </a>
                 </div>
@@ -660,7 +670,7 @@
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2021</span>
   <span class="with-love" id="animate"> 
     <i class="fa fa-user"></i>
   </span>
