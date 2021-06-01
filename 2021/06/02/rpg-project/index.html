@@ -99,28 +99,30 @@
 
 
 
-  <meta name="description" content="之前漫談了 Variational Inference ，基本上從機器學習與機率分佈近似的角度出發來談了理論與應用，我們旨在最小化ELBO，來最大化對於資料的解釋，而且從中學習到隱變量，且隱變量還能捕捉到資料潛在資訊，這樣的演算法非常精緻優雅，是我個人非常欣賞的模型；我們的大腦，或是更廣泛來說，一個需要與環境交互的生物或自組織系統，隨時都在對抗失序(resisting a tendency to">
-<meta name="keywords" content="generative model,variational inference">
+  <meta name="description" content="Wei-Jan Ko, Hui-Yu Huang, Yu-Liang Kuo, Chen-Yi Chiu, Li-Heng Wang, Wei-Chen ChiuNational Yang Ming Chiao Tung UniversityPaper and Code      AbstractIn this paper we propose a novel point cloud genera">
+<meta name="keywords" content="generative model,point cloud">
 <meta property="og:type" content="article">
-<meta property="og:title" content="漫談 Free energy principle (ㄧ)">
-<meta property="og:url" content="https://odie2630463.github.io/2019/01/16/free-energy-1/index.html">
+<meta property="og:title" content="RPG: Learning Recursive Point Cloud Generation">
+<meta property="og:url" content="https://odie2630463.github.io/2021/06/02/rpg-project/index.html">
 <meta property="og:site_name" content="odie&#39;s whisper">
-<meta property="og:description" content="之前漫談了 Variational Inference ，基本上從機器學習與機率分佈近似的角度出發來談了理論與應用，我們旨在最小化ELBO，來最大化對於資料的解釋，而且從中學習到隱變量，且隱變量還能捕捉到資料潛在資訊，這樣的演算法非常精緻優雅，是我個人非常欣賞的模型；我們的大腦，或是更廣泛來說，一個需要與環境交互的生物或自組織系統，隨時都在對抗失序(resisting a tendency to">
+<meta property="og:description" content="Wei-Jan Ko, Hui-Yu Huang, Yu-Liang Kuo, Chen-Yi Chiu, Li-Heng Wang, Wei-Chen ChiuNational Yang Ming Chiao Tung UniversityPaper and Code      AbstractIn this paper we propose a novel point cloud genera">
 <meta property="og:locale" content="zh-TW">
-<meta property="og:image" content="https://odie2630463.github.io/media/15476205423036.jpg">
-<meta property="og:image" content="https://odie2630463.github.io/media/15476226757989.jpg">
-<meta property="og:updated_time" content="2019-12-03T14:04:53.000Z">
+<meta property="og:image" content="https://odie2630463.github.io/media/16225634194180.jpg">
+<meta property="og:image" content="https://odie2630463.github.io/media/sample.jpg">
+<meta property="og:image" content="https://odie2630463.github.io/media/interpolation.jpg">
+<meta property="og:image" content="https://odie2630463.github.io/media/co-segmentation.jpg">
+<meta property="og:updated_time" content="2021-06-01T16:13:52.546Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="漫談 Free energy principle (ㄧ)">
-<meta name="twitter:description" content="之前漫談了 Variational Inference ，基本上從機器學習與機率分佈近似的角度出發來談了理論與應用，我們旨在最小化ELBO，來最大化對於資料的解釋，而且從中學習到隱變量，且隱變量還能捕捉到資料潛在資訊，這樣的演算法非常精緻優雅，是我個人非常欣賞的模型；我們的大腦，或是更廣泛來說，一個需要與環境交互的生物或自組織系統，隨時都在對抗失序(resisting a tendency to">
-<meta name="twitter:image" content="https://odie2630463.github.io/media/15476205423036.jpg">
+<meta name="twitter:title" content="RPG: Learning Recursive Point Cloud Generation">
+<meta name="twitter:description" content="Wei-Jan Ko, Hui-Yu Huang, Yu-Liang Kuo, Chen-Yi Chiu, Li-Heng Wang, Wei-Chen ChiuNational Yang Ming Chiao Tung UniversityPaper and Code      AbstractIn this paper we propose a novel point cloud genera">
+<meta name="twitter:image" content="https://odie2630463.github.io/media/16225634194180.jpg">
 
 
 
 
 
 
-  <link rel="canonical" href="https://odie2630463.github.io/2019/01/16/free-energy-1/"/>
+  <link rel="canonical" href="https://odie2630463.github.io/2021/06/02/rpg-project/"/>
 
 
 
@@ -130,7 +132,7 @@
   };
 </script>
 
-  <title>漫談 Free energy principle (ㄧ) | odie's whisper</title>
+  <title>RPG: Learning Recursive Point Cloud Generation | odie's whisper</title>
   
 
 
@@ -328,7 +330,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://odie2630463.github.io/2019/01/16/free-energy-1/">
+    <link itemprop="mainEntityOfPage" href="https://odie2630463.github.io/2021/06/02/rpg-project/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="odie">
@@ -345,7 +347,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">漫談 Free energy principle (ㄧ)</h1>
+          <h1 class="post-title" itemprop="name headline">RPG: Learning Recursive Point Cloud Generation</h1>
         
 
         <div class="post-meta">
@@ -357,7 +359,7 @@
               
                 <span class="post-meta-item-text">發表於</span>
               
-              <time title="創建於" itemprop="dateCreated datePublished" datetime="2019-01-16T17:15:18+08:00">2019-01-16</time>
+              <time title="創建於" itemprop="dateCreated datePublished" datetime="2021-06-02T00:13:52+08:00">2021-06-02</time>
             
 
             
@@ -378,7 +380,7 @@
                 <span class="post-meta-item-text">分類於</span>
               
               
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/free-energy/" itemprop="url" rel="index"><span itemprop="name">free energy</span></a></span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/publish/" itemprop="url" rel="index"><span itemprop="name">publish</span></a></span>
 
                 
                 
@@ -412,45 +414,18 @@
       
 
       
-        <p>之前漫談了 Variational Inference ，基本上從機器學習與機率分佈近似的角度出發來談了理論與應用，我們旨在最小化ELBO，來最大化對於資料的解釋，而且從中學習到隱變量，且隱變量還能捕捉到資料潛在資訊，這樣的演算法非常精緻優雅，是我個人非常欣賞的模型；我們的大腦，或是更廣泛來說，一個需要與環境交互的生物或自組織系統，<em>隨時都在對抗失序(resisting a tendency to disorder)</em>，生命需要維持一定的秩序才能生存，各種生理運作都必須精準穩定維持某種秩序，<em>簡言之，維持穩定是生存的要務之一</em>。</p>
-<p>對於大腦來說，所謂的穩定就是對於各種輸入大腦都能給予解釋，<em>大腦討厭surprise！</em>大腦討厭無法解釋的東西，或是與自己預期差異很大的狀況，所以大腦的任務就是解釋或是預測各種輸入，來減少遇到surprise，<strong>這個概念為 The free energy principle</strong>。</p>
-<p>The free energy principle 跟 Variational Inference 非常有關係，核心數學概念是相同的，由Karl Friston於2005提出，2010年於Nature上有一篇完整的概念描述 <strong>The free-energy principle:a unified brain theory ?</strong>，本篇會基於此文章來跟大家介紹這個概念；另外，2017年 Rafal Bogacz 寫了一篇 <strong>A tutorial on the free-energy framework for modelling perception and learning</strong>，這篇帶領讀者入門一些計算細節，本系列會基於這兩篇文章內容與大家分享。</p>
-<h2 id="The-free-energy-principle"><a href="#The-free-energy-principle" class="headerlink" title="The free energy principle"></a>The free energy principle</h2><p><img src="/media/15476205423036.jpg" alt="-w974"></p>
-<ul>
-<li>外部狀態(External states)：會依agent產生的action與隱變量$\vartheta$改變，同時受到隨機干擾$\tilde {w}$的影響</li>
-<li>感知(Sensation)：觀測外部狀態$\tilde{x}$與隱變量$\vartheta$得到感知$\tilde{s}$</li>
-<li>內部狀態(Internal states)：最小化Free energy得到最佳的解釋$\mu$</li>
-<li>決策行為：最小化Free energy來得到最佳的行為$a$</li>
-</ul>
-<p>整個流程是一個動態的過程，每個變數都有初始值，透過這樣的循環，agent可以最大化對於環境狀態的了解，內部狀態$\mu$一開始可能完全是隨機的，但透過感知與行為來最小化Free energy，最後內部狀態會從外部狀態中獲取最多資訊</p>
-<h3 id="Free-energy"><a href="#Free-energy" class="headerlink" title="Free energy"></a>Free energy</h3><p>其實Free energy就是我們之前提到過的ELBO，差異在於負號，我們希望最小化Free energy，而要最大化ELBO，不過其實從優化角度來看其實一樣</p>
-<p>回顧一下ELBO，並且寫成另一個形式<br>$$<br>\begin{split}<br>\mathbb{E}_{q_{\phi}(z)}<br>        \left[<br>          \log \frac{p_{\theta}(x,z)}             {q_{\phi}(z)}\right] &amp;= \mathbb{E}\left[ \log p_{\theta}(x|z) \right] - KL(q_{\phi}(z) || p(z)) \\<br>          &amp;= \mathbb{E}\left[ \log p_{\theta}(x,z) \right] - \mathbb{H}\left[ q_{\phi}(z) \right]<br>\end{split}<br>$$</p>
-<p>上述是以ELBO的角度，需要最大化ELBO，換到Free energy就加上負號，得到下圖的公式，接下來的描述也是以圖上的符號來說明：</p>
-<p><img src="/media/15476226757989.jpg" alt="-w873"></p>
-<h3 id="Free-energy-bound-on-suprise"><a href="#Free-energy-bound-on-suprise" class="headerlink" title="Free-energy bound on suprise"></a>Free-energy bound on suprise</h3><ul>
-<li>$q(\vartheta | \mu)$ 係指給定內部狀態解釋$\mu$對環境隱變量$\vartheta$的條件機率，跟VI想法一樣，我們無法精確知道隱變量的分佈，只好用一個近似的分佈來估計，所以我們如果對環境有好的解釋，我們應該可以把隱變量估計得比較好</li>
-<li>$p(\tilde { s } , \vartheta|m)$ 給定目前模型$m$，生成$\tilde{s},\vartheta$聯合機率分佈</li>
-<li>可以對照上述ELBO式子，是完全對應的，整個Free energy 可以寫成 $F ( \tilde { s } , \mu )$，我們可以分別針對兩個變量來最小化</li>
-</ul>
-<h3 id="Perception-optimizes-predictions"><a href="#Perception-optimizes-predictions" class="headerlink" title="Perception optimizes predictions"></a>Perception optimizes predictions</h3><ul>
-<li>$\mu = \arg \min F ( \tilde { s } , \mu )$</li>
-<li>根據現在輸入的感知，調整內部狀態$\mu$來最小化$F$，這個跟VI做的事情一樣，去學習好的表徵</li>
-</ul>
-<h3 id="Action-minimizes-prediction-errors"><a href="#Action-minimizes-prediction-errors" class="headerlink" title="Action minimizes prediction errors"></a>Action minimizes prediction errors</h3><ul>
-<li>$a = \arg \min F ( \tilde { s } , \mu )$</li>
-<li>這裡就是有趣的地方了，其實除了可以透過改變解釋來減少$F$，agent也可以透過改變輸入的感知來優化，<em>意思是agent會去選擇比較符合期待感知輸入</em>，這個也稱為<strong>active inference</strong></li>
-</ul>
-<p>Agent長期而言希望能最小化surprise，其實就是在最小化Free energy，透過改變自己對於感知輸入的解釋，透過主動選擇感知輸入來源與行為，讓agent能快速的了解適應環境；Free energy 是很有機會做為大腦學習、控制的基礎理論，在 <strong>The free-energy principle:a unified brain theory ?</strong> 文中有介紹與其他現有理論的關係，像是 Neural coding、Bayesian brain hypothesis 等等</p>
-<h2 id="結語"><a href="#結語" class="headerlink" title="結語"></a>結語</h2><p>智慧的本質到底是什麼？我們到底是如何快速的學習？又為何要學習？本篇介紹了The free energy principle，我想我們為了要生存，必須要抵抗<em>失序</em>，我們必須讓自己維持在一種認知穩地的狀態，這樣帶來的附加效益就是讓我們有快速的學習能力，最終我們成了一個強大的解釋與預測機器</p>
-<p>下一篇會介紹 <strong>A tutorial on the free-energy framework for modelling perception and learning</strong> 這篇文章，提出一個神經網路的框架能執行基於Free energy principle的計算，相當有趣！敬請期待</p>
-<h2 id="Refernece"><a href="#Refernece" class="headerlink" title="Refernece"></a>Refernece</h2><ul>
-<li><a href="https://en.wikipedia.org/wiki/Free_energy_principle" target="_blank" rel="noopener">Free energy principle - Wiki</a></li>
-<li><a href="https://www.researchgate.net/publication/41001209_Friston_KJ_The_free-energy_principle_a_unified_brain_theory_Nat_Rev_Neurosci_11_127-138" target="_blank" rel="noopener">The free-energy principle: a unified brain theory?</a></li>
-<li><a href="https://www.sciencedirect.com/science/article/pii/S0022249615000759" target="_blank" rel="noopener">A tutorial on the free-energy framework for modelling perception and learning</a></li>
-<li><a href="">Karl Friston 15分鐘訪談 - Free Energy Principle</a></li>
-<li><a href="https://www.youtube.com/watch?v=dLXKFA33SSM&t=2642s" target="_blank" rel="noopener">Karl Friston 演講影片 - Free energy and active inference</a></li>
-</ul>
+        <div class="note primary"><p><strong>Wei-Jan Ko, Hui-Yu Huang, Yu-Liang Kuo, Chen-Yi Chiu, Li-Heng Wang, Wei-Chen Chiu</strong><br><em>National Yang Ming Chiao Tung University</em><br><a href="https://arxiv.org/abs/2105.14322" target="_blank" rel="noopener">Paper</a> and Code</p></div>
 
+<div class="video-container"><iframe src="//www.youtube.com/embed/cw9apIayw30" frameborder="0" allowfullscreen></iframe></div>
+
+<div class="video-container"><iframe src="//www.youtube.com/embed/T1NEE60imhs" frameborder="0" allowfullscreen></iframe></div>
+
+<h2 id="Abstract"><a href="#Abstract" class="headerlink" title="Abstract"></a>Abstract</h2><p>In this paper we propose a novel point cloud generator that is able to reconstruct and generate 3D point clouds composed of semantic parts. Given a latent representation of the target 3D model, the generation starts from a single point and gets expanded recursively to produce the high-resolution point cloud via a sequence of point expansion stages. During the recursive procedure of generation, we not only obtain the coarse-to-fine point clouds for the target 3D model from every expansion stage, but also unsupervisedly discover the semantic segmentation of the target model according to the hierarchical/parent-child relation between the points across expansion stages. Moreover, the expansion modules and other elements used in our recursive generator are mostly sharing weights thus making the overall framework light and efficient. Extensive experiments are conducted to demonstrate that our proposed point cloud generator has comparable or even superior performance on both generation and reconstruction tasks in comparison to various baselines, as well as provides the consistent co-segmentation among 3D instances of the same object class.</p>
+<h2 id="Experiments"><a href="#Experiments" class="headerlink" title="Experiments"></a>Experiments</h2><h3 id="Reconstruction"><a href="#Reconstruction" class="headerlink" title="Reconstruction"></a>Reconstruction</h3><p><img src="/media/16225634194180.jpg" alt=""></p>
+<h3 id="Generation"><a href="#Generation" class="headerlink" title="Generation"></a>Generation</h3><p><img src="/media/sample.jpg" alt="sample"></p>
+<h3 id="Interpolation"><a href="#Interpolation" class="headerlink" title="Interpolation"></a>Interpolation</h3><p><img src="/media/interpolation.jpg" alt="interpolation"></p>
+<h3 id="Co-segmentation"><a href="#Co-segmentation" class="headerlink" title="Co-segmentation"></a>Co-segmentation</h3><p><img src="/media/co-segmentation.jpg" alt="co-segmentation"></p>
+<h2 id="Citation"><a href="#Citation" class="headerlink" title="Citation"></a>Citation</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">@misc&#123;ko2021rpg,</span><br><span class="line">      title=&#123;RPG: Learning Recursive Point Cloud Generation&#125;, </span><br><span class="line">      author=&#123;Wei-Jan Ko and Hui-Yu Huang and Yu-Liang Kuo and Chen-Yi Chiu and Li-Heng Wang and Wei-Chen Chiu&#125;,</span><br><span class="line">      year=&#123;2021&#125;,</span><br><span class="line">      eprint=&#123;2105.14322&#125;,</span><br><span class="line">      archivePrefix=&#123;arXiv&#125;,</span><br><span class="line">      primaryClass=&#123;cs.CV&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
       
     </div>
 
@@ -472,7 +447,7 @@
           
             <a href="/tags/generative-model/" rel="tag"># generative model</a>
           
-            <a href="/tags/variational-inference/" rel="tag"># variational inference</a>
+            <a href="/tags/point-cloud/" rel="tag"># point cloud</a>
           
         </div>
       
@@ -485,8 +460,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2018/09/20/vi-2/" rel="next" title="漫談 Variational Inference (二)">
-                <i class="fa fa-chevron-left"></i> 漫談 Variational Inference (二)
+              <a href="/2021/06/01/ebm-1/" rel="next" title="漫談 Energy-based model">
+                <i class="fa fa-chevron-left"></i> 漫談 Energy-based model
               </a>
             
           </div>
@@ -494,10 +469,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2019/10/23/pycon-pyro/" rel="prev" title="Introduction to Deep  Probabilistic Programming with Pyro">
-                Introduction to Deep  Probabilistic Programming with Pyro <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -665,7 +636,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#The-free-energy-principle"><span class="nav-number">1.</span> <span class="nav-text">The free energy principle</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Free-energy"><span class="nav-number">1.1.</span> <span class="nav-text">Free energy</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Free-energy-bound-on-suprise"><span class="nav-number">1.2.</span> <span class="nav-text">Free-energy bound on suprise</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Perception-optimizes-predictions"><span class="nav-number">1.3.</span> <span class="nav-text">Perception optimizes predictions</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Action-minimizes-prediction-errors"><span class="nav-number">1.4.</span> <span class="nav-text">Action minimizes prediction errors</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#結語"><span class="nav-number">2.</span> <span class="nav-text">結語</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Refernece"><span class="nav-number">3.</span> <span class="nav-text">Refernece</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Abstract"><span class="nav-number">1.</span> <span class="nav-text">Abstract</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Experiments"><span class="nav-number">2.</span> <span class="nav-text">Experiments</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Reconstruction"><span class="nav-number">2.1.</span> <span class="nav-text">Reconstruction</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Generation"><span class="nav-number">2.2.</span> <span class="nav-text">Generation</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Interpolation"><span class="nav-number">2.3.</span> <span class="nav-text">Interpolation</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Co-segmentation"><span class="nav-number">2.4.</span> <span class="nav-text">Co-segmentation</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Citation"><span class="nav-number">3.</span> <span class="nav-text">Citation</span></a></li></ol></div>
             
 
           </div>
